@@ -47,6 +47,7 @@
     "pdfkit": "^0.20.2",
     "prisma": "^6.19.3",
     "qrcode": "^1.5.4",
+    "tsx": "^4.20.6",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -65,7 +66,6 @@
     "@vitest/coverage-v8": "^5.1.0",
     "autocannon": "^9.0.0",
     "supertest": "^7.1.4",
-    "tsx": "^4.20.6",
     "typescript": "5.9.3",
     "vitest": "^5.1.0"
   },

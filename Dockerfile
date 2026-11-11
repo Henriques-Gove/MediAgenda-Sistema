@@ -38,6 +38,7 @@ COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/package.json ./package.json
 COPY views ./views
 COPY public ./public
+COPY scripts ./scripts
 
 RUN mkdir -p /app/data /app/public/uploads/documentos /app/public/uploads/perfis \
   && chown -R mediagenda:mediagenda /app/data /app/public/uploads
