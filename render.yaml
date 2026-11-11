@@ -1,0 +1,40 @@
+# Implantação do MediAgenda no Render (Blueprint)
+# Depois de ligar o repositório, use "New + > Blueprint" e o Render cria
+# automaticamente o serviço descrito abaixo.
+services:
+  - type: web
+    name: mediagenda
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npx prisma migrate deploy && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        # Disco persistente: a base de dados sobrevive a reinícios.
+        value: file:/var/data/mediagenda.db
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: APP_URL
+        sync: false # preencher com o endereço público (ex.: https://mediagenda.onrender.com)
+      - key: SMTP_HOST
+        sync: false # opcional: e-mails reais (vazio = simulação)
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMS_API_URL
+        sync: false # opcional: SMS reais (vazio = simulação)
+      - key: SMS_API_KEY
+        sync: false
+    disk:
+      name: dados
+      mountPath: /var/data
+      sizeGB: 1
