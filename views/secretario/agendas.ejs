@@ -1,0 +1,208 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Agendas dos médicos</h1>
+        <p class="lead mb-0">Consulte a ocupação real e marque consultas em nome do paciente.</p>
+      </div>
+      <a class="btn btn-outline-ma" href="/secretario/consultas"><i class="bi bi-table me-1"></i> Todas as consultas</a>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="card mb-4">
+      <div class="card-body p-3">
+        <form action="/secretario/agendas" method="get" class="row g-2 align-items-end">
+          <input type="hidden" name="vista" value="<%= vista %>" />
+          <div class="col-md-5">
+            <label class="form-label" for="medicoId">Médico</label>
+            <select class="form-select" id="medicoId" name="medicoId">
+              <% medicos.forEach(function (item) { %>
+                <option value="<%= item.id %>" <%= medicoId === item.id ? 'selected' : '' %>>
+                  <%= item.utilizador.nome %> - <%= item.especialidades.map(function (e) { return e.especialidade.nome; }).join(', ') %>
+                </option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" for="data">Data</label>
+            <input class="form-control" id="data" name="data" type="date" value="<%= dataSelecionada %>" />
+          </div>
+          <div class="col-md-2">
+            <label class="form-label" for="vista">Vista</label>
+            <select class="form-select" id="vista" name="vista">
+              <option value="dia" <%= vista === 'dia' ? 'selected' : '' %>>Dia</option>
+              <option value="semana" <%= vista === 'semana' ? 'selected' : '' %>>Semana</option>
+              <option value="mes" <%= vista === 'mes' ? 'selected' : '' %>>Mês</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-ma w-100" type="submit"><i class="bi bi-search me-1"></i>Ver</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <% if (!medico) { %>
+      <div class="card empty-state">
+        <i class="bi bi-person-badge"></i>
+        <p class="mb-0">Ainda não existem médicos registados.</p>
+      </div>
+    <% } else { %>
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+        <div class="fw-semibold"><i class="bi bi-person-badge me-1 text-success"></i><%= medico.utilizador.nome %></div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <a class="btn btn-sm btn-outline-secondary" href="/secretario/agendas?medicoId=<%= medicoId %>&data=<%= navegacao.anterior %>&vista=<%= vista %>" title="Anterior"><i class="bi bi-chevron-left"></i></a>
+          <span class="small text-muted text-capitalize"><%= navegacao.rotulo %></span>
+          <a class="btn btn-sm btn-outline-secondary" href="/secretario/agendas?medicoId=<%= medicoId %>&data=<%= navegacao.seguinte %>&vista=<%= vista %>" title="Seguinte"><i class="bi bi-chevron-right"></i></a>
+          <a class="btn btn-sm btn-outline-ma" href="/secretario/agendas?medicoId=<%= medicoId %>&vista=<%= vista %>">Hoje</a>
+        </div>
+      </div>
+
+      <% if (vista === 'semana') { %>
+        <%- include('../partials/agenda-semana', {
+          dias: dias,
+          urlBase: '/secretario/agendas',
+          paramsExtra: '&medicoId=' + medicoId,
+          mostrarPaciente: true
+        }) %>
+      <% } else if (vista === 'mes') { %>
+        <%- include('../partials/agenda-mes', {
+          mes: mes,
+          urlBase: '/secretario/agendas',
+          paramsExtra: '&medicoId=' + medicoId,
+          mostrarPaciente: true
+        }) %>
+      <% } else { %>
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="card mb-4">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-calendar-day me-1"></i> <%= medico.utilizador.nome %> &middot; <%= formatarData(dataSelecionada) %></span>
+                <span class="small text-muted"><%= consultas.length %> consulta(s)</span>
+              </div>
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i><%= medico.localizacao %> &middot; <%= medico.duracaoConsultaMinutos %> min</div>
+                  <span class="badge badge-soft-success"><%= slots.filter(function (s) { return s.disponivel; }).length %> vaga(s)</span>
+                </div>
+                <% if (consultas.length) { %>
+                  <div class="d-flex flex-column gap-2">
+                    <% consultas.forEach(function (consulta) { %>
+                      <div class="border rounded-3 p-3 d-flex flex-column flex-md-row justify-content-between gap-2">
+                        <div>
+                          <div class="fw-semibold"><span class="text-success"><%= formatarHora(consulta.inicio) %></span> <%= consulta.paciente.utilizador.nome %></div>
+                          <div class="small text-muted">
+                            <%= consulta.especialidade ? consulta.especialidade.nome : 'Consulta geral' %>
+                            <% if (consulta.motivo) { %> &middot; <%= consulta.motivo %><% } %>
+                          </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="badge badge-soft-<%= coresEstado[consulta.estado] %>"><%= rotulosEstado[consulta.estado] %></span>
+                          <% if (consulta.estado === 'CONFIRMADA') { %>
+                            <form action="/secretario/consultas/<%= consulta.id %>/realizar" method="post">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                              <button class="btn btn-sm btn-outline-ma" type="submit" title="Marcar como realizada"><i class="bi bi-check2"></i></button>
+                            </form>
+                          <% } %>
+                        </div>
+                      </div>
+                    <% }); %>
+                  </div>
+                <% } else { %>
+                  <div class="empty-state py-4">
+                    <i class="bi bi-calendar-x"></i>
+                    <p class="fw-semibold mb-1">Sem consultas neste dia</p>
+                    <p class="small mb-0">Pode marcar uma nova consulta no formulário ao lado.</p>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><i class="bi bi-grid-3x3-gap me-1"></i> Vagas do dia</div>
+              <div class="card-body">
+                <% if (slots.length) { %>
+                  <div class="d-flex flex-wrap gap-1">
+                    <% slots.forEach(function (slot) { %>
+                      <span class="badge <%= slot.disponivel ? 'badge-soft-success' : 'badge-soft-secondary' %>" title="<%= slot.motivo || 'Disponível' %>"><%= slot.hora %></span>
+                    <% }); %>
+                  </div>
+                  <p class="small text-muted mt-2 mb-0">As vagas a cinzento estão ocupadas ou indisponíveis.</p>
+                <% } else { %>
+                  <p class="small text-muted mb-0">Este médico não tem janelas de atendimento neste dia.</p>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="card mb-4">
+              <div class="card-header"><i class="bi bi-calendar2-plus me-1"></i> Marcar consulta</div>
+              <div class="card-body p-4">
+                <form action="/secretario/marcar" method="post">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <input type="hidden" name="medicoId" value="<%= medico.id %>" />
+                  <div class="mb-3">
+                    <label class="form-label" for="pacienteId">Paciente</label>
+                    <select class="form-select" id="pacienteId" name="pacienteId" required>
+                      <option value="">Selecione o paciente</option>
+                      <% pacientes.forEach(function (paciente) { %>
+                        <option value="<%= paciente.id %>"><%= paciente.utilizador.nome %> (<%= paciente.telefone %>)</option>
+                      <% }); %>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="especialidadeId">Especialidade</label>
+                    <select class="form-select" id="especialidadeId" name="especialidadeId">
+                      <option value="">Escolher automaticamente</option>
+                      <% medico.especialidades.forEach(function (vinculo) { %>
+                        <option value="<%= vinculo.especialidadeId %>"><%= vinculo.especialidade.nome %></option>
+                      <% }); %>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="dataMarcacao">Data</label>
+                    <input class="form-control" id="dataMarcacao" name="data" type="date" value="<%= dataSelecionada %>" required />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="hora">Hora</label>
+                    <% const disponiveis = slots.filter(function (s) { return s.disponivel; }); %>
+                    <% if (disponiveis.length) { %>
+                      <select class="form-select" id="hora" name="hora" required>
+                        <% disponiveis.forEach(function (slot) { %>
+                          <option value="<%= slot.hora %>"><%= slot.hora %></option>
+                        <% }); %>
+                      </select>
+                    <% } else { %>
+                      <input class="form-control" id="hora" name="hora" type="time" required />
+                      <div class="form-text text-warning">Sem vagas listadas para este dia. Confirme o horário com o médico.</div>
+                    <% } %>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="motivo">Motivo</label>
+                    <input class="form-control" id="motivo" name="motivo" type="text" maxlength="180" placeholder="Opcional" />
+                  </div>
+                  <button class="btn btn-ma w-100" type="submit"><i class="bi bi-check2-circle me-1"></i> Marcar consulta</button>
+                  <p class="small text-muted text-center mt-2 mb-0">A consulta fica pendente até à confirmação.</p>
+                </form>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><i class="bi bi-info-circle me-1"></i> Dados do médico</div>
+              <div class="card-body small">
+                <div class="d-flex justify-content-between py-1"><span class="text-muted">Registo</span><span class="fw-semibold"><%= medico.numeroRegisto %></span></div>
+                <div class="d-flex justify-content-between py-1"><span class="text-muted">Duração</span><span class="fw-semibold"><%= medico.duracaoConsultaMinutos %> min</span></div>
+                <div class="d-flex justify-content-between py-1"><span class="text-muted">Máx./dia</span><span class="fw-semibold"><%= medico.maxConsultasDia %></span></div>
+                <div class="d-flex justify-content-between py-1"><span class="text-muted">Telefone</span><span class="fw-semibold"><%= medico.telefone %></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    <% } %>
+  </div>
+</section>

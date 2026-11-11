@@ -1,0 +1,234 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">As minhas consultas</h1>
+        <p class="lead mb-0">Consulte, confirme, reagende, cancele ou avalie as suas consultas.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-ma" href="/medicos"><i class="bi bi-calendar2-plus me-1"></i> Nova marcação</a>
+        <div class="btn-group">
+          <a class="btn btn-outline-secondary" href="/paciente/consultas/exportar.csv?estado=<%= filtros.estado %>&especialidade=<%= filtros.especialidade %>" title="Exportar CSV"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+          <a class="btn btn-outline-secondary" href="/paciente/consultas/exportar.pdf?estado=<%= filtros.estado %>&especialidade=<%= filtros.especialidade %>" title="Exportar PDF"><i class="bi bi-filetype-pdf me-1"></i>PDF</a>
+          <a class="btn btn-outline-secondary" href="/paciente/consultas/exportar.ics" title="Adicionar ao calendário"><i class="bi bi-calendar-plus me-1"></i>.ics</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="card mb-4">
+      <div class="card-body p-3">
+        <form action="/paciente/consultas" method="get" class="row g-2 align-items-end">
+          <div class="col-6 col-md-4">
+            <label class="form-label" for="estado">Estado</label>
+            <select class="form-select" id="estado" name="estado" data-auto-submit>
+              <option value="">Todos</option>
+              <% ['PENDENTE', 'CONFIRMADA', 'REALIZADA', 'CANCELADA'].forEach(function (estado) { %>
+                <option value="<%= estado %>" <%= filtros.estado === estado ? 'selected' : '' %>><%= rotulosEstado[estado] %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label" for="especialidade">Especialidade</label>
+            <select class="form-select" id="especialidade" name="especialidade" data-auto-submit>
+              <option value="">Todas</option>
+              <% especialidades.forEach(function (item) { %>
+                <option value="<%= item.id %>" <%= filtros.especialidade === item.id ? 'selected' : '' %>><%= item.nome %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="col-12 col-md-4 d-flex gap-2">
+            <button class="btn btn-outline-ma flex-grow-1" type="submit"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+            <a class="btn btn-outline-secondary" href="/paciente/consultas" aria-label="Limpar filtros" title="Limpar filtros"><i class="bi bi-arrow-counterclockwise"></i></a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <% if (consultas.length) { %>
+      <div class="d-flex flex-column gap-3">
+        <% consultas.forEach(function (consulta) { %>
+          <div class="card">
+            <div class="card-body p-3 p-md-4">
+              <div class="row g-3 align-items-start">
+                <div class="col-auto">
+                  <div class="text-center bg-light rounded-3 px-3 py-2" style="min-width: 5.2rem">
+                    <div class="small text-muted text-uppercase"><%= formatarData(consulta.inicio).slice(3, 5) %>/<%= formatarData(consulta.inicio).slice(6, 10) %></div>
+                    <div class="fw-bold fs-4 lh-1"><%= formatarData(consulta.inicio).slice(0, 2) %></div>
+                    <div class="small fw-semibold text-success mt-1"><%= formatarHora(consulta.inicio) %></div>
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="d-flex justify-content-between flex-wrap gap-2">
+                    <div>
+                      <h5 class="h6 fw-bold mb-1"><%= consulta.medico.utilizador.nome %></h5>
+                      <div class="small text-muted">
+                        <i class="bi bi-tags me-1"></i><%= consulta.especialidade ? consulta.especialidade.nome : 'Consulta geral' %>
+                        &middot; <i class="bi bi-clock me-1"></i><%= formatarHora(consulta.inicio) %> - <%= formatarHora(consulta.fim) %>
+                        &middot; <i class="bi bi-geo-alt me-1"></i><%= consulta.medico.localizacao %>
+                      </div>
+                    </div>
+                    <span class="badge badge-soft-<%= coresEstado[consulta.estado] %> align-self-start"><%= rotulosEstado[consulta.estado] %></span>
+                  </div>
+
+                  <% if (consulta.motivo) { %>
+                    <div class="small text-muted mt-2"><i class="bi bi-chat-left-text me-1"></i><strong>Motivo:</strong> <%= consulta.motivo %></div>
+                  <% } %>
+                  <% if (consulta.estado === 'CANCELADA') { %>
+                    <div class="alert alert-danger py-2 px-3 small mt-2 mb-0">
+                      <i class="bi bi-info-circle me-1"></i>
+                      <%= consulta.motivoCancelamento || 'Consulta cancelada.' %>
+                      <% if (consulta.cancelamentoTardio) { %>
+                        <span class="badge badge-soft-danger ms-1">Cancelamento tardio</span>
+                      <% } %>
+                    </div>
+                  <% } %>
+                  <% if (consulta.estado === 'REALIZADA' && consulta.avaliacao) { %>
+                    <div class="small mt-2">
+                      <span class="text-muted me-1">A sua avaliação:</span>
+                      <span class="rating">
+                        <% for (let i = 1; i <= 5; i += 1) { %>
+                          <i class="bi <%= i <= consulta.avaliacao.estrelas ? 'bi-star-fill' : 'bi-star' %>"></i>
+                        <% } %>
+                      </span>
+                    </div>
+                  <% } %>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <% if (consulta.estado === 'PENDENTE' && consulta.confirmacaoToken) { %>
+                      <a class="btn btn-success btn-sm" href="/confirmar/<%= consulta.confirmacaoToken %>">
+                        <i class="bi bi-check2-circle me-1"></i>Confirmar marcação
+                      </a>
+                    <% } %>
+                    <% if (consulta.estado === 'PENDENTE' || consulta.estado === 'CONFIRMADA') { %>
+                      <button class="btn btn-outline-ma btn-sm" data-bs-toggle="modal" data-bs-target="#reagendar<%= consulta.id %>">
+                        <i class="bi bi-arrow-repeat me-1"></i>Reagendar
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelar<%= consulta.id %>">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                      </button>
+                    <% } %>
+                    <% if (consulta.estado === 'REALIZADA' && !consulta.avaliacao) { %>
+                      <button class="btn btn-ma btn-sm" data-bs-toggle="modal" data-bs-target="#avaliar<%= consulta.id %>">
+                        <i class="bi bi-star me-1"></i>Avaliar consulta
+                      </button>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <% if (consulta.estado === 'PENDENTE' || consulta.estado === 'CONFIRMADA') { %>
+            <div class="modal fade" id="reagendar<%= consulta.id %>" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content" action="/paciente/consultas/<%= consulta.id %>/reagendar" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <div class="modal-header">
+                    <h5 class="modal-title">Reagendar consulta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="small text-muted">
+                      Consulta atual: <strong><%= formatarDataHora(consulta.inicio) %></strong> com <%= consulta.medico.utilizador.nome %>.
+                    </p>
+                    <div class="row g-3">
+                      <div class="col-7">
+                        <label class="form-label" for="data<%= consulta.id %>">Nova data</label>
+                        <input class="form-control" id="data<%= consulta.id %>" name="data" type="date" min="<%= formatarDataInput(new Date()) %>" required />
+                      </div>
+                      <div class="col-5">
+                        <label class="form-label" for="hora<%= consulta.id %>">Nova hora</label>
+                        <input class="form-control" id="hora<%= consulta.id %>" name="hora" type="time" required />
+                      </div>
+                    </div>
+                    <div class="alert alert-info small mt-3 mb-0">
+                      <i class="bi bi-info-circle me-1"></i>O novo horário será validado automaticamente (antecedência, conflitos e limites).
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Voltar</button>
+                    <button type="submit" class="btn btn-ma">Guardar novo horário</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="modal fade" id="cancelar<%= consulta.id %>" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content" action="/paciente/consultas/<%= consulta.id %>/cancelar" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <div class="modal-header">
+                    <h5 class="modal-title">Cancelar consulta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="small text-muted">
+                      Consulta com <strong><%= consulta.medico.utilizador.nome %></strong> em
+                      <strong><%= formatarDataHora(consulta.inicio) %></strong>.
+                    </p>
+                    <label class="form-label" for="motivo<%= consulta.id %>">Motivo do cancelamento</label>
+                    <textarea class="form-control" id="motivo<%= consulta.id %>" name="motivo" rows="2" minlength="3" required placeholder="Indique o motivo"></textarea>
+                    <div class="alert alert-warning small mt-3 mb-0">
+                      <i class="bi bi-exclamation-triangle me-1"></i>
+                      Cancelamentos com menos de 24 horas de antecedência são registados como tardios.
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Voltar</button>
+                    <button type="submit" class="btn btn-danger">Confirmar cancelamento</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          <% } %>
+
+          <% if (consulta.estado === 'REALIZADA' && !consulta.avaliacao) { %>
+            <div class="modal fade" id="avaliar<%= consulta.id %>" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content" action="/paciente/consultas/<%= consulta.id %>/avaliar" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <div class="modal-header">
+                    <h5 class="modal-title">Avaliar consulta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="small text-muted mb-3">
+                      Como avalia a consulta com <strong><%= consulta.medico.utilizador.nome %></strong> em <%= formatarData(consulta.inicio) %>?
+                    </p>
+                    <label class="form-label" for="estrelas<%= consulta.id %>">Classificacao</label>
+                    <select class="form-select mb-3" id="estrelas<%= consulta.id %>" name="estrelas" required>
+                      <option value="5">5 estrelas - Excelente</option>
+                      <option value="4">4 estrelas - Muito bom</option>
+                      <option value="3">3 estrelas - Bom</option>
+                      <option value="2">2 estrelas - Fraco</option>
+                      <option value="1">1 estrela - Muito fraco</option>
+                    </select>
+                    <label class="form-label" for="comentario<%= consulta.id %>">Comentário (opcional)</label>
+                    <textarea class="form-control" id="comentario<%= consulta.id %>" name="comentario" rows="3" maxlength="500" placeholder="Partilhe a sua experiência"></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-ma">Enviar avaliação</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          <% } %>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="card empty-state">
+        <i class="bi bi-calendar-x"></i>
+        <h5 class="fw-bold">Nenhuma consulta encontrada</h5>
+        <p class="mb-3">Ainda não tem consultas com estes filtros.</p>
+        <a class="btn btn-ma" href="/medicos">Marcar a primeira consulta</a>
+      </div>
+    <% } %>
+    <%- include('../partials/pagination') %>
+  </div>
+</section>

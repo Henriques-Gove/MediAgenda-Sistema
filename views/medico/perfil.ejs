@@ -1,0 +1,135 @@
+<section class="page-header">
+  <div class="container">
+    <h1 class="h2 mb-1">O meu perfil profissional</h1>
+    <p class="lead mb-0">Atualize os seus dados, especialidades e regras de agenda.</p>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-person-vcard me-1"></i> Dados do médico</div>
+          <div class="card-body p-4">
+            <form action="/medico/perfil" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div class="d-flex align-items-center gap-3 mb-4">
+                <span class="avatar avatar-lg"><%= medico.utilizador.nome.replace('Dr. ', '').replace('Dra. ', '').charAt(0) %></span>
+                <div>
+                  <div class="fw-semibold"><%= medico.utilizador.nome %></div>
+                  <div class="small text-muted"><%= medico.utilizador.email %></div>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="nome">Nome completo</label>
+                  <input class="form-control" id="nome" name="nome" type="text" value="<%= medico.utilizador.nome %>" required minlength="3" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="numeroRegisto">Número de registo</label>
+                  <input class="form-control" id="numeroRegisto" name="numeroRegisto" type="text" value="<%= medico.numeroRegisto %>" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="telefone">Telefone</label>
+                  <input class="form-control" id="telefone" name="telefone" type="tel" value="<%= medico.telefone %>" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="localizacao">Localização</label>
+                  <input class="form-control" id="localizacao" name="localizacao" type="text" value="<%= medico.localizacao %>" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" for="duracaoConsultaMinutos">Duração (min)</label>
+                  <input class="form-control" id="duracaoConsultaMinutos" name="duracaoConsultaMinutos" type="number" min="60" max="120" step="15" value="<%= medico.duracaoConsultaMinutos %>" required />
+                  <div class="form-text">Entre 60 e 120 minutos.</div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" for="maxConsultasDia">Máximo por dia</label>
+                  <input class="form-control" id="maxConsultasDia" name="maxConsultasDia" type="number" min="1" max="40" value="<%= medico.maxConsultasDia %>" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" for="preferenciaNotificacao">Canal preferido</label>
+                  <select class="form-select" id="preferenciaNotificacao" name="preferenciaNotificacao">
+                    <option value="EMAIL" <%= medico.utilizador.preferenciaNotificacao === 'EMAIL' ? 'selected' : '' %>>E-mail</option>
+                    <option value="SMS" <%= medico.utilizador.preferenciaNotificacao === 'SMS' ? 'selected' : '' %>>SMS</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="bio">Biografia</label>
+                  <textarea class="form-control" id="bio" name="bio" rows="3" maxlength="600"><%= medico.bio || '' %></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label d-block">Especialidades</label>
+                  <div class="row g-2">
+                    <% especialidades.forEach(function (especialidade) { %>
+                      <% const marcada = medico.especialidades.some(function (vinculo) { return vinculo.especialidadeId === especialidade.id; }); %>
+                      <div class="col-md-6">
+                        <div class="form-check border rounded-3 px-4 py-2">
+                          <input class="form-check-input" type="checkbox" name="especialidadeIds" value="<%= especialidade.id %>" id="esp<%= especialidade.id %>" <%= marcada ? 'checked' : '' %> />
+                          <label class="form-check-label small" for="esp<%= especialidade.id %>"><%= especialidade.nome %></label>
+                        </div>
+                      </div>
+                    <% }); %>
+                  </div>
+                  <div class="form-text">Se não seleccionar nenhuma, as especialidades atuais são mantidas.</div>
+                </div>
+              </div>
+
+              <button class="btn btn-ma mt-4" type="submit"><i class="bi bi-check2-circle me-1"></i> Guardar alterações</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><i class="bi bi-shield-lock me-1"></i> Segurança</div>
+          <div class="card-body p-4">
+            <form action="/medico/password" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="atual">Palavra-passe atual</label>
+                  <input class="form-control" id="atual" name="atual" type="password" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="nova">Nova palavra-passe</label>
+                  <input class="form-control" id="nova" name="nova" type="password" minlength="8" required />
+                </div>
+              </div>
+              <button class="btn btn-outline-ma mt-4" type="submit"><i class="bi bi-key me-1"></i> Alterar palavra-passe</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-tags me-1"></i> Especialidades atuais</div>
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-1">
+              <% medico.especialidades.forEach(function (vinculo) { %>
+                <span class="specialty-pill"><%= vinculo.especialidade.nome %></span>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-sliders me-1"></i> Regras da agenda</div>
+          <div class="card-body small text-muted">
+            <p class="mb-2"><i class="bi bi-check2 text-success me-1"></i>Duração entre 60 e 120 minutos.</p>
+            <p class="mb-2"><i class="bi bi-check2 text-success me-1"></i>Limite diário definido por si.</p>
+            <p class="mb-2"><i class="bi bi-check2 text-success me-1"></i>Antecedência mínima de 1 hora.</p>
+            <p class="mb-0"><i class="bi bi-check2 text-success me-1"></i>Conflitos de horário bloqueados.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <a class="btn btn-outline-ma w-100" href="/medico/disponibilidade"><i class="bi bi-clock-history me-1"></i>Gerir disponibilidade</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,58 @@
+<%
+  const modoDocumentos = typeof modo !== 'undefined' ? modo : 'paciente';
+  const rotulosTipo = {
+    RECEITA: 'Receita',
+    ATESTADO: 'Atestado',
+    NOTA: 'Nota clínica',
+    ANEXO: 'Anexo'
+  };
+  const coresTipo = {
+    RECEITA: 'success',
+    ATESTADO: 'primary',
+    NOTA: 'info',
+    ANEXO: 'secondary'
+  };
+%>
+<% if (documentos.length) { %>
+  <div class="d-flex flex-column gap-3">
+    <% documentos.forEach(function (documento) { %>
+      <div class="border rounded-3 p-3">
+        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2">
+          <div class="min-w-0">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+              <span class="badge badge-soft-<%= coresTipo[documento.tipo] || 'secondary' %>"><%= rotulosTipo[documento.tipo] || documento.tipo %></span>
+              <span class="fw-semibold"><%= documento.titulo %></span>
+            </div>
+            <div class="small text-muted">
+              <%= documento.medico.utilizador.nome %>
+              · <%= formatarDataHora(documento.criadoEm) %>
+              <% if (documento.consulta) { %> · consulta de <%= formatarData(documento.consulta.inicio) %><% } %>
+            </div>
+            <% if (documento.conteudo) { %>
+              <p class="small mb-0 mt-2" style="white-space: pre-wrap"><%= documento.conteudo %></p>
+            <% } %>
+          </div>
+          <div class="d-flex align-items-start gap-1 flex-shrink-0">
+            <% if (documento.ficheiroCaminho) { %>
+              <a class="btn btn-sm btn-outline-ma" href="<%= modoDocumentos === 'medico' ? '/medico/documentos/' + documento.id + '/ficheiro' : '/paciente/documentos/' + documento.id + '/ficheiro' %>" title="Descarregar <%= documento.ficheiroNome %>">
+                <i class="bi bi-download me-1"></i>Descarregar
+              </a>
+            <% } %>
+            <% if (modoDocumentos === 'medico') { %>
+              <form action="/medico/documentos/<%= documento.id %>/remover" method="post" data-confirm="Remover este documento clínico?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button class="btn btn-sm btn-outline-danger" type="submit" title="Remover documento"><i class="bi bi-trash"></i></button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="empty-state py-4">
+    <i class="bi bi-folder2-open"></i>
+    <p class="fw-semibold mb-1">Sem documentos</p>
+    <p class="small mb-0">Os documentos clínicos partilhados aparecem aqui.</p>
+  </div>
+<% } %>

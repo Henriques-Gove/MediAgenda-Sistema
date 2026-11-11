@@ -1,0 +1,85 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Auditoria</h1>
+        <p class="lead mb-0">Registo imutável das operações críticas do sistema.</p>
+      </div>
+      <a class="btn btn-outline-ma" href="/admin/dashboard"><i class="bi bi-arrow-left me-1"></i> Painel</a>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="card mb-4">
+      <div class="card-body p-3">
+        <form action="/admin/auditoria" method="get" class="row g-2 align-items-end">
+          <div class="col-md-5">
+            <label class="form-label" for="acao">Ação</label>
+            <select class="form-select" id="acao" name="acao" data-auto-submit>
+              <option value="">Todas</option>
+              <% ['LOGIN', 'CONSULTA_CRIADA', 'CONSULTA_CONFIRMADA', 'CONSULTA_REAGENDADA', 'CONSULTA_CANCELADA', 'CONSULTA_REALIZADA', 'CONSULTA_AVALIADA', 'UTILIZADOR_REGISTADO', 'MEDICO_DESATIVADO'].forEach(function (acao) { %>
+                <option value="<%= acao %>" <%= filtros.acao === acao ? 'selected' : '' %>><%= acao %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="desde">Desde</label>
+            <input class="form-control" id="desde" name="desde" type="date" value="<%= filtros.desde %>" />
+          </div>
+          <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-outline-ma flex-grow-1" type="submit">Filtrar</button>
+            <a class="btn btn-outline-secondary" href="/admin/auditoria" aria-label="Limpar filtros" title="Limpar filtros"><i class="bi bi-arrow-counterclockwise"></i></a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-shield-check me-1"></i> Registos</span>
+        <span class="small text-muted"><%= registos.length %> registo(s)</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Data</th><th>Utilizador</th><th>Ação</th><th>Entidade</th><th>Detalhes</th><th>IP</th></tr>
+          </thead>
+          <tbody>
+            <% registos.forEach(function (registo) { %>
+              <tr>
+                <td class="small text-nowrap"><%= formatarDataHora(registo.criadoEm) %></td>
+                <td class="small">
+                  <% if (registo.utilizador) { %>
+                    <div class="fw-semibold"><%= registo.utilizador.nome %></div>
+                    <div class="text-muted"><%= registo.utilizador.perfil %></div>
+                  <% } else { %>
+                    <span class="text-muted">Sistema</span>
+                  <% } %>
+                </td>
+                <td><span class="badge badge-soft-primary"><%= registo.acao %></span></td>
+                <td class="small">
+                  <div><%= registo.entidade || '-' %></div>
+                  <% if (registo.entidadeId) { %><div class="text-muted mono"><%= registo.entidadeId.slice(0, 12) %>...</div><% } %>
+                </td>
+                <td class="small text-muted" style="max-width: 24rem">
+                  <% if (registo.detalhes) { %>
+                    <span title="<%= registo.detalhes %>"><%= registo.detalhes.length > 110 ? registo.detalhes.slice(0, 110) + '...' : registo.detalhes %></span>
+                  <% } else { %>
+                    -
+                  <% } %>
+                </td>
+                <td class="small text-muted"><%= registo.ip || '-' %></td>
+              </tr>
+            <% }); %>
+            <% if (!registos.length) { %>
+              <tr><td colspan="6" class="text-center text-muted py-4">Nenhum registo encontrado.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+      <%- include('../partials/pagination') %>
+    </div>
+  </div>
+</section>

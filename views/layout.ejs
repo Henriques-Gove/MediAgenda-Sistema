@@ -1,0 +1,214 @@
+<%
+  const caminhoLayout = typeof caminho !== 'undefined' ? caminho : '/';
+  const ehPaginaAuth = caminhoLayout === '/login'
+    || caminhoLayout === '/login/2fa'
+    || caminhoLayout === '/registo'
+    || caminhoLayout === '/recuperar'
+    || caminhoLayout.indexOf('/repor-password') === 0;
+  const temSidebar = typeof utilizador !== 'undefined' && utilizador && !ehPaginaAuth;
+  const classesCorpo = [ehPaginaAuth ? 'auth-body' : '', temSidebar ? 'has-sidebar' : ''].filter(Boolean).join(' ');
+%>
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="<%= t('app.descricao') %>" />
+    <meta name="theme-color" content="#0f766e" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b3b38" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title><%= typeof titulo !== 'undefined' && titulo ? titulo + ' | MediAgenda' : 'MediAgenda' %></title>
+    <script nonce="<%= cspNonce %>">
+      (function () {
+        try {
+          var guardado = localStorage.getItem('mediagenda-tema');
+          var prefereEscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (guardado === 'dark' || (!guardado && prefereEscuro)) {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+          }
+        } catch (erro) {
+          /* preferência inacessível */
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="/vendor/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="<%= classesCorpo %>">
+    <a class="skip-link" href="#conteudo"><%= t('geral.saltarConteudo') %></a>
+    <%- include('partials/navbar') %>
+
+    <% if (temSidebar) { %>
+      <div class="app-shell">
+        <aside class="app-sidebar d-none d-lg-flex flex-column">
+          <%- include('partials/sidebar') %>
+        </aside>
+
+        <div class="app-main">
+          <main id="conteudo">
+            <%- include('partials/flash') %>
+            <%- body %>
+          </main>
+          <%- include('partials/footer') %>
+        </div>
+      </div>
+
+      <div
+        class="offcanvas offcanvas-start sidebar-offcanvas"
+        tabindex="-1"
+        id="menuLateral"
+        aria-labelledby="menuLateralLabel"
+      >
+        <div class="offcanvas-header">
+          <a class="navbar-brand m-0" href="/" id="menuLateralLabel">
+            <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+            <span>MediAgenda</span>
+          </a>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column">
+          <%- include('partials/sidebar') %>
+        </div>
+      </div>
+    <% } else { %>
+      <main id="conteudo">
+        <%- include('partials/flash') %>
+        <%- body %>
+      </main>
+      <%- include('partials/footer') %>
+    <% } %>
+
+    <script src="/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+    <script nonce="<%= cspNonce %>">
+      (function () {
+        function temaAtual() {
+          return document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light';
+        }
+
+        function atualizarBotoes() {
+          var escuro = temaAtual() === 'dark';
+          document.querySelectorAll('[data-toggle-tema]').forEach(function (botao) {
+            var icone = botao.querySelector('i');
+            if (icone) icone.className = escuro ? 'bi bi-sun' : 'bi bi-moon-stars';
+            botao.setAttribute('aria-label', escuro ? '<%= t('tema.ativarClaro') %>' : '<%= t('tema.ativarEscuro') %>');
+            botao.setAttribute('title', escuro ? '<%= t('tema.ativarClaro') %>' : '<%= t('tema.ativarEscuro') %>');
+          });
+        }
+
+        function aplicarTema(tema) {
+          if (tema === 'dark') {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+          } else {
+            document.documentElement.removeAttribute('data-bs-theme');
+          }
+          try {
+            localStorage.setItem('mediagenda-tema', tema);
+          } catch (erro) {
+            /* preferência não persistida */
+          }
+          atualizarBotoes();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+          atualizarBotoes();
+          document.querySelectorAll('[data-toggle-tema]').forEach(function (botao) {
+            botao.addEventListener('click', function () {
+              aplicarTema(temaAtual() === 'dark' ? 'light' : 'dark');
+            });
+          });
+          document.querySelectorAll('[data-reload]').forEach(function (botao) {
+            botao.addEventListener('click', function () {
+              window.location.reload();
+            });
+          });
+        });
+
+        try {
+          var consulta = window.matchMedia('(prefers-color-scheme: dark)');
+          consulta.addEventListener('change', function (evento) {
+            if (!localStorage.getItem('mediagenda-tema')) {
+              if (evento.matches) {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+              } else {
+                document.documentElement.removeAttribute('data-bs-theme');
+              }
+              atualizarBotoes();
+            }
+          });
+        } catch (erro) {
+          /* matchMedia indisponível */
+        }
+      })();
+    </script>
+    <script nonce="<%= cspNonce %>">
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {
+            /* PWA indisponível neste contexto */
+          });
+        });
+      }
+    </script>
+    <script nonce="<%= cspNonce %>">
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-auto-submit]').forEach(function (el) {
+          el.addEventListener('change', function () {
+            if (el.form) el.form.submit();
+          });
+        });
+
+        document.querySelectorAll('.alert-dismissible').forEach(function (el) {
+          window.setTimeout(function () {
+            if (window.bootstrap) bootstrap.Alert.getOrCreateInstance(el).close();
+          }, 8000);
+        });
+
+        document.querySelectorAll('[data-toggle-password]').forEach(function (botao) {
+          botao.addEventListener('click', function () {
+            var campo = document.getElementById(botao.getAttribute('data-toggle-password'));
+            if (!campo) return;
+            var mostrar = campo.type === 'password';
+            campo.type = mostrar ? 'text' : 'password';
+            var icone = botao.querySelector('i');
+            if (icone) icone.className = mostrar ? 'bi bi-eye-slash' : 'bi bi-eye';
+            botao.setAttribute('aria-label', mostrar ? 'Ocultar palavra-passe' : 'Mostrar palavra-passe');
+          });
+        });
+
+        document.querySelectorAll('[data-confirm]').forEach(function (el) {
+          el.addEventListener('submit', function (event) {
+            if (!window.confirm(el.getAttribute('data-confirm'))) event.preventDefault();
+          });
+        });
+
+        document.querySelectorAll('[data-history-back]').forEach(function (el) {
+          el.addEventListener('click', function (event) {
+            event.preventDefault();
+            window.history.back();
+          });
+        });
+
+        document.querySelectorAll('[data-demo-email]').forEach(function (chip) {
+          chip.addEventListener('click', function () {
+            var email = document.getElementById('email');
+            var password = document.getElementById('password');
+            if (email) {
+              email.value = chip.getAttribute('data-demo-email');
+              email.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            if (password) {
+              password.value = chip.getAttribute('data-demo-password') || 'Medi@2026';
+              password.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            var submeter = document.querySelector('form[action="/login"] button[type="submit"]');
+            if (submeter) submeter.focus();
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

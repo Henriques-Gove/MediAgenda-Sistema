@@ -1,0 +1,88 @@
+<section class="auth-page">
+  <div class="auth-frame auth-frame-wide">
+    <%- include('../partials/auth-brand', {
+      authBadge: 'Comece em menos de 2 minutos',
+      authTitulo: 'Comece a cuidar da sua saúde hoje.',
+      authTexto: 'Crie a sua conta gratuita de paciente e tenha acesso a médicos verificados, horários reais e lembretes automáticos.'
+    }) %>
+
+    <div class="auth-panel">
+      <a class="auth-mobile-brand d-lg-none" href="/">
+        <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+        <span>MediAgenda</span>
+      </a>
+
+      <div class="auth-panel-header">
+        <h2>Criar conta de paciente</h2>
+        <p>Preencha os seus dados para começar a marcar consultas online.</p>
+      </div>
+
+      <form action="/registo" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="auth-form-grid">
+          <div class="auth-field-full">
+            <label class="form-label" for="nome">Nome completo</label>
+            <input class="form-control" id="nome" name="nome" type="text" value="<%= valores.nome || '' %>" required minlength="3" autocomplete="name" />
+          </div>
+
+          <div>
+            <label class="form-label" for="email">E-mail</label>
+            <input class="form-control" id="email" name="email" type="email" value="<%= valores.email || '' %>" required autocomplete="email" />
+          </div>
+
+          <div>
+            <label class="form-label" for="telefone">Telefone</label>
+            <input class="form-control" id="telefone" name="telefone" type="tel" value="<%= valores.telefone || '' %>" placeholder="+258 84 000 0000" autocomplete="tel" />
+          </div>
+
+          <div>
+            <label class="form-label" for="password">Palavra-passe</label>
+            <div class="input-group">
+              <input class="form-control" id="password" name="password" type="password" minlength="8" required autocomplete="new-password" />
+              <button class="btn btn-outline-secondary" type="button" data-toggle-password="password" aria-label="Mostrar palavra-passe">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            <div class="form-text">Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo.</div>
+          </div>
+
+          <div>
+            <label class="form-label" for="dataNascimento">Data de nascimento</label>
+            <input class="form-control" id="dataNascimento" name="dataNascimento" type="date" value="<%= valores.dataNascimento || '' %>" required />
+          </div>
+
+          <div>
+            <label class="form-label" for="endereco">Endereço</label>
+            <input class="form-control" id="endereco" name="endereco" type="text" value="<%= valores.endereco || '' %>" placeholder="Bairro, cidade" required />
+          </div>
+
+          <div class="auth-field-full">
+            <label class="form-label" for="preferenciaNotificacao">Preferência de notificação</label>
+            <select class="form-select" id="preferenciaNotificacao" name="preferenciaNotificacao">
+              <option value="EMAIL" <%= valores.preferenciaNotificacao === 'SMS' ? '' : 'selected' %>>E-mail</option>
+              <option value="SMS" <%= valores.preferenciaNotificacao === 'SMS' ? 'selected' : '' %>>SMS</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-check mt-3">
+          <input class="form-check-input" id="aceiteTermos" name="aceiteTermos" type="checkbox" required />
+          <label class="form-check-label small" for="aceiteTermos">
+            Li e aceito os <a href="/termos" target="_blank" rel="noopener">termos de utilização</a>,
+            a <a href="/privacidade" target="_blank" rel="noopener">política de privacidade</a> e o
+            <a href="/consentimento" target="_blank" rel="noopener">consentimento para dados de saúde</a>.
+          </label>
+        </div>
+
+        <button class="btn btn-ma w-100 mt-3" type="submit">
+          <i class="bi bi-check2-circle me-1"></i> Criar conta
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        Já tem conta? <a href="/login">Entrar</a>
+      </p>
+      <a class="auth-back" href="/"><i class="bi bi-arrow-left"></i>Voltar ao site</a>
+    </div>
+  </div>
+</section>

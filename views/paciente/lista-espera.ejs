@@ -1,0 +1,120 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Lista de espera</h1>
+        <p class="lead mb-0">Sem vaga no dia que queria? Avisamos assim que houver disponibilidade.</p>
+      </div>
+      <a class="btn btn-outline-ma" href="/medicos"><i class="bi bi-search me-1"></i> Encontrar médico</a>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="card">
+          <div class="card-header"><i class="bi bi-hourglass-split me-1"></i> Novo pedido</div>
+          <div class="card-body p-4">
+            <form action="/paciente/lista-espera" method="post">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+              <div class="mb-3">
+                <label class="form-label" for="medicoId">Médico</label>
+                <select class="form-select" id="medicoId" name="medicoId" required>
+                  <option value="">Escolha o médico</option>
+                  <% medicos.forEach(function (item) { %>
+                    <option value="<%= item.id %>" <%= medicoPreSelecionado === item.id ? 'selected' : '' %>>
+                      <%= item.utilizador.nome %> · <%= item.especialidades.map(function (e) { return e.especialidade.nome; }).join(', ') %>
+                    </option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="especialidadeId">Especialidade (opcional)</label>
+                <select class="form-select" id="especialidadeId" name="especialidadeId">
+                  <option value="">Qualquer especialidade</option>
+                  <% especialidades.forEach(function (especialidade) { %>
+                    <option value="<%= especialidade.id %>"><%= especialidade.nome %></option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-sm-6">
+                  <label class="form-label" for="dataPreferida">Data preferida</label>
+                  <input class="form-control" id="dataPreferida" name="dataPreferida" type="date" value="<%= dataPreferida %>" />
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label" for="periodo">Período</label>
+                  <select class="form-select" id="periodo" name="periodo">
+                    <option value="">Qualquer</option>
+                    <option value="MANHA">Manhã</option>
+                    <option value="TARDE">Tarde</option>
+                    <option value="DIA">Dia inteiro</option>
+                  </select>
+                </div>
+              </div>
+
+              <button class="btn btn-ma w-100 mt-4" type="submit">
+                <i class="bi bi-bell-plus me-1"></i> Entrar na lista de espera
+              </button>
+              <p class="small text-muted text-center mt-2 mb-0">
+                Entramos em contacto por e-mail ou SMS quando surgir uma vaga compatível.
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check me-1"></i> Os meus pedidos</span>
+            <span class="small text-muted"><%= pedidos.filter(function (p) { return p.estado === 'ATIVA'; }).length %> ativo(s)</span>
+          </div>
+          <div class="card-body">
+            <% if (pedidos.length) { %>
+              <div class="d-flex flex-column gap-3">
+                <% pedidos.forEach(function (pedido) { %>
+                  <div class="border rounded-3 p-3">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between gap-2">
+                      <div>
+                        <div class="fw-semibold"><%= pedido.medico.utilizador.nome %></div>
+                        <div class="small text-muted">
+                          <%= pedido.especialidade ? pedido.especialidade.nome : 'Qualquer especialidade' %>
+                          <% if (pedido.dataPreferida) { %> · preferência: <%= formatarData(pedido.dataPreferida) %><% } %>
+                          <% if (pedido.periodo) { %> · <%= pedido.periodo === 'MANHA' ? 'manhã' : pedido.periodo === 'TARDE' ? 'tarde' : 'dia inteiro' %><% } %>
+                        </div>
+                        <div class="small text-muted">Pedido em <%= formatarData(pedido.criadoEm) %></div>
+                      </div>
+                      <div class="d-flex align-items-start gap-2">
+                        <span class="badge badge-soft-<%= pedido.estado === 'ATIVA' ? 'success' : pedido.estado === 'CANCELADA' ? 'secondary' : 'info' %>">
+                          <%= pedido.estado === 'ATIVA' ? 'Ativo' : pedido.estado === 'CANCELADA' ? 'Cancelado' : 'Atendido' %>
+                        </span>
+                        <% if (pedido.estado === 'ATIVA') { %>
+                          <form action="/paciente/lista-espera/<%= pedido.id %>/cancelar" method="post" data-confirm="Cancelar este pedido de lista de espera?">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                            <button class="btn btn-sm btn-outline-danger" type="submit" title="Cancelar pedido"><i class="bi bi-x-lg"></i></button>
+                          </form>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } else { %>
+              <div class="empty-state py-4">
+                <i class="bi bi-hourglass"></i>
+                <p class="fw-semibold mb-1">Ainda não tem pedidos</p>
+                <p class="small mb-0">Use o formulário ao lado para ser avisado quando surgir uma vaga.</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

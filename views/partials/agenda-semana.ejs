@@ -1,0 +1,40 @@
+<%
+  const urlAgendaSemana = typeof urlBase !== 'undefined' ? urlBase : '/medico/agenda';
+  const extraSemana = typeof paramsExtra !== 'undefined' ? paramsExtra : '';
+  const mostrarPacienteSemana = typeof mostrarPaciente !== 'undefined' ? mostrarPaciente : false;
+%>
+<div class="row g-3">
+  <% dias.forEach(function (dia) { %>
+    <% const hoje = mesmoDia(dia.data, new Date()); %>
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card h-100 <%= hoje ? 'border-success' : '' %>">
+        <div class="card-header d-flex justify-content-between align-items-center py-2 <%= hoje ? 'bg-success-subtle' : '' %>">
+          <a class="text-decoration-none text-dark fw-semibold small text-capitalize" href="<%= urlAgendaSemana %>?data=<%= formatarDataInput(dia.data) %>&vista=dia<%= extraSemana %>">
+            <%= formatarDiaCurto(dia.data) %>
+          </a>
+          <span class="badge badge-soft-<%= dia.consultas.length ? 'success' : 'secondary' %>"><%= dia.consultas.length %></span>
+        </div>
+        <div class="card-body p-2">
+          <% if (dia.consultas.length) { %>
+            <div class="d-flex flex-column gap-2">
+              <% dia.consultas.forEach(function (consulta) { %>
+                <div class="border rounded-3 px-2 py-1 small">
+                  <div class="d-flex justify-content-between align-items-center gap-1">
+                    <span class="fw-bold text-success"><%= formatarHora(consulta.inicio) %></span>
+                    <span class="badge badge-soft-<%= coresEstado[consulta.estado] %>"><%= rotulosEstado[consulta.estado] %></span>
+                  </div>
+                  <% if (mostrarPacienteSemana) { %>
+                    <div class="text-truncate"><%= consulta.paciente.utilizador.nome %></div>
+                  <% } %>
+                  <div class="text-muted text-truncate"><%= consulta.especialidade ? consulta.especialidade.nome : 'Consulta geral' %></div>
+                </div>
+              <% }); %>
+            </div>
+          <% } else { %>
+            <p class="small text-muted text-center my-3 mb-0">Sem consultas</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  <% }); %>
+</div>

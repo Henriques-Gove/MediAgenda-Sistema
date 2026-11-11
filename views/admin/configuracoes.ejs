@@ -1,0 +1,106 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Configurações do sistema</h1>
+        <p class="lead mb-0">Alterações aplicadas imediatamente a todos os serviços (Singleton).</p>
+      </div>
+      <a class="btn btn-outline-ma" href="/admin/dashboard"><i class="bi bi-arrow-left me-1"></i> Painel</a>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <form action="/admin/configuracoes" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-building me-1"></i> Identidade e horário</div>
+            <div class="card-body p-4">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label" for="nome_clinica">Nome da clínica</label>
+                  <input class="form-control" id="nome_clinica" name="nome_clinica" type="text" value="<%= configuracoes.nome_clinica %>" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="horario_abertura">Hora de abertura</label>
+                  <input class="form-control" id="horario_abertura" name="horario_abertura" type="time" value="<%= configuracoes.horario_abertura %>" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="horario_fecho">Hora de fecho</label>
+                  <input class="form-control" id="horario_fecho" name="horario_fecho" type="time" value="<%= configuracoes.horario_fecho %>" required />
+                </div>
+                <div class="col-12">
+                  <label class="form-label d-block">Dias de funcionamento</label>
+                  <div class="d-flex flex-wrap gap-2">
+                    <% diasSemana.forEach(function (dia, indice) { %>
+                      <div class="form-check form-check-inline border rounded-3 px-4 py-2">
+                        <input class="form-check-input" type="checkbox" id="dia<%= indice %>" name="dias" value="<%= indice %>" <%= diasActivos.includes(indice) ? 'checked' : '' %> />
+                        <label class="form-check-label small" for="dia<%= indice %>"><%= dia %></label>
+                      </div>
+                    <% }); %>
+                  </div>
+                  <div class="form-text">A clínica não aceita marcações fora destes dias.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><i class="bi bi-sliders me-1"></i> Regras de negócio</div>
+            <div class="card-body p-4">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="antecedencia_minima_horas">Antecedência mínima (horas)</label>
+                  <input class="form-control" id="antecedencia_minima_horas" name="antecedencia_minima_horas" type="number" min="1" max="168" value="<%= configuracoes.antecedencia_minima_horas %>" required />
+                  <div class="form-text">Tempo mínimo entre a marcação e a consulta.</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="limite_cancelamento_horas">Limite de cancelamento (horas)</label>
+                  <input class="form-control" id="limite_cancelamento_horas" name="limite_cancelamento_horas" type="number" min="1" max="168" value="<%= configuracoes.limite_cancelamento_horas %>" required />
+                  <div class="form-text">Abaixo deste limite, o cancelamento é registado como tardio.</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="max_consultas_paciente_medico">Máximo por paciente/médico</label>
+                  <input class="form-control" id="max_consultas_paciente_medico" name="max_consultas_paciente_medico" type="number" min="1" max="20" value="<%= configuracoes.max_consultas_paciente_medico %>" required />
+                  <div class="form-text">Limite de consultas futuras com o mesmo médico.</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="expiracao_confirmacao_horas">Expiração da confirmação (horas)</label>
+                  <input class="form-control" id="expiracao_confirmacao_horas" name="expiracao_confirmacao_horas" type="number" min="1" max="48" value="<%= configuracoes.expiracao_confirmacao_horas %>" required />
+                  <div class="form-text">Prazo para o paciente confirmar a marcação.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-info-circle me-1"></i> Como funciona</div>
+            <div class="card-body small text-muted">
+              <p class="mb-2"><i class="bi bi-check2 text-success me-1"></i>A configuração e carregada uma única vez e partilhada por todos os serviços.</p>
+              <p class="mb-2"><i class="bi bi-check2 text-success me-1"></i>As alterações entram em vigor imediatamente, sem reiniciar a aplicação.</p>
+              <p class="mb-0"><i class="bi bi-check2 text-success me-1"></i>Os valores ficam guardados na base de dados.</p>
+            </div>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-gear me-1"></i> Valores atuais</div>
+            <div class="card-body small">
+              <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Abertura</span><span class="fw-semibold"><%= configuracoes.horario_abertura %></span></div>
+              <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Fecho</span><span class="fw-semibold"><%= configuracoes.horario_fecho %></span></div>
+              <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Antecedência</span><span class="fw-semibold"><%= configuracoes.antecedencia_minima_horas %>h</span></div>
+              <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Cancelamento</span><span class="fw-semibold"><%= configuracoes.limite_cancelamento_horas %>h</span></div>
+              <div class="d-flex justify-content-between py-1"><span class="text-muted">Expiração</span><span class="fw-semibold"><%= configuracoes.expiracao_confirmacao_horas %>h</span></div>
+            </div>
+          </div>
+
+          <button class="btn btn-ma w-100 py-2" type="submit"><i class="bi bi-check2-circle me-1"></i> Guardar configurações</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>

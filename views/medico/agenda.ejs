@@ -1,0 +1,138 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">
+          <%= vista === 'semana' ? 'Agenda semanal' : vista === 'mes' ? 'Agenda mensal' : 'Agenda diária' %>
+        </h1>
+        <p class="lead mb-0 text-capitalize"><%= navegacao.rotulo %></p>
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Vista da agenda">
+          <a class="btn btn-outline-ma <%= vista === 'dia' ? 'active' : '' %>" href="/medico/agenda?data=<%= dataSelecionada %>&vista=dia">Dia</a>
+          <a class="btn btn-outline-ma <%= vista === 'semana' ? 'active' : '' %>" href="/medico/agenda?data=<%= dataSelecionada %>&vista=semana">Semana</a>
+          <a class="btn btn-outline-ma <%= vista === 'mes' ? 'active' : '' %>" href="/medico/agenda?data=<%= dataSelecionada %>&vista=mes">Mês</a>
+        </div>
+
+        <form action="/medico/agenda" method="get" class="d-flex gap-2">
+          <input type="hidden" name="vista" value="<%= vista %>" />
+          <a class="btn btn-outline-secondary" href="/medico/agenda?data=<%= navegacao.anterior %>&vista=<%= vista %>" title="Anterior"><i class="bi bi-chevron-left"></i></a>
+          <input class="form-control" type="date" name="data" value="<%= dataSelecionada %>" data-auto-submit aria-label="Escolher data" />
+          <a class="btn btn-outline-secondary" href="/medico/agenda?data=<%= navegacao.seguinte %>&vista=<%= vista %>" title="Seguinte"><i class="bi bi-chevron-right"></i></a>
+          <a class="btn btn-outline-ma" href="/medico/agenda?vista=<%= vista %>">Hoje</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <% if (vista === 'semana') { %>
+      <%- include('../partials/agenda-semana', {
+        dias: dias,
+        urlBase: '/medico/agenda',
+        paramsExtra: '',
+        mostrarPaciente: false
+      }) %>
+    <% } else if (vista === 'mes') { %>
+      <%- include('../partials/agenda-mes', {
+        mes: mes,
+        urlBase: '/medico/agenda',
+        paramsExtra: '',
+        mostrarPaciente: false
+      }) %>
+    <% } else { %>
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-list-check me-1"></i> Consultas do dia</span>
+              <span class="small text-muted"><%= consultas.length %> marcada(s)</span>
+            </div>
+            <div class="card-body">
+              <% if (consultas.length) { %>
+                <div class="d-flex flex-column gap-2">
+                  <% consultas.forEach(function (consulta) { %>
+                    <div class="border rounded-3 p-3">
+                      <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                        <div class="d-flex gap-3">
+                          <div class="text-center" style="min-width: 3.6rem">
+                            <div class="fw-bold text-success"><%= formatarHora(consulta.inicio) %></div>
+                            <div class="small text-muted"><%= formatarHora(consulta.fim) %></div>
+                          </div>
+                          <div>
+                            <div class="fw-semibold"><%= consulta.paciente.utilizador.nome %></div>
+                            <div class="small text-muted">
+                              <%= consulta.especialidade ? consulta.especialidade.nome : 'Consulta geral' %>
+                              <% if (consulta.motivo) { %> &middot; <%= consulta.motivo %><% } %>
+                            </div>
+                            <a class="small text-decoration-none" href="/medico/pacientes/<%= consulta.pacienteId %>/historico">
+                              <i class="bi bi-clock-history me-1"></i>Histórico do paciente
+                            </a>
+                          </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="badge badge-soft-<%= coresEstado[consulta.estado] %>"><%= rotulosEstado[consulta.estado] %></span>
+                          <% if (consulta.estado === 'CONFIRMADA') { %>
+                            <form action="/medico/consultas/<%= consulta.id %>/realizar" method="post">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                              <button class="btn btn-sm btn-ma" type="submit"><i class="bi bi-check2 me-1"></i>Realizada</button>
+                            </form>
+                          <% } %>
+                        </div>
+                      </div>
+                    </div>
+                  <% }); %>
+                </div>
+              <% } else { %>
+                <div class="empty-state py-4">
+                  <i class="bi bi-calendar-x"></i>
+                  <p class="fw-semibold mb-1">Sem consultas neste dia</p>
+                  <p class="small mb-0">Escolha outra data ou atualize a disponibilidade.</p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-grid-3x3-gap me-1"></i> Vagas do dia</div>
+            <div class="card-body">
+              <% const livres = slots.filter(function (slot) { return slot.disponivel; }).length; %>
+              <div class="d-flex justify-content-between mb-3 small">
+                <span class="text-muted">Disponíveis</span>
+                <span class="fw-bold text-success"><%= livres %> de <%= slots.length %></span>
+              </div>
+              <div class="progress mb-3">
+                <div class="progress-bar" style="width: <%= slots.length ? Math.round((livres / slots.length) * 100) : 0 %>%"></div>
+              </div>
+              <% if (slots.length) { %>
+                <div class="d-flex flex-wrap gap-1">
+                  <% slots.forEach(function (slot) { %>
+                    <span class="badge <%= slot.disponivel ? 'badge-soft-success' : 'badge-soft-secondary' %>" title="<%= slot.motivo || 'Disponível' %>"><%= slot.hora %></span>
+                  <% }); %>
+                </div>
+              <% } else { %>
+                <p class="small text-muted mb-0">Sem janelas de atendimento configuradas para este dia.</p>
+              <% } %>
+              <a class="btn btn-outline-ma btn-sm w-100 mt-3" href="/medico/disponibilidade"><i class="bi bi-sliders me-1"></i>Gerir disponibilidade</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><i class="bi bi-lightning me-1"></i> Ações</div>
+            <div class="list-group list-group-flush">
+              <a class="list-group-item list-group-item-action" href="/medico/bloqueios"><i class="bi bi-calendar-x me-2 text-danger"></i>Bloquear período / férias</a>
+              <a class="list-group-item list-group-item-action" href="/medico/consultas"><i class="bi bi-clock-history me-2 text-success"></i>Histórico de consultas</a>
+              <a class="list-group-item list-group-item-action" href="/medico/perfil"><i class="bi bi-person-gear me-2 text-secondary"></i>Editar perfil</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</section>
+

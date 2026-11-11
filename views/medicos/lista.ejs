@@ -1,0 +1,111 @@
+<section class="page-header">
+  <div class="container">
+    <h1 class="h2 mb-1">Encontrar médico</h1>
+    <p class="lead mb-0">Pesquise por nome, especialidade ou localização e escolha o horário ideal.</p>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="card mb-4">
+      <div class="card-body p-3 p-md-4">
+        <form action="/medicos" method="get">
+          <div class="row g-3 align-items-end">
+            <div class="col-lg-4">
+              <label class="form-label" for="busca">Pesquisar</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input class="form-control" id="busca" name="busca" type="search" value="<%= filtros.busca %>" placeholder="Nome do médico ou especialidade" />
+              </div>
+            </div>
+            <div class="col-6 col-lg-2">
+              <label class="form-label" for="especialidade">Especialidade</label>
+              <select class="form-select" id="especialidade" name="especialidade">
+                <option value="">Todas</option>
+                <% especialidades.forEach(function (item) { %>
+                  <option value="<%= item.id %>" <%= filtros.especialidade === item.id ? 'selected' : '' %>><%= item.nome %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-6 col-lg-2">
+              <label class="form-label" for="localizacao">Localização</label>
+              <input class="form-control" id="localizacao" name="localizacao" type="text" value="<%= filtros.localizacao %>" placeholder="Ex.: Maputo" />
+            </div>
+            <div class="col-6 col-lg-2">
+              <label class="form-label" for="avaliacao">Avaliação mínima</label>
+              <select class="form-select" id="avaliacao" name="avaliacao">
+                <option value="">Qualquer</option>
+                <option value="4" <%= filtros.avaliacao === '4' ? 'selected' : '' %>>4+ estrelas</option>
+                <option value="3" <%= filtros.avaliacao === '3' ? 'selected' : '' %>>3+ estrelas</option>
+                <option value="2" <%= filtros.avaliacao === '2' ? 'selected' : '' %>>2+ estrelas</option>
+              </select>
+            </div>
+            <div class="col-6 col-lg-2 d-flex gap-2">
+              <button class="btn btn-ma flex-grow-1" type="submit"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+              <a class="btn btn-outline-secondary" href="/medicos" title="Limpar filtros"><i class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="text-muted small"><strong><%= medicos.length %></strong> médico(s) encontrado(s)</span>
+      <% if (filtros.busca || filtros.especialidade || filtros.localizacao || filtros.avaliacao) { %>
+        <a class="small text-decoration-none" href="/medicos"><i class="bi bi-x-circle me-1"></i>Limpar pesquisa</a>
+      <% } %>
+    </div>
+
+    <div class="row g-4">
+      <% medicos.forEach(function (medico) { %>
+        <div class="col-md-6 col-xl-4">
+          <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column">
+              <div class="d-flex align-items-start gap-3 mb-3">
+                <span class="avatar avatar-lg"><%= medico.utilizador.nome.replace('Dr. ', '').replace('Dra. ', '').charAt(0) %></span>
+                <div class="flex-grow-1">
+                  <h5 class="mb-1 fw-bold"><%= medico.utilizador.nome %></h5>
+                  <div class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i><%= medico.localizacao %></div>
+                  <div class="small text-muted"><i class="bi bi-clock me-1"></i><%= medico.duracaoConsultaMinutos %> min por consulta</div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <% medico.especialidades.forEach(function (vinculo) { %>
+                  <span class="specialty-pill mb-1"><%= vinculo.especialidade.nome %></span>
+                <% }); %>
+              </div>
+
+              <% if (medico.bio) { %>
+                <p class="small text-muted mt-2 mb-3"><%= medico.bio.length > 120 ? medico.bio.slice(0, 120) + '...' : medico.bio %></p>
+              <% } else { %>
+                <p class="small text-muted mt-2 mb-3">Médico da Clínica Central disponível para consultas presenciais.</p>
+              <% } %>
+
+              <div class="mt-auto">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <%- include('../partials/rating', { media: medico.avaliacaoMedia, total: medico.totalAvaliacoes }) %>
+                  </div>
+                  <span class="badge badge-soft-secondary">Reg. <%= medico.numeroRegisto %></span>
+                </div>
+                <a class="btn btn-ma w-100" href="/medicos/<%= medico.id %>">
+                  <i class="bi bi-calendar2-check me-1"></i> Ver horários disponíveis
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+
+    <% if (!medicos.length) { %>
+      <div class="card empty-state">
+        <i class="bi bi-search"></i>
+        <h5 class="fw-bold">Nenhum médico encontrado</h5>
+        <p class="mb-3">Tente ajustar os filtros ou pesquisar por outro termo.</p>
+        <a class="btn btn-outline-ma" href="/medicos">Ver todos os médicos</a>
+      </div>
+    <% } %>
+  </div>
+</section>

@@ -1,0 +1,90 @@
+<section class="auth-page">
+  <div class="auth-frame">
+    <%- include('../partials/auth-brand', {
+      authBadge: 'Agendamento online 24/7',
+      authTitulo: 'A sua saúde, agendada em minutos.',
+      authTexto: 'Encontre o médico certo, escolha o horário e receba a confirmação por e-mail ou SMS.'
+    }) %>
+
+    <div class="auth-panel">
+      <a class="auth-mobile-brand d-lg-none" href="/">
+        <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+        <span>MediAgenda</span>
+      </a>
+
+      <div class="auth-panel-header">
+        <h2>Bem-vindo de volta</h2>
+        <p>Inicie sessão para gerir as suas consultas.</p>
+      </div>
+
+      <form action="/login" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="hidden" name="next" value="<%= next %>" />
+
+        <div class="mb-2">
+          <label class="form-label" for="email">E-mail</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+            <input
+              class="form-control <%= erros.email ? 'is-invalid' : '' %>"
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="nome@exemplo.com"
+              value="<%= valores.email || '' %>"
+              required
+              autofocus
+            />
+          </div>
+          <% if (erros.email) { %><div class="invalid-feedback d-block"><%= erros.email %></div><% } %>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <label class="form-label" for="password">Palavra-passe</label>
+            <a class="small text-decoration-none" href="/recuperar">Esqueceu-se?</a>
+          </div>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-key"></i></span>
+            <input
+              class="form-control"
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="A sua palavra-passe"
+              required
+            />
+            <button class="btn btn-outline-secondary" type="button" data-toggle-password="password" aria-label="Mostrar palavra-passe">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-ma w-100" type="submit">
+          <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+        </button>
+      </form>
+
+      <div class="auth-demo">
+        <div class="auth-demo-title">
+          <i class="bi bi-info-circle"></i>
+          <span>Contas de demonstração</span>
+        </div>
+        <div class="demo-chips">
+          <button type="button" class="demo-chip" data-demo-email="paciente@mediagenda.co.mz" data-demo-password="Medi@2026">Paciente</button>
+          <button type="button" class="demo-chip" data-demo-email="medico@mediagenda.co.mz" data-demo-password="Medi@2026">Médico</button>
+          <button type="button" class="demo-chip" data-demo-email="secretaria@mediagenda.co.mz" data-demo-password="Medi@2026">Secretaria</button>
+          <button type="button" class="demo-chip" data-demo-email="admin@mediagenda.co.mz" data-demo-password="Medi@2026">Administrador</button>
+        </div>
+        <div class="auth-demo-hint">Clique num perfil para preencher as credenciais. Senha comum: <span class="mono">Medi@2026</span></div>
+      </div>
+
+      <p class="auth-switch">
+        Ainda não tem conta? <a href="/registo">Criar conta</a>
+      </p>
+      <a class="auth-back" href="/"><i class="bi bi-arrow-left"></i>Voltar ao site</a>
+    </div>
+  </div>
+</section>

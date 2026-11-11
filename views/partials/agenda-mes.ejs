@@ -1,0 +1,50 @@
+<%
+  const urlAgendaMes = typeof urlBase !== 'undefined' ? urlBase : '/medico/agenda';
+  const extraMes = typeof paramsExtra !== 'undefined' ? paramsExtra : '';
+  const mostrarPacienteMes = typeof mostrarPaciente !== 'undefined' ? mostrarPaciente : false;
+  const rotulosDias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+%>
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-bordered align-top mb-0 agenda-mes">
+        <thead class="table-light">
+          <tr>
+            <% rotulosDias.forEach(function (rotulo) { %>
+              <th class="text-center small text-uppercase text-muted" scope="col"><%= rotulo %></th>
+            <% }); %>
+          </tr>
+        </thead>
+        <tbody>
+          <% mes.semanas.forEach(function (semana) { %>
+            <tr>
+              <% semana.forEach(function (dia) { %>
+                <% const hoje = mesmoDia(dia.data, new Date()); %>
+                <td class="<%= dia.noMes ? '' : 'bg-light text-muted' %> <%= hoje ? 'border-success' : '' %>" style="min-width: 8.5rem">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <a class="small fw-semibold text-decoration-none <%= hoje ? 'text-success' : 'text-dark' %>" href="<%= urlAgendaMes %>?data=<%= formatarDataInput(dia.data) %>&vista=dia<%= extraMes %>">
+                      <%= dia.data.getDate() %>
+                    </a>
+                    <% if (dia.consultas.length) { %>
+                      <span class="badge badge-soft-success"><%= dia.consultas.length %></span>
+                    <% } %>
+                  </div>
+                  <% dia.consultas.slice(0, 3).forEach(function (consulta) { %>
+                    <div class="small text-truncate mb-1" title="<%= formatarHora(consulta.inicio) %> · <%= consulta.paciente.utilizador.nome %>">
+                      <span class="fw-semibold text-success"><%= formatarHora(consulta.inicio) %></span>
+                      <% if (mostrarPacienteMes) { %><%= consulta.paciente.utilizador.nome.split(' ')[0] %><% } %>
+                      <span class="text-muted"><%= consulta.especialidade ? '· ' + consulta.especialidade.nome : '' %></span>
+                    </div>
+                  <% }); %>
+                  <% if (dia.consultas.length > 3) { %>
+                    <a class="small text-decoration-none" href="<%= urlAgendaMes %>?data=<%= formatarDataInput(dia.data) %>&vista=dia<%= extraMes %>">+<%= dia.consultas.length - 3 %> mais</a>
+                  <% } %>
+                </td>
+              <% }); %>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

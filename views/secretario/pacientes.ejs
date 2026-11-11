@@ -1,0 +1,166 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Pacientes</h1>
+        <p class="lead mb-0">Pesquise, crie e atualize os dados dos pacientes da clínica.</p>
+      </div>
+      <button class="btn btn-ma" data-bs-toggle="collapse" data-bs-target="#novoPaciente" aria-expanded="false">
+        <i class="bi bi-person-plus me-1"></i> Novo paciente
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="collapse mb-4" id="novoPaciente">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-person-plus me-1"></i> Criar conta de paciente</div>
+        <div class="card-body p-4">
+          <form action="/secretario/pacientes" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="nome">Nome completo</label>
+                <input class="form-control" id="nome" name="nome" type="text" required minlength="3" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="email">E-mail</label>
+                <input class="form-control" id="email" name="email" type="email" required />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="telefone">Telefone</label>
+                <input class="form-control" id="telefone" name="telefone" type="tel" required />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="dataNascimento">Data de nascimento</label>
+                <input class="form-control" id="dataNascimento" name="dataNascimento" type="date" max="<%= formatarDataInput(new Date()) %>" required />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="preferenciaNotificacao">Canal preferido</label>
+                <select class="form-select" id="preferenciaNotificacao" name="preferenciaNotificacao">
+                  <option value="EMAIL">E-mail</option>
+                  <option value="SMS">SMS</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="endereco">Endereço</label>
+                <input class="form-control" id="endereco" name="endereco" type="text" required />
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-4">
+              <p class="small text-muted mb-0"><i class="bi bi-info-circle me-1"></i>A senha inicial será mostrada após a criação.</p>
+              <button class="btn btn-ma" type="submit"><i class="bi bi-check2-circle me-1"></i> Criar paciente</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body p-3">
+        <form action="/secretario/pacientes" method="get" class="row g-2 align-items-end">
+          <div class="col-md-8">
+            <label class="form-label" for="busca">Pesquisar por nome, e-mail ou telefone</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+              <input class="form-control" id="busca" name="busca" type="search" value="<%= busca %>" placeholder="Ex.: Ana Silva" />
+            </div>
+          </div>
+          <div class="col-md-4 d-flex gap-2">
+            <button class="btn btn-outline-ma flex-grow-1" type="submit">Pesquisar</button>
+            <a class="btn btn-outline-secondary" href="/secretario/pacientes" aria-label="Limpar filtros" title="Limpar filtros"><i class="bi bi-arrow-counterclockwise"></i></a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-people me-1"></i> Lista de pacientes</span>
+        <span class="small text-muted"><%= pacientes.length %> registo(s)</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Paciente</th><th>Contactos</th><th>Idade</th><th>Canal</th><th class="text-end">Ações</th></tr>
+          </thead>
+          <tbody>
+            <% pacientes.forEach(function (paciente) { %>
+              <tr>
+                <td class="small">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar avatar-sm"><%= paciente.utilizador.nome.charAt(0).toUpperCase() %></span>
+                    <div>
+                      <div class="fw-semibold"><%= paciente.utilizador.nome %></div>
+                      <div class="text-muted"><%= paciente.endereco %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="small">
+                  <div><i class="bi bi-envelope me-1 text-muted"></i><%= paciente.utilizador.email %></div>
+                  <div><i class="bi bi-telephone me-1 text-muted"></i><%= paciente.telefone %></div>
+                </td>
+                <td class="small"><%= idade(paciente.dataNascimento) %> anos</td>
+                <td><span class="badge badge-soft-info"><%= paciente.utilizador.preferenciaNotificacao %></span></td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-ma" data-bs-toggle="modal" data-bs-target="#editar<%= paciente.id %>"><i class="bi bi-pencil"></i></button>
+                </td>
+              </tr>
+            <% }); %>
+            <% if (!pacientes.length) { %>
+              <tr><td colspan="5" class="text-center text-muted py-4">Nenhum paciente encontrado.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+      <%- include('../partials/pagination') %>
+    </div>
+  </div>
+</section>
+
+<% pacientes.forEach(function (paciente) { %>
+  <div class="modal fade" id="editar<%= paciente.id %>" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <form class="modal-content" action="/secretario/pacientes/<%= paciente.id %>" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="modal-header">
+          <h5 class="modal-title">Editar paciente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="nome<%= paciente.id %>">Nome</label>
+              <input class="form-control" id="nome<%= paciente.id %>" name="nome" type="text" value="<%= paciente.utilizador.nome %>" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="telefone<%= paciente.id %>">Telefone</label>
+              <input class="form-control" id="telefone<%= paciente.id %>" name="telefone" type="tel" value="<%= paciente.telefone %>" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="nascimento<%= paciente.id %>">Data de nascimento</label>
+              <input class="form-control" id="nascimento<%= paciente.id %>" name="dataNascimento" type="date" value="<%= formatarDataInput(paciente.dataNascimento) %>" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="canal<%= paciente.id %>">Canal preferido</label>
+              <select class="form-select" id="canal<%= paciente.id %>" name="preferenciaNotificacao">
+                <option value="EMAIL" <%= paciente.utilizador.preferenciaNotificacao === 'EMAIL' ? 'selected' : '' %>>E-mail</option>
+                <option value="SMS" <%= paciente.utilizador.preferenciaNotificacao === 'SMS' ? 'selected' : '' %>>SMS</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="endereco<%= paciente.id %>">Endereço</label>
+              <input class="form-control" id="endereco<%= paciente.id %>" name="endereco" type="text" value="<%= paciente.endereco %>" required />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-ma">Guardar alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+<% }); %>

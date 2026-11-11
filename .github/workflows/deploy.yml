@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  render:
+    name: Publicar no Render
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+    steps:
+      - name: Acionar o deploy
+        if: env.RENDER_DEPLOY_HOOK_URL != ''
+        run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+
+      - name: Avisar quando o segredo não está configurado
+        if: env.RENDER_DEPLOY_HOOK_URL == ''
+        run: |
+          echo "RENDER_DEPLOY_HOOK_URL não está configurado."
+          echo "Crie o segredo no repositório para ativar o deploy automático."
+
+  railway:
+    name: Publicar no Railway
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    env:
+      RAILWAY_DEPLOY_HOOK_URL: ${{ secrets.RAILWAY_DEPLOY_HOOK_URL }}
+    steps:
+      - name: Acionar o deploy
+        if: env.RAILWAY_DEPLOY_HOOK_URL != ''
+        run: curl -fsS -X POST "$RAILWAY_DEPLOY_HOOK_URL"
+
+      - name: Avisar quando o segredo não está configurado
+        if: env.RAILWAY_DEPLOY_HOOK_URL == ''
+        run: echo "RAILWAY_DEPLOY_HOOK_URL não está configurado."

@@ -1,0 +1,152 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Segurança da conta</h1>
+        <p class="lead mb-0">Proteja o acesso à sua conta e mantenha os seus dados seguros.</p>
+      </div>
+      <a class="btn btn-outline-ma" href="/conta/password">
+        <i class="bi bi-key me-1"></i> Alterar palavra-passe
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-shield-check me-1"></i> Verificação em dois passos</div>
+          <div class="card-body p-4">
+            <% if (utilizador.twoFactorEnabled) { %>
+              <div class="d-flex align-items-start gap-3 mb-3">
+                <span class="badge bg-success-subtle text-success-emphasis p-2"><i class="bi bi-check2-circle fs-5"></i></span>
+                <div>
+                  <div class="fw-semibold">Proteção ativa</div>
+                  <div class="small text-muted">
+                    Sempre que iniciar sessão, pedimos um código da sua aplicação de autenticação.
+                  </div>
+                </div>
+              </div>
+
+              <form action="/conta/seguranca/2fa/desativar" method="post" data-confirm="Desativar a verificação em dois passos?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <div class="mb-3">
+                  <label class="form-label" for="password-desativar">Confirme a sua palavra-passe</label>
+                  <input class="form-control" id="password-desativar" name="password" type="password" autocomplete="current-password" required />
+                </div>
+                <button class="btn btn-outline-danger" type="submit">
+                  <i class="bi bi-shield-slash me-1"></i> Desativar verificação
+                </button>
+              </form>
+            <% } else { %>
+              <p class="text-muted">
+                Adicione uma camada extra de segurança. Para além da palavra-passe, será pedido
+                um código de seis dígitos gerado numa aplicação como o Google Authenticator,
+                Microsoft Authenticator ou Authy.
+              </p>
+
+              <% if (qrCode) { %>
+                <div class="row g-4 align-items-center">
+                  <div class="col-md-5 text-center">
+                    <img class="img-fluid border rounded-3 p-2 bg-white" src="<%= qrCode %>" alt="Código QR para configurar a verificação em dois passos" width="240" height="240" />
+                  </div>
+                  <div class="col-md-7">
+                    <div class="small text-muted mb-2">Não consegue ler o código? Introduza esta chave manualmente:</div>
+                    <div class="mono small bg-light border rounded-3 p-2 mb-3 text-break"><%= secret %></div>
+                    <form action="/conta/seguranca/2fa/ativar" method="post">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                      <label class="form-label" for="token">Código de seis dígitos</label>
+                      <input class="form-control mono text-center" id="token" name="token" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required />
+                      <button class="btn btn-ma mt-3" type="submit">
+                        <i class="bi bi-shield-check me-1"></i> Ativar verificação
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              <% } %>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><i class="bi bi-camera me-1"></i> Fotografia de perfil</div>
+          <div class="card-body p-4">
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3 mb-3">
+              <% if (utilizador.fotoUrl) { %>
+                <img class="avatar avatar-lg object-fit-cover" src="<%= utilizador.fotoUrl %>" alt="Fotografia de <%= utilizador.nome %>" />
+              <% } else { %>
+                <span class="avatar avatar-lg"><%= utilizador.nome.charAt(0).toUpperCase() %></span>
+              <% } %>
+              <div class="small text-muted">
+                Formatos aceites: JPG, PNG ou WebP. Tamanho máximo: 2 MB.
+              </div>
+            </div>
+
+            <form action="/conta/foto" method="post" enctype="multipart/form-data">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div class="input-group">
+                <input class="form-control" id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" required />
+                <button class="btn btn-ma" type="submit"><i class="bi bi-upload me-1"></i> Enviar</button>
+              </div>
+            </form>
+
+            <% if (utilizador.fotoUrl) { %>
+              <form action="/conta/foto/remover" method="post" class="mt-2" data-confirm="Remover a fotografia de perfil?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button class="btn btn-link btn-sm text-danger p-0" type="submit">Remover fotografia</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-person me-1"></i> A sua conta</div>
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <% if (utilizador.fotoUrl) { %>
+                <img class="avatar avatar-lg object-fit-cover" src="<%= utilizador.fotoUrl %>" alt="Fotografia de <%= utilizador.nome %>" />
+              <% } else { %>
+                <span class="avatar avatar-lg"><%= utilizador.nome.charAt(0).toUpperCase() %></span>
+              <% } %>
+              <div>
+                <div class="fw-semibold"><%= utilizador.nome %></div>
+                <div class="small text-muted"><%= utilizador.email %></div>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom small">
+              <span class="text-muted">Palavra-passe alterada</span>
+              <span class="fw-semibold"><%= formatarData(utilizador.passwordChangedAt) %></span>
+            </div>
+            <div class="d-flex justify-content-between py-2 small">
+              <span class="text-muted">Verificação em dois passos</span>
+              <span class="fw-semibold <%= utilizador.twoFactorEnabled ? 'text-success' : 'text-muted' %>">
+                <%= utilizador.twoFactorEnabled ? 'Ativa' : 'Inativa' %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body small text-muted">
+            <div class="d-flex gap-2 mb-2">
+              <i class="bi bi-shield-lock text-success"></i>
+              <span>Nunca partilhe os seus códigos de verificação com ninguém.</span>
+            </div>
+            <div class="d-flex gap-2 mb-2">
+              <i class="bi bi-envelope-check text-success"></i>
+              <span>Se notar um acesso estranho, altere a palavra-passe imediatamente.</span>
+            </div>
+            <div class="d-flex gap-2">
+              <i class="bi bi-telephone text-success"></i>
+              <span>Em caso de dúvida, contacte a clínica.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,30 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Documentos clínicos</h1>
+        <p class="lead mb-0">Receitas, atestados e notas partilhados pelos seus médicos.</p>
+      </div>
+      <a class="btn btn-outline-ma" href="/paciente/consultas"><i class="bi bi-calendar2-check me-1"></i> As minhas consultas</a>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-folder2-open me-1"></i> Os meus documentos</span>
+        <span class="small text-muted"><%= documentos.length %> documento(s)</span>
+      </div>
+      <div class="card-body">
+        <%- include('../partials/lista-documentos', { documentos: documentos, modo: 'paciente' }) %>
+      </div>
+    </div>
+
+    <div class="alert alert-info mt-3 small">
+      <i class="bi bi-shield-lock me-1"></i>
+      Estes documentos são confidenciais. Se notar algo estranho, contacte a clínica.
+    </div>
+  </div>
+</section>

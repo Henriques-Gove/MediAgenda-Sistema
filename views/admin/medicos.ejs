@@ -1,0 +1,213 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Gestao de médicos</h1>
+        <p class="lead mb-0">Crie contas, atualize dados e controle a disponibilidade dos profissionais.</p>
+      </div>
+      <button class="btn btn-ma" data-bs-toggle="collapse" data-bs-target="#novoMedico">
+        <i class="bi bi-person-plus me-1"></i> Novo médico
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="collapse mb-4" id="novoMedico">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-person-plus me-1"></i> Criar conta de médico</div>
+        <div class="card-body p-4">
+          <form action="/admin/medicos" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label" for="nome">Nome completo</label>
+                <input class="form-control" id="nome" name="nome" type="text" required minlength="3" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="email">E-mail</label>
+                <input class="form-control" id="email" name="email" type="email" required />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="password">Palavra-passe inicial</label>
+                <input class="form-control" id="password" name="password" type="password" minlength="8" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label" for="numeroRegisto">Número de registo</label>
+                <input class="form-control" id="numeroRegisto" name="numeroRegisto" type="text" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label" for="telefone">Telefone</label>
+                <input class="form-control" id="telefone" name="telefone" type="tel" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label" for="localizacao">Localização</label>
+                <input class="form-control" id="localizacao" name="localizacao" type="text" required />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label" for="duracaoConsultaMinutos">Duração (min)</label>
+                <input class="form-control" id="duracaoConsultaMinutos" name="duracaoConsultaMinutos" type="number" min="60" max="120" step="15" value="60" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label" for="maxConsultasDia">Máximo por dia</label>
+                <input class="form-control" id="maxConsultasDia" name="maxConsultasDia" type="number" min="1" max="40" value="10" />
+              </div>
+              <div class="col-md-9">
+                <label class="form-label" for="bio">Biografia</label>
+                <input class="form-control" id="bio" name="bio" type="text" maxlength="600" />
+              </div>
+              <div class="col-12">
+                <label class="form-label d-block">Especialidades</label>
+                <div class="row g-2">
+                  <% especialidades.forEach(function (especialidade) { %>
+                    <div class="col-md-4">
+                      <div class="form-check border rounded-3 px-4 py-2">
+                        <input class="form-check-input" type="checkbox" name="especialidadeIds" value="<%= especialidade.id %>" id="novaEsp<%= especialidade.id %>" />
+                        <label class="form-check-label small" for="novaEsp<%= especialidade.id %>"><%= especialidade.nome %></label>
+                      </div>
+                    </div>
+                  <% }); %>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex justify-content-end mt-4">
+              <button class="btn btn-ma" type="submit"><i class="bi bi-check2-circle me-1"></i> Criar médico</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-person-badge me-1"></i> Médicos registados</span>
+        <span class="small text-muted"><%= medicos.length %> registo(s)</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Médico</th><th>Especialidades</th><th>Contactos</th><th>Agenda</th><th>Estado</th><th class="text-end">Ações</th></tr>
+          </thead>
+          <tbody>
+            <% medicos.forEach(function (medico) { %>
+              <tr>
+                <td class="small">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar avatar-sm"><%= medico.utilizador.nome.replace('Dr. ', '').replace('Dra. ', '').charAt(0) %></span>
+                    <div>
+                      <div class="fw-semibold"><%= medico.utilizador.nome %></div>
+                      <div class="text-muted"><%= medico.numeroRegisto %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="small">
+                  <% medico.especialidades.forEach(function (vinculo) { %>
+                    <span class="specialty-pill mb-1"><%= vinculo.especialidade.nome %></span>
+                  <% }); %>
+                </td>
+                <td class="small">
+                  <div><i class="bi bi-envelope me-1 text-muted"></i><%= medico.utilizador.email %></div>
+                  <div><i class="bi bi-telephone me-1 text-muted"></i><%= medico.telefone %></div>
+                </td>
+                <td class="small">
+                  <div><%= medico.duracaoConsultaMinutos %> min / consulta</div>
+                  <div class="text-muted">Até <%= medico.maxConsultasDia %>/dia</div>
+                </td>
+                <td>
+                  <span class="badge badge-soft-<%= medico.ativo && medico.utilizador.ativo ? 'success' : 'secondary' %>">
+                    <%= medico.ativo && medico.utilizador.ativo ? 'Ativo' : 'Inativo' %>
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="d-flex justify-content-end gap-1">
+                    <button class="btn btn-sm btn-outline-ma" data-bs-toggle="modal" data-bs-target="#editar<%= medico.id %>" title="Editar"><i class="bi bi-pencil"></i></button>
+                    <% if (medico.ativo) { %>
+                      <form action="/admin/medicos/<%= medico.id %>/desativar" method="post" data-confirm="Desativar o médico? As consultas futuras serão canceladas.">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Desactivar"><i class="bi bi-slash-circle"></i></button>
+                      </form>
+                    <% } else { %>
+                      <form action="/admin/medicos/<%= medico.id %>/reativar" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <button class="btn btn-sm btn-outline-success" type="submit" title="Reactivar"><i class="bi bi-arrow-clockwise"></i></button>
+                      </form>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+            <% if (!medicos.length) { %>
+              <tr><td colspan="6" class="text-center text-muted py-4">Ainda sem médicos.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="alert alert-warning small mt-3">
+      <i class="bi bi-exclamation-triangle me-1"></i>
+      Ao desativar um médico, todas as consultas futuras pendentes ou confirmadas são canceladas e os pacientes notificados.
+    </div>
+  </div>
+</section>
+
+<% medicos.forEach(function (medico) { %>
+  <div class="modal fade" id="editar<%= medico.id %>" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <form class="modal-content" action="/admin/medicos/<%= medico.id %>" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="modal-header">
+          <h5 class="modal-title">Editar <%= medico.utilizador.nome %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="registo<%= medico.id %>">Número de registo</label>
+              <input class="form-control" id="registo<%= medico.id %>" name="numeroRegisto" type="text" value="<%= medico.numeroRegisto %>" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="tel<%= medico.id %>">Telefone</label>
+              <input class="form-control" id="tel<%= medico.id %>" name="telefone" type="tel" value="<%= medico.telefone %>" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="loc<%= medico.id %>">Localização</label>
+              <input class="form-control" id="loc<%= medico.id %>" name="localizacao" type="text" value="<%= medico.localizacao %>" required />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="dur<%= medico.id %>">Duração (min)</label>
+              <input class="form-control" id="dur<%= medico.id %>" name="duracaoConsultaMinutos" type="number" min="60" max="120" step="15" value="<%= medico.duracaoConsultaMinutos %>" required />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="max<%= medico.id %>">Max./dia</label>
+              <input class="form-control" id="max<%= medico.id %>" name="maxConsultasDia" type="number" min="1" max="40" value="<%= medico.maxConsultasDia %>" required />
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="bio<%= medico.id %>">Biografia</label>
+              <textarea class="form-control" id="bio<%= medico.id %>" name="bio" rows="2"><%= medico.bio || '' %></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label d-block">Especialidades</label>
+              <div class="row g-2">
+                <% especialidades.forEach(function (especialidade) { %>
+                  <% const marcada = medico.especialidades.some(function (vinculo) { return vinculo.especialidadeId === especialidade.id; }); %>
+                  <div class="col-md-6">
+                    <div class="form-check border rounded-3 px-4 py-2">
+                      <input class="form-check-input" type="checkbox" name="especialidadeIds" value="<%= especialidade.id %>" id="esp<%= medico.id %><%= especialidade.id %>" <%= marcada ? 'checked' : '' %> />
+                      <label class="form-check-label small" for="esp<%= medico.id %><%= especialidade.id %>"><%= especialidade.nome %></label>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-ma">Guardar alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+<% }); %>

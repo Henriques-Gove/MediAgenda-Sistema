@@ -1,0 +1,122 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Médicos</h1>
+        <p class="lead mb-0">Registe novos médicos da equipa clínica e acompanhe a agenda de cada um.</p>
+      </div>
+      <button class="btn btn-ma" data-bs-toggle="modal" data-bs-target="#criarMedico">
+        <i class="bi bi-person-plus me-1"></i> Registar médico
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-person-badge me-1"></i> Equipa clínica</span>
+        <span class="small text-muted"><%= medicos.length %> médico(s) ativo(s)</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Médico</th><th>Especialidade</th><th>Localização</th><th>Agenda</th><th>Avaliação</th></tr>
+          </thead>
+          <tbody>
+            <% medicos.forEach(function (medico) { %>
+              <tr>
+                <td class="small">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar avatar-sm"><%= medico.utilizador.nome.charAt(0).toUpperCase() %></span>
+                    <div>
+                      <div class="fw-semibold"><%= medico.utilizador.nome %></div>
+                      <div class="text-muted"><%= medico.utilizador.email %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="small"><%= medico.especialidades.map(function (e) { return e.especialidade.nome; }).join(', ') || 'Consulta geral' %></td>
+                <td class="small"><%= medico.localizacao || '-' %></td>
+                <td class="small text-muted">
+                  <%= medico.duracaoConsultaMinutos %> min/consulta · max. <%= medico.maxConsultasDia %>/dia
+                </td>
+                <td><%- include('../partials/rating', { media: medico.avaliacaoMedia, total: medico.totalAvaliacoes }) %></td>
+              </tr>
+            <% }); %>
+            <% if (!medicos.length) { %>
+              <tr><td colspan="5" class="text-center text-muted py-4">Ainda não existem médicos registados.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="criarMedico" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <form class="modal-content" action="/secretario/medicos" method="post">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div class="modal-header">
+        <h5 class="modal-title">Registar médico</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label" for="nome">Nome completo</label>
+            <input class="form-control" id="nome" name="nome" type="text" required minlength="3" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="email">E-mail profissional</label>
+            <input class="form-control" id="email" name="email" type="email" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="telefone">Telefone</label>
+            <input class="form-control" id="telefone" name="telefone" type="tel" placeholder="+258 84 000 0000" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="numeroRegisto">Número de registo</label>
+            <input class="form-control" id="numeroRegisto" name="numeroRegisto" type="text" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="localizacao">Localização</label>
+            <input class="form-control" id="localizacao" name="localizacao" type="text" placeholder="Clínica Central, Maputo" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="especialidadeId">Especialidade</label>
+            <select class="form-select" id="especialidadeId" name="especialidadeId" required>
+              <option value="">Selecione</option>
+              <% especialidades.forEach(function (especialidade) { %>
+                <option value="<%= especialidade.id %>"><%= especialidade.nome %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="duracaoConsultaMinutos">Duração da consulta (min)</label>
+            <input class="form-control" id="duracaoConsultaMinutos" name="duracaoConsultaMinutos" type="number" min="60" max="120" step="15" value="60" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="maxConsultasDia">Consultas por dia (máximo)</label>
+            <input class="form-control" id="maxConsultasDia" name="maxConsultasDia" type="number" min="1" max="40" value="10" />
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="bio">Biografia (opcional)</label>
+            <textarea class="form-control" id="bio" name="bio" rows="2" placeholder="Experiência, formação e áreas de interesse"></textarea>
+          </div>
+          <div class="col-12">
+            <div class="alert alert-info mb-0 py-2 small">
+              <i class="bi bi-info-circle me-1"></i>
+              Uma palavra-passe inicial será gerada automaticamente e apresentada depois de guardar. O médico deve trocá-la no primeiro acesso.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-ma" type="submit"><i class="bi bi-check2 me-1"></i> Registar</button>
+      </div>
+    </form>
+  </div>
+</div>

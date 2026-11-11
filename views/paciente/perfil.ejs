@@ -1,0 +1,125 @@
+<section class="page-header">
+  <div class="container">
+    <h1 class="h2 mb-1">O meu perfil</h1>
+    <p class="lead mb-0">Mantenha os seus dados atualizados para receber as notificações certas.</p>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-person-gear me-1"></i> Dados pessoais</div>
+          <div class="card-body p-4">
+            <form action="/paciente/perfil" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div class="d-flex align-items-center gap-3 mb-4">
+                <span class="avatar avatar-lg"><%= paciente.utilizador.nome.charAt(0).toUpperCase() %></span>
+                <div>
+                  <div class="fw-semibold"><%= paciente.utilizador.nome %></div>
+                  <div class="small text-muted">Paciente desde <%= formatarData(paciente.criadoEm) %></div>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="nome">Nome completo</label>
+                  <input class="form-control" id="nome" name="nome" type="text" value="<%= paciente.utilizador.nome %>" required minlength="3" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="email">E-mail</label>
+                  <input class="form-control" id="email" type="email" value="<%= paciente.utilizador.email %>" disabled />
+                  <div class="form-text">O e-mail de acesso não pode ser alterado aqui.</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="telefone">Telefone</label>
+                  <input class="form-control" id="telefone" name="telefone" type="tel" value="<%= paciente.telefone %>" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="dataNascimento">Data de nascimento</label>
+                  <input class="form-control" id="dataNascimento" name="dataNascimento" type="date" max="<%= hoje %>" value="<%= formatarDataInput(paciente.dataNascimento) %>" required />
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="endereco">Endereço</label>
+                  <input class="form-control" id="endereco" name="endereco" type="text" value="<%= paciente.endereco %>" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="preferenciaNotificacao">Canal preferido</label>
+                  <select class="form-select" id="preferenciaNotificacao" name="preferenciaNotificacao">
+                    <option value="EMAIL" <%= paciente.utilizador.preferenciaNotificacao === 'EMAIL' ? 'selected' : '' %>>E-mail</option>
+                    <option value="SMS" <%= paciente.utilizador.preferenciaNotificacao === 'SMS' ? 'selected' : '' %>>SMS</option>
+                  </select>
+                  <div class="form-text">Se escolher SMS e não tiver telefone, o sistema usa e-mail.</div>
+                </div>
+              </div>
+
+              <button class="btn btn-ma mt-4" type="submit"><i class="bi bi-check2-circle me-1"></i> Guardar alterações</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><i class="bi bi-shield-lock me-1"></i> Segurança</div>
+          <div class="card-body p-4">
+            <form action="/paciente/password" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="atual">Palavra-passe atual</label>
+                  <input class="form-control" id="atual" name="atual" type="password" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="nova">Nova palavra-passe</label>
+                  <input class="form-control" id="nova" name="nova" type="password" minlength="8" required />
+                </div>
+              </div>
+              <button class="btn btn-outline-ma mt-4" type="submit"><i class="bi bi-key me-1"></i> Alterar palavra-passe</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-bar-chart me-1"></i> Resumo</div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between py-2 border-bottom">
+              <span class="text-muted small">Consultas totais</span>
+              <span class="fw-bold"><%= estatisticas.total %></span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+              <span class="text-muted small">Realizadas</span>
+              <span class="fw-bold text-success"><%= estatisticas.realizadas %></span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+              <span class="text-muted small">Canceladas</span>
+              <span class="fw-bold text-danger"><%= estatisticas.canceladas %></span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+              <span class="text-muted small">Cancelamentos tardios</span>
+              <span class="fw-bold text-warning"><%= estatisticas.tardias %></span>
+            </div>
+            <div class="d-flex justify-content-between py-2">
+              <span class="text-muted small">Próximas</span>
+              <span class="fw-bold text-primary"><%= estatisticas.proximas %></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-info-circle text-success"></i>
+              <span class="fw-semibold">Privacidade</span>
+            </div>
+            <p class="small text-muted mb-0">
+              Os seus dados são usados apenas para gerir consultas e enviar notificações.
+              Todas as operações críticas ficam registadas na auditoria do sistema.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

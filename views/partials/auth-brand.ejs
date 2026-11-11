@@ -1,0 +1,28 @@
+<aside class="auth-brand">
+  <a class="auth-brand-logo" href="/">
+    <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+    <span>MediAgenda</span>
+  </a>
+
+  <div class="auth-brand-content">
+    <span class="auth-badge">
+      <i class="bi bi-calendar2-check"></i>
+      <%= typeof authBadge !== 'undefined' ? authBadge : 'Agendamento online 24/7' %>
+    </span>
+    <h1><%= typeof authTitulo !== 'undefined' ? authTitulo : 'A sua saúde, agendada em minutos.' %></h1>
+    <p>
+      <%= typeof authTexto !== 'undefined' ? authTexto : 'Encontre o médico certo, escolha o horário e receba a confirmação por e-mail ou SMS.' %>
+    </p>
+    <ul class="auth-benefits">
+      <li><i class="bi bi-check2-circle"></i><span>Médicos verificados e avaliados</span></li>
+      <li><i class="bi bi-check2-circle"></i><span>Confirmação e lembretes automáticos</span></li>
+      <li><i class="bi bi-check2-circle"></i><span>Reagendamento e cancelamento online</span></li>
+      <li><i class="bi bi-check2-circle"></i><span>Histórico de consultas sempre disponível</span></li>
+    </ul>
+  </div>
+
+  <div class="auth-trust">
+    <i class="bi bi-shield-check"></i>
+    <span>Dados protegidos e sessão segura</span>
+  </div>
+</aside>

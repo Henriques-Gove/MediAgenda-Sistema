@@ -1,0 +1,11 @@
+<section class="auth-shell">
+  <div class="container text-center">
+    <div class="display-1 fw-bold" style="color: var(--ma-primary)"><%= status || 500 %></div>
+    <h1 class="h3 fw-bold mb-2"><%= titulo || 'Ocorreu um erro' %></h1>
+    <p class="text-muted mb-4"><%= mensagem || 'Ocorreu um erro inesperado. Tente novamente.' %></p>
+    <div class="d-flex justify-content-center gap-2">
+      <a class="btn btn-ma" href="/"><i class="bi bi-house me-1"></i> Voltar ao início</a>
+      <a class="btn btn-outline-ma" href="#" data-history-back><i class="bi bi-arrow-left me-1"></i> Voltar atrás</a>
+    </div>
+  </div>
+</section>

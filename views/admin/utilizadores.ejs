@@ -1,0 +1,242 @@
+<%
+  const rotulosPerfil = {
+    PACIENTE: 'Paciente',
+    MEDICO: 'Médico',
+    SECRETARIO: 'Secretaria',
+    ADMINISTRADOR: 'Administrador',
+  };
+%>
+
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Utilizadores</h1>
+        <p class="lead mb-0">Consulte todas as contas, crie acessos e controle quem pode usar o sistema.</p>
+      </div>
+      <button class="btn btn-ma" data-bs-toggle="modal" data-bs-target="#criarConta">
+        <i class="bi bi-person-plus me-1"></i> Criar conta
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="card mb-4">
+      <div class="card-body p-3">
+        <form action="/admin/utilizadores" method="get" class="row g-2 align-items-end">
+          <div class="col-md-5">
+            <label class="form-label" for="busca">Pesquisar</label>
+            <input class="form-control" id="busca" name="busca" type="search" value="<%= filtros.busca %>" placeholder="Nome ou e-mail" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="perfil">Perfil</label>
+            <select class="form-select" id="perfil" name="perfil" data-auto-submit>
+              <option value="">Todos</option>
+              <% Object.keys(rotulosPerfil).forEach(function (perfil) { %>
+                <option value="<%= perfil %>" <%= filtros.perfil === perfil ? 'selected' : '' %>><%= rotulosPerfil[perfil] %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-outline-ma flex-grow-1" type="submit">Filtrar</button>
+            <a class="btn btn-outline-secondary" href="/admin/utilizadores" aria-label="Limpar filtros" title="Limpar filtros"><i class="bi bi-arrow-counterclockwise"></i></a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-people me-1"></i> Contas</span>
+        <span class="small text-muted"><%= utilizadores.length %> registo(s)</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Utilizador</th><th>Perfil</th><th>Contacto</th><th>E-mail confirmado</th><th>Criado</th><th>Estado</th><th class="text-end">Ações</th></tr>
+          </thead>
+          <tbody>
+            <% utilizadores.forEach(function (conta) { %>
+              <tr>
+                <td class="small">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="avatar avatar-sm"><%= conta.nome.charAt(0).toUpperCase() %></span>
+                    <div>
+                      <div class="fw-semibold"><%= conta.nome %></div>
+                      <div class="text-muted"><%= conta.email %></div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge badge-soft-primary"><%= rotulosPerfil[conta.perfil] || conta.perfil %></span></td>
+                <td class="small"><%= conta.telefone || '-' %></td>
+                <td>
+                  <span class="badge badge-soft-<%= conta.emailConfirmado ? 'success' : 'warning' %>"><%= conta.emailConfirmado ? 'Sim' : 'Pendente' %></span>
+                </td>
+                <td class="small text-muted"><%= formatarData(conta.criadoEm) %></td>
+                <td>
+                  <span class="badge badge-soft-<%= conta.ativo ? 'success' : 'secondary' %>"><%= conta.ativo ? 'Ativo' : 'Inativo' %></span>
+                </td>
+                <td class="text-end">
+                  <% if (conta.id === utilizador.id) { %>
+                    <span class="small text-muted">Sessão atual</span>
+                  <% } else if (conta.ativo) { %>
+                    <form action="/admin/utilizadores/<%= conta.id %>/desactivar" method="post" data-confirm="Desativar esta conta?">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                      <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-slash-circle me-1"></i>Desativar</button>
+                    </form>
+                  <% } else { %>
+                    <form action="/admin/utilizadores/<%= conta.id %>/activar" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                      <button class="btn btn-sm btn-outline-success" type="submit"><i class="bi bi-arrow-clockwise me-1"></i>Ativar</button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+            <% if (!utilizadores.length) { %>
+              <tr><td colspan="7" class="text-center text-muted py-4">Nenhum utilizador encontrado.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+      <%- include('../partials/pagination') %>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="criarConta" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <form class="modal-content" action="/admin/utilizadores" method="post">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div class="modal-header">
+        <h5 class="modal-title">Criar conta</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label" for="perfil">Perfil</label>
+            <select class="form-select" id="perfil" name="perfil" required>
+              <option value="PACIENTE" selected>Paciente</option>
+              <option value="MEDICO">Médico</option>
+              <option value="SECRETARIO">Secretaria</option>
+              <option value="ADMINISTRADOR">Administrador</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="preferenciaNotificacao">Preferência de notificação</label>
+            <select class="form-select" id="preferenciaNotificacao" name="preferenciaNotificacao">
+              <option value="EMAIL" selected>E-mail</option>
+              <option value="SMS">SMS</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="nome">Nome completo</label>
+            <input class="form-control" id="nome" name="nome" type="text" required minlength="3" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="email">E-mail</label>
+            <input class="form-control" id="email" name="email" type="email" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="telefone">Telefone</label>
+            <input class="form-control" id="telefone" name="telefone" type="tel" placeholder="+258 84 000 0000" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="password">Palavra-passe (opcional)</label>
+            <div class="input-group">
+              <input class="form-control" id="password" name="password" type="password" autocomplete="new-password" />
+              <button class="btn btn-outline-secondary" type="button" data-toggle-password="password" aria-label="Mostrar palavra-passe">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            <div class="form-text">Se ficar vazia, o sistema gera uma inicial automaticamente.</div>
+          </div>
+        </div>
+
+        <div id="camposPaciente" class="mt-3 border rounded-3 p-3">
+          <div class="small fw-semibold mb-2"><i class="bi bi-person me-1"></i> Dados do paciente</div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="dataNascimento">Data de nascimento</label>
+              <input class="form-control" id="dataNascimento" name="dataNascimento" type="date" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="endereco">Endereço</label>
+              <input class="form-control" id="endereco" name="endereco" type="text" placeholder="Bairro, cidade" />
+            </div>
+          </div>
+        </div>
+
+        <div id="camposMedico" class="mt-3 border rounded-3 p-3 d-none">
+          <div class="small fw-semibold mb-2"><i class="bi bi-person-badge me-1"></i> Dados do médico</div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="numeroRegisto">Número de registo</label>
+              <input class="form-control" id="numeroRegisto" name="numeroRegisto" type="text" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="localizacao">Localização</label>
+              <input class="form-control" id="localizacao" name="localizacao" type="text" placeholder="Clínica Central, Maputo" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="especialidadeId">Especialidade</label>
+              <select class="form-select" id="especialidadeId" name="especialidadeId">
+                <option value="">Selecione</option>
+                <% especialidades.forEach(function (especialidade) { %>
+                  <option value="<%= especialidade.id %>"><%= especialidade.nome %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="duracaoConsultaMinutos">Duração da consulta (min)</label>
+              <input class="form-control" id="duracaoConsultaMinutos" name="duracaoConsultaMinutos" type="number" min="60" max="120" step="15" value="60" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="maxConsultasDia">Consultas por dia (máximo)</label>
+              <input class="form-control" id="maxConsultasDia" name="maxConsultasDia" type="number" min="1" max="40" value="10" />
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="bio">Biografia (opcional)</label>
+              <textarea class="form-control" id="bio" name="bio" rows="2" placeholder="Experiência, formação e áreas de interesse"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info mt-3 mb-0 py-2 small">
+          <i class="bi bi-info-circle me-1"></i>
+          Se a palavra-passe ficar vazia, será gerada automaticamente e apresentada depois de guardar. A conta é criada já confirmada.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-ma" type="submit"><i class="bi bi-check2 me-1"></i> Criar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script nonce="<%= cspNonce %>">
+  document.addEventListener('DOMContentLoaded', function () {
+    var perfil = document.getElementById('perfil');
+    var camposPaciente = document.getElementById('camposPaciente');
+    var camposMedico = document.getElementById('camposMedico');
+    function atualizar() {
+      var valor = perfil.value;
+      camposPaciente.classList.toggle('d-none', valor !== 'PACIENTE');
+      camposMedico.classList.toggle('d-none', valor !== 'MEDICO');
+      ['dataNascimento', 'endereco'].forEach(function (id) {
+        var campo = document.getElementById(id);
+        if (campo) campo.required = valor === 'PACIENTE';
+      });
+      ['numeroRegisto', 'localizacao', 'especialidadeId'].forEach(function (id) {
+        var campo = document.getElementById(id);
+        if (campo) campo.required = valor === 'MEDICO';
+      });
+    }
+    perfil.addEventListener('change', atualizar);
+    atualizar();
+  });
+</script>

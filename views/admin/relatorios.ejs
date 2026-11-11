@@ -1,0 +1,149 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Relatórios e estatísticas</h1>
+        <p class="lead mb-0">Analise a ocupação, cancelamentos e satisfação dos pacientes.</p>
+      </div>
+      <a class="btn btn-outline-ma" href="/admin/dashboard"><i class="bi bi-arrow-left me-1"></i> Painel</a>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="card mb-4">
+      <div class="card-body p-3">
+        <form action="/admin/relatorios" method="get" class="row g-2 align-items-end">
+          <div class="col-6 col-md-4">
+            <label class="form-label" for="desde">Desde</label>
+            <input class="form-control" id="desde" name="desde" type="date" value="<%= desde %>" required />
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label" for="ate">Até</label>
+            <input class="form-control" id="ate" name="ate" type="date" value="<%= ate %>" required />
+          </div>
+          <div class="col-md-4">
+            <div class="d-flex gap-2">
+              <button class="btn btn-ma flex-grow-1" type="submit"><i class="bi bi-bar-chart me-1"></i> Atualizar</button>
+              <a class="btn btn-outline-secondary" href="/admin/relatorios/exportar.pdf?desde=<%= desde %>&ate=<%= ate %>" title="Exportar PDF"><i class="bi bi-filetype-pdf"></i></a>
+              <a class="btn btn-outline-secondary" href="/admin/relatorios/exportar.csv?desde=<%= desde %>&ate=<%= ate %>" title="Exportar CSV"><i class="bi bi-filetype-csv"></i></a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value"><%= resumo.totalConsultas %></div><div class="small text-muted">consultas no período</div></div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card"><div class="stat-label">Realizadas</div><div class="stat-value text-primary"><%= resumo.realizadas %></div><div class="small text-muted">consultas concluidas</div></div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card"><div class="stat-label">Canceladas</div><div class="stat-value text-danger"><%= resumo.canceladas %></div><div class="small text-muted"><%= resumo.taxaCancelamento %>% do total</div></div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card"><div class="stat-label">Ocupação</div><div class="stat-value text-success"><%= resumo.taxaOcupacao %>%</div><div class="small text-muted">de <%= resumo.capacidadeEstimada %> vagas</div></div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-pie-chart me-1"></i> Consultas por especialidade</div>
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead><tr><th>Especialidade</th><th class="text-end">Total</th><th class="text-end">%</th></tr></thead>
+              <tbody>
+                <% resumo.consultasPorEspecialidade.forEach(function (item) { %>
+                  <tr>
+                    <td class="small"><%= item.especialidade %></td>
+                    <td class="small text-end fw-semibold"><%= item.total %></td>
+                    <td class="small text-end text-muted"><%= resumo.totalConsultas ? ((item.total / resumo.totalConsultas) * 100).toFixed(1) : '0.0' %>%</td>
+                  </tr>
+                <% }); %>
+                <% if (!resumo.consultasPorEspecialidade.length) { %>
+                  <tr><td colspan="3" class="text-center text-muted small py-4">Sem dados no período.</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><i class="bi bi-calendar3 me-1"></i> Consultas por mês</div>
+          <div class="card-body">
+            <%- include('../partials/grafico-barras', {
+              dados: resumo.consultasPorMes.map(function (item) {
+                return { rotulo: item.mes.slice(5) + '/' + item.mes.slice(2, 4), valor: item.total };
+              }),
+              titulo: 'Consultas por mês'
+            }) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-emoji-smile me-1"></i> Satisfação por médico</div>
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead><tr><th>Médico</th><th>Média</th><th class="text-end">Avaliações</th></tr></thead>
+              <tbody>
+                <% resumo.satisfacaoPorMedico.forEach(function (item) { %>
+                  <tr>
+                    <td class="small"><%= item.medico %></td>
+                    <td>
+                      <% if (item.media) { %>
+                        <span class="rating small">
+                          <% for (let i = 1; i <= 5; i += 1) { %><i class="bi <%= i <= Math.round(item.media) ? 'bi-star-fill' : 'bi-star' %>"></i><% } %>
+                        </span>
+                        <span class="small text-muted"><%= item.media.toFixed(1) %></span>
+                      <% } else { %>
+                        <span class="small text-muted">Sem avaliações</span>
+                      <% } %>
+                    </td>
+                    <td class="small text-end"><%= item.total %></td>
+                  </tr>
+                <% }); %>
+                <% if (!resumo.satisfacaoPorMedico.length) { %>
+                  <tr><td colspan="3" class="text-center text-muted small py-4">Sem avaliações.</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-clipboard-data me-1"></i> Distribuicao por estado</div>
+          <div class="card-body">
+            <% const estados = [
+              ['Pendentes', resumo.pendentes, 'warning'],
+              ['Confirmadas', resumo.confirmadas, 'success'],
+              ['Realizadas', resumo.realizadas, 'primary'],
+              ['Canceladas', resumo.canceladas, 'danger'],
+            ]; %>
+            <% estados.forEach(function (item) { %>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span><span class="badge badge-soft-<%= item[2] %> me-1"><%= item[0] %></span></span>
+                  <span class="fw-semibold"><%= item[1] %></span>
+                </div>
+                <div class="progress"><div class="progress-bar" style="width: <%= resumo.totalConsultas ? (item[1] / resumo.totalConsultas) * 100 : 0 %>%"></div></div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body small text-muted">
+            <div class="d-flex gap-2 mb-2"><i class="bi bi-info-circle text-success"></i><span>Período analisado: <strong><%= formatarData(resumo.periodo.desde) %></strong> a <strong><%= formatarData(resumo.periodo.ate) %></strong>.</span></div>
+            <div class="d-flex gap-2"><i class="bi bi-calculator text-success"></i><span>Capacidade estimada com base nos dias úteis e no limite diário de cada médico ativo.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

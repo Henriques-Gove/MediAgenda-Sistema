@@ -1,0 +1,43 @@
+<% if (typeof paginacao !== 'undefined' && paginacao && paginacao.totalPaginas > 1) { %>
+  <%
+    const inicioJanela = Math.max(1, paginacao.pagina - 2);
+    const fimJanela = Math.min(paginacao.totalPaginas, paginacao.pagina + 2);
+    const separador = urlBase.indexOf('?') === -1 ? '?' : '&';
+    const ligacao = function (numero) {
+      return urlBase + separador + 'pagina=' + numero;
+    };
+  %>
+  <nav class="mt-4" aria-label="Paginação">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+      <div class="small text-muted">
+        A mostrar <strong><%= paginacao.primeiro %></strong>–<strong><%= paginacao.ultimo %></strong>
+        de <strong><%= paginacao.total %></strong> registos
+      </div>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item <%= paginacao.temAnterior ? '' : 'disabled' %>">
+          <a class="page-link" href="<%= paginacao.temAnterior ? ligacao(paginacao.pagina - 1) : '#' %>" aria-label="Página anterior">
+            <i class="bi bi-chevron-left"></i>
+          </a>
+        </li>
+        <% if (inicioJanela > 1) { %>
+          <li class="page-item"><a class="page-link" href="<%= ligacao(1) %>">1</a></li>
+          <% if (inicioJanela > 2) { %><li class="page-item disabled"><span class="page-link">…</span></li><% } %>
+        <% } %>
+        <% for (let numero = inicioJanela; numero <= fimJanela; numero += 1) { %>
+          <li class="page-item <%= numero === paginacao.pagina ? 'active' : '' %>">
+            <a class="page-link" href="<%= ligacao(numero) %>" <%= numero === paginacao.pagina ? 'aria-current="page"' : '' %>><%= numero %></a>
+          </li>
+        <% } %>
+        <% if (fimJanela < paginacao.totalPaginas) { %>
+          <% if (fimJanela < paginacao.totalPaginas - 1) { %><li class="page-item disabled"><span class="page-link">…</span></li><% } %>
+          <li class="page-item"><a class="page-link" href="<%= ligacao(paginacao.totalPaginas) %>"><%= paginacao.totalPaginas %></a></li>
+        <% } %>
+        <li class="page-item <%= paginacao.temSeguinte ? '' : 'disabled' %>">
+          <a class="page-link" href="<%= paginacao.temSeguinte ? ligacao(paginacao.pagina + 1) : '#' %>" aria-label="Página seguinte">
+            <i class="bi bi-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+<% } %>

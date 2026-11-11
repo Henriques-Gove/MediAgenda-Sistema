@@ -1,0 +1,11 @@
+<% const valorMedia = typeof media === 'number' ? media : 0; const arredondado = Math.round(valorMedia); %>
+<span class="rating" title="<%= valorMedia ? valorMedia.toFixed(1) : 'Sem avaliacoes' %>">
+  <% for (let i = 1; i <= 5; i += 1) { %>
+    <i class="bi <%= i <= arredondado ? 'bi-star-fill' : 'bi-star' %> <%= valorMedia ? '' : 'rating-empty' %>"></i>
+  <% } %>
+</span>
+<% if (typeof total !== 'undefined') { %>
+  <span class="small text-muted ms-1">
+    <%= valorMedia ? valorMedia.toFixed(1) : 'Novo' %> (<%= total %>)
+  </span>
+<% } %>

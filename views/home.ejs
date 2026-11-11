@@ -1,0 +1,281 @@
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <span class="badge badge-soft-primary mb-3 px-3 py-2">
+          <i class="bi bi-calendar2-check me-1"></i> Agendamento online 24 horas
+        </span>
+        <h1 class="display-5 mb-3">A sua saúde,<br /><span style="color: var(--ma-primary)">agendada em minutos.</span></h1>
+        <p class="lead mb-4">
+          Encontre o médico certo, escolha o horário que lhe convém e receba a confirmação
+          por e-mail ou SMS. Sem filas e sem chamadas telefonicas.
+        </p>
+
+        <form class="hero-panel p-3 p-md-4" action="/medicos" method="get">
+          <div class="row g-2">
+            <div class="col-12 col-md-5">
+              <label class="form-label small" for="busca">Especialidade ou médico</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                <input
+                  class="form-control border-start-0"
+                  id="busca"
+                  name="busca"
+                  type="search"
+                  placeholder="Ex.: Cardiologia"
+                />
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label small" for="especialidade">Especialidade</label>
+              <select class="form-select" id="especialidade" name="especialidade">
+                <option value="">Todas</option>
+                <% especialidades.forEach(function (especialidade) { %>
+                  <option value="<%= especialidade.id %>"><%= especialidade.nome %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex align-items-end">
+              <button class="btn btn-ma w-100 py-2" type="submit">
+                <i class="bi bi-calendar-plus me-1"></i> Pesquisar
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="d-flex flex-wrap gap-4 mt-4 small text-muted">
+          <span><i class="bi bi-check2-circle text-success me-1"></i>Confirmação imediata</span>
+          <span><i class="bi bi-check2-circle text-success me-1"></i>Lembretes automáticos</span>
+          <span><i class="bi bi-check2-circle text-success me-1"></i>Cancelamento online</span>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="hero-panel p-3 p-md-4">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <span class="feature-icon"><i class="bi bi-calendar2-week"></i></span>
+            <div>
+              <h5 class="mb-0 fw-bold">Próxima consulta</h5>
+              <span class="small text-muted">Exemplo de confirmação</span>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-3 p-3 rounded-3 bg-white border mb-3">
+            <span class="avatar">DR</span>
+            <div class="flex-grow-1">
+              <div class="fw-semibold">Dr. Ricardo Mabote</div>
+              <div class="small text-muted">Cardiologia &middot; Clínica Central</div>
+            </div>
+            <span class="badge badge-soft-success">Confirmada</span>
+          </div>
+          <div class="row g-2 text-center">
+            <div class="col-4">
+              <div class="p-3 rounded-3 bg-white border h-100">
+                <i class="bi bi-calendar-event d-block fs-5 text-success mb-1"></i>
+                <div class="small fw-semibold">12 Nov</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-3 rounded-3 bg-white border h-100">
+                <i class="bi bi-clock d-block fs-5 text-success mb-1"></i>
+                <div class="small fw-semibold">09:30</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-3 rounded-3 bg-white border h-100">
+                <i class="bi bi-bell d-block fs-5 text-success mb-1"></i>
+                <div class="small fw-semibold">Lembrete</div>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-success mt-4 mb-0 small">
+            <i class="bi bi-shield-check me-1"></i>
+            A confirmação e os lembretes são enviados automaticamente pelo sistema.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+          <span class="stat-icon"><i class="bi bi-person-badge"></i></span>
+          <div>
+            <div class="stat-value"><%= totalMedicos %></div>
+            <div class="stat-label">Médicos</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+          <span class="stat-icon"><i class="bi bi-tags"></i></span>
+          <div>
+            <div class="stat-value"><%= especialidades.length %></div>
+            <div class="stat-label">Especialidades</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+          <span class="stat-icon"><i class="bi bi-clock-history"></i></span>
+          <div>
+            <div class="stat-value">24/7</div>
+            <div class="stat-label">Disponível</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+          <span class="stat-icon"><i class="bi bi-bell"></i></span>
+          <div>
+            <div class="stat-value">2h</div>
+            <div class="stat-label">Confirmação</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-3">
+      <div>
+        <h2 class="h3 fw-bold mb-1">Especialidades</h2>
+        <p class="text-muted mb-0">Escolha a área médica que precisa.</p>
+      </div>
+      <a class="btn btn-outline-ma btn-sm" href="/medicos">Ver todas</a>
+    </div>
+    <div class="row g-3">
+      <% especialidades.slice(0, 6).forEach(function (especialidade, indice) { %>
+        <% const icones = ['bi-heart-pulse', 'bi-activity', 'bi-emoji-smile', 'bi-eye', 'bi-bandaid', 'bi-lungs', 'bi-gender-female', 'bi-person-check']; %>
+        <div class="col-6 col-md-4 col-lg-2">
+          <a class="card h-100 text-decoration-none text-dark" href="/medicos?especialidade=<%= especialidade.id %>">
+            <div class="card-body text-center p-3">
+              <span class="feature-icon mb-2"><i class="bi <%= icones[indice % icones.length] %>"></i></span>
+              <div class="fw-semibold small"><%= especialidade.nome %></div>
+              <div class="text-muted" style="font-size: 0.75rem">
+                <%= especialidade._count.medicos %> médico(s)
+              </div>
+            </div>
+          </a>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-3">
+      <div>
+        <h2 class="h3 fw-bold mb-1">Médicos em destaque</h2>
+        <p class="text-muted mb-0">Profissionais verificados e avaliados por pacientes.</p>
+      </div>
+      <a class="btn btn-outline-ma btn-sm" href="/medicos">Ver todos</a>
+    </div>
+    <div class="row g-3">
+      <% medicos.forEach(function (medico) { %>
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="avatar"><%= medico.utilizador.nome.replace('Dr. ', '').replace('Dra. ', '').charAt(0) %></span>
+                <div class="min-w-0">
+                  <h6 class="mb-0 fw-bold"><%= medico.utilizador.nome %></h6>
+                  <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i><%= medico.localizacao %></div>
+                </div>
+              </div>
+              <div class="mb-2">
+                <% medico.especialidades.slice(0, 2).forEach(function (vinculo) { %>
+                  <span class="specialty-pill mb-1"><%= vinculo.especialidade.nome %></span>
+                <% }); %>
+              </div>
+              <div class="mb-3">
+                <%- include('partials/rating', { media: medico.avaliacaoMedia, total: medico.totalAvaliacoes }) %>
+              </div>
+              <a class="btn btn-ma btn-sm w-100" href="/medicos/<%= medico.id %>">
+                <i class="bi bi-calendar2-check me-1"></i> Ver horários
+              </a>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+      <% if (!medicos.length) { %>
+        <div class="col-12">
+          <div class="empty-state card">
+            <i class="bi bi-person-badge"></i>
+            <p class="mb-0">Ainda não existem médicos registados.</p>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="card overflow-hidden">
+      <div class="card-body p-3 p-md-4">
+        <div class="row g-3 align-items-center">
+          <div class="col-lg-4">
+            <h2 class="h3 fw-bold mb-2">Como funciona</h2>
+            <p class="text-muted mb-0">Marcar uma consulta no MediAgenda leva menos de dois minutos.</p>
+          </div>
+          <div class="col-lg-8">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="d-flex gap-3">
+                  <span class="step-number">1</span>
+                  <div>
+                    <div class="fw-semibold">Pesquise</div>
+                    <div class="small text-muted">Filtre por especialidade, localização ou avaliação.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="d-flex gap-3">
+                  <span class="step-number">2</span>
+                  <div>
+                    <div class="fw-semibold">Escolha o horário</div>
+                    <div class="small text-muted">Veja as vagas reais e selecione a que preferir.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="d-flex gap-3">
+                  <span class="step-number">3</span>
+                  <div>
+                    <div class="fw-semibold">Confirme</div>
+                    <div class="small text-muted">Receba a confirmação e os lembretes automáticos.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<% if (!utilizador) { %>
+<section class="pb-5">
+  <div class="container">
+    <div class="p-4 rounded-4 text-white" style="background: linear-gradient(135deg, #0f766e, #14b8a6)">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <h2 class="h3 fw-bold mb-2">Pronto para cuidar da sua saúde?</h2>
+          <p class="mb-0 opacity-75">Crie a sua conta gratuita e marque a primeira consulta hoje.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+          <a class="btn btn-light fw-semibold px-4" href="/registo">Criar conta <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<% } %>

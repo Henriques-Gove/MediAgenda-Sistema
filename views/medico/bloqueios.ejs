@@ -1,0 +1,83 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Bloqueios e férias</h1>
+        <p class="lead mb-0">Marque períodos em que não está disponível. As vagas ficam automaticamente indisponíveis.</p>
+      </div>
+      <a class="btn btn-outline-ma" href="/medico/agenda"><i class="bi bi-calendar3 me-1"></i> Ver agenda</a>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header"><i class="bi bi-calendar-plus me-1"></i> Novo bloqueio</div>
+          <div class="card-body p-4">
+            <form action="/medico/bloqueios" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div class="mb-3">
+                <label class="form-label" for="inicio">Início</label>
+                <input class="form-control" id="inicio" name="inicio" type="datetime-local" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="fim">Fim</label>
+                <input class="form-control" id="fim" name="fim" type="datetime-local" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="motivo">Motivo</label>
+                <input class="form-control" id="motivo" name="motivo" type="text" maxlength="180" required placeholder="Ex.: férias, formação, congresso" />
+              </div>
+              <button class="btn btn-ma w-100" type="submit"><i class="bi bi-plus-circle me-1"></i> Registar bloqueio</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-calendar-x me-1"></i> Bloqueios ativos</span>
+            <span class="small text-muted"><%= bloqueios.length %> registo(s)</span>
+          </div>
+          <div class="card-body">
+            <% if (bloqueios.length) { %>
+              <div class="d-flex flex-column gap-2">
+                <% bloqueios.forEach(function (bloqueio) { %>
+                  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 border rounded-3 p-3">
+                    <div>
+                      <div class="fw-semibold"><%= bloqueio.motivo %></div>
+                      <div class="small text-muted">
+                        <i class="bi bi-calendar-event me-1"></i><%= formatarDataHora(bloqueio.inicio) %>
+                        <i class="bi bi-arrow-right mx-1"></i><%= formatarDataHora(bloqueio.fim) %>
+                      </div>
+                    </div>
+                    <form action="/medico/bloqueios/<%= bloqueio.id %>/remover" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                      <button class="btn btn-outline-danger btn-sm" type="submit"><i class="bi bi-trash me-1"></i>Remover</button>
+                    </form>
+                  </div>
+                <% }); %>
+              </div>
+            <% } else { %>
+              <div class="empty-state py-4">
+                <i class="bi bi-calendar-check"></i>
+                <p class="fw-semibold mb-1">Sem bloqueios ativos</p>
+                <p class="small mb-0">A sua agenda esta totalmente disponível.</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="alert alert-info mt-3 small">
+          <i class="bi bi-info-circle me-1"></i>
+          Os pacientes com consultas dentro de um novo bloqueio não são cancelados automaticamente.
+          Contacte a secretaria para reagendar, se necessário.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

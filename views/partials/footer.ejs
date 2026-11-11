@@ -1,0 +1,20 @@
+<footer class="footer-ma">
+  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="brand-mark" style="width: 1.9rem; height: 1.9rem; font-size: 0.95rem">
+        <i class="bi bi-heart-pulse-fill"></i>
+      </span>
+      <div>
+        <div class="fw-semibold footer-brand">MediAgenda</div>
+        <div class="small"><%= t('footer.clinica') %> &middot; <%= ano %></div>
+      </div>
+    </div>
+    <div class="small d-flex flex-wrap gap-3">
+      <a class="text-decoration-none text-muted" href="/medicos"><%= t('footer.encontrarMedico') %></a>
+      <a class="text-decoration-none text-muted" href="/sobre"><%= t('nav.sobre') %></a>
+      <a class="text-decoration-none text-muted" href="/termos"><%= t('footer.termos') %></a>
+      <a class="text-decoration-none text-muted" href="/privacidade"><%= t('footer.privacidade') %></a>
+      <span><i class="bi bi-shield-check me-1"></i><%= t('footer.dadosProtegidos') %></span>
+    </div>
+  </div>
+</footer>

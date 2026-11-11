@@ -1,0 +1,145 @@
+<%
+  const perfilAtual = utilizador.perfil;
+  const caminhoAtual = typeof caminho !== 'undefined' ? caminho : '';
+  const rotulosPerfil = {
+    PACIENTE: 'Paciente',
+    MEDICO: 'Médico',
+    SECRETARIO: 'Secretaria',
+    ADMINISTRADOR: 'Administrador'
+  };
+  const ativo = function (prefixo) {
+    return caminhoAtual === prefixo || caminhoAtual.indexOf(prefixo + '/') === 0;
+  };
+%>
+
+<div class="sidebar-role">
+  <span class="avatar avatar-sm"><%= utilizador.nome.charAt(0).toUpperCase() %></span>
+  <div class="min-w-0">
+    <div class="role-name text-truncate"><%= utilizador.nome %></div>
+    <div class="role-label"><%= rotulosPerfil[perfilAtual] || perfilAtual %></div>
+  </div>
+</div>
+
+<nav class="sidebar-nav" aria-label="<%= t('nav.navegacaoPrincipal') %>">
+  <% if (perfilAtual === 'PACIENTE') { %>
+    <div class="sidebar-label">Principal</div>
+    <a class="sidebar-link <%= ativo('/paciente/dashboard') ? 'active' : '' %>" href="/paciente/dashboard" <%= ativo('/paciente/dashboard') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-grid-1x2"></i><span>Painel</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/paciente/consultas') ? 'active' : '' %>" href="/paciente/consultas" <%= ativo('/paciente/consultas') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-calendar2-check"></i><span>As minhas consultas</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/medicos') ? 'active' : '' %>" href="/medicos" <%= ativo('/medicos') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-calendar2-plus"></i><span>Marcar consulta</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/paciente/lista-espera') ? 'active' : '' %>" href="/paciente/lista-espera" <%= ativo('/paciente/lista-espera') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-hourglass-split"></i><span>Lista de espera</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/paciente/documentos') ? 'active' : '' %>" href="/paciente/documentos" <%= ativo('/paciente/documentos') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-folder2-open"></i><span>Documentos</span>
+    </a>
+    <div class="sidebar-label">Conta</div>
+    <a class="sidebar-link <%= ativo('/paciente/perfil') ? 'active' : '' %>" href="/paciente/perfil" <%= ativo('/paciente/perfil') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-person-gear"></i><span>Perfil</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/conta/seguranca') ? 'active' : '' %>" href="/conta/seguranca" <%= ativo('/conta/seguranca') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-shield-lock"></i><span>Segurança</span>
+    </a>
+  <% } else if (perfilAtual === 'MEDICO') { %>
+    <div class="sidebar-label">Principal</div>
+    <a class="sidebar-link <%= ativo('/medico/dashboard') ? 'active' : '' %>" href="/medico/dashboard" <%= ativo('/medico/dashboard') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-grid-1x2"></i><span>Painel</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/medico/agenda') ? 'active' : '' %>" href="/medico/agenda" <%= ativo('/medico/agenda') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-calendar3"></i><span>Agenda</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/medico/consultas') ? 'active' : '' %>" href="/medico/consultas" <%= ativo('/medico/consultas') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-calendar2-check"></i><span>Consultas</span>
+    </a>
+    <div class="sidebar-label">Gestão</div>
+    <a class="sidebar-link <%= ativo('/medico/disponibilidade') ? 'active' : '' %>" href="/medico/disponibilidade" <%= ativo('/medico/disponibilidade') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-clock"></i><span>Disponibilidade</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/medico/bloqueios') ? 'active' : '' %>" href="/medico/bloqueios" <%= ativo('/medico/bloqueios') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-calendar-x"></i><span>Bloqueios</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/medico/lista-espera') ? 'active' : '' %>" href="/medico/lista-espera" <%= ativo('/medico/lista-espera') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-hourglass-split"></i><span>Lista de espera</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/medico/documentos') ? 'active' : '' %>" href="/medico/documentos" <%= ativo('/medico/documentos') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-folder2-open"></i><span>Documentos</span>
+    </a>
+    <div class="sidebar-label">Conta</div>
+    <a class="sidebar-link <%= ativo('/medico/perfil') ? 'active' : '' %>" href="/medico/perfil" <%= ativo('/medico/perfil') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-person-gear"></i><span>Perfil</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/conta/seguranca') ? 'active' : '' %>" href="/conta/seguranca" <%= ativo('/conta/seguranca') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-shield-lock"></i><span>Segurança</span>
+    </a>
+  <% } else if (perfilAtual === 'SECRETARIO') { %>
+    <div class="sidebar-label">Principal</div>
+    <a class="sidebar-link <%= ativo('/secretario/dashboard') ? 'active' : '' %>" href="/secretario/dashboard" <%= ativo('/secretario/dashboard') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-grid-1x2"></i><span>Painel</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/secretario/agendas') ? 'active' : '' %>" href="/secretario/agendas" <%= ativo('/secretario/agendas') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-calendar2-week"></i><span>Agendas</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/secretario/pacientes') ? 'active' : '' %>" href="/secretario/pacientes" <%= ativo('/secretario/pacientes') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-people"></i><span>Pacientes</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/secretario/medicos') ? 'active' : '' %>" href="/secretario/medicos" <%= ativo('/secretario/medicos') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-person-badge"></i><span>Médicos</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/secretario/consultas') ? 'active' : '' %>" href="/secretario/consultas" <%= ativo('/secretario/consultas') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-calendar2-check"></i><span>Consultas</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/secretario/lista-espera') ? 'active' : '' %>" href="/secretario/lista-espera" <%= ativo('/secretario/lista-espera') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-hourglass-split"></i><span>Lista de espera</span>
+    </a>
+    <div class="sidebar-label">Conta</div>
+    <a class="sidebar-link <%= ativo('/conta/seguranca') ? 'active' : '' %>" href="/conta/seguranca" <%= ativo('/conta/seguranca') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-shield-lock"></i><span>Segurança</span>
+    </a>
+  <% } else if (perfilAtual === 'ADMINISTRADOR') { %>
+    <div class="sidebar-label">Visão geral</div>
+    <a class="sidebar-link <%= ativo('/admin/dashboard') ? 'active' : '' %>" href="/admin/dashboard" <%= ativo('/admin/dashboard') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-grid-1x2"></i><span>Painel</span>
+    </a>
+    <div class="sidebar-label">Gestão</div>
+    <a class="sidebar-link <%= ativo('/admin/especialidades') ? 'active' : '' %>" href="/admin/especialidades" <%= ativo('/admin/especialidades') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-tags"></i><span>Especialidades</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/admin/medicos') ? 'active' : '' %>" href="/admin/medicos" <%= ativo('/admin/medicos') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-person-badge"></i><span>Médicos</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/admin/utilizadores') ? 'active' : '' %>" href="/admin/utilizadores" <%= ativo('/admin/utilizadores') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-people"></i><span>Utilizadores</span>
+    </a>
+    <div class="sidebar-label">Análise</div>
+    <a class="sidebar-link <%= ativo('/admin/relatorios') ? 'active' : '' %>" href="/admin/relatorios" <%= ativo('/admin/relatorios') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-bar-chart"></i><span>Relatórios</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/admin/auditoria') ? 'active' : '' %>" href="/admin/auditoria" <%= ativo('/admin/auditoria') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-shield-check"></i><span>Auditoria</span>
+    </a>
+    <div class="sidebar-label">Sistema</div>
+    <a class="sidebar-link <%= ativo('/admin/notificacoes') ? 'active' : '' %>" href="/admin/notificacoes" <%= ativo('/admin/notificacoes') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-envelope"></i><span>Notificações</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/admin/avaliacoes') ? 'active' : '' %>" href="/admin/avaliacoes" <%= ativo('/admin/avaliacoes') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-star"></i><span>Avaliações</span>
+    </a>
+    <a class="sidebar-link <%= ativo('/admin/configuracoes') ? 'active' : '' %>" href="/admin/configuracoes" <%= ativo('/admin/configuracoes') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-sliders"></i><span>Configurações</span>
+    </a>
+    <div class="sidebar-label">Conta</div>
+    <a class="sidebar-link <%= ativo('/conta/seguranca') ? 'active' : '' %>" href="/conta/seguranca" <%= ativo('/conta/seguranca') ? 'aria-current="page"' : '' %>>
+      <i class="bi bi-shield-lock"></i><span>Segurança</span>
+    </a>
+  <% } %>
+</nav>
+
+<div class="sidebar-foot">
+  <a class="sidebar-link" href="/"><i class="bi bi-house"></i><span><%= t('nav.paginaInicial') %></span></a>
+  <a class="sidebar-link text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i><span><%= t('nav.terminarSessao') %></span></a>
+</div>

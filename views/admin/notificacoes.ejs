@@ -1,0 +1,78 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Notificações enviadas</h1>
+        <p class="lead mb-0">Histórico de e-mails e SMS gerados pelo sistema.</p>
+      </div>
+      <a class="btn btn-outline-ma" href="/admin/dashboard"><i class="bi bi-arrow-left me-1"></i> Painel</a>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-envelope me-1"></i> Notificações</span>
+        <span class="small text-muted"><%= notificacoes.length %> registo(s)</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Data</th><th>Destinatario</th><th>Canal</th><th>Assunto</th><th>Estado</th><th>Consulta</th><th></th></tr>
+          </thead>
+          <tbody>
+            <% notificacoes.forEach(function (notificacao) { %>
+              <tr>
+                <td class="small text-nowrap"><%= formatarDataHora(notificacao.enviadoEm) %></td>
+                <td class="small"><%= notificacao.destinatario %></td>
+                <td><span class="badge badge-soft-secondary"><%= notificacao.canal %></span></td>
+                <td class="small"><%= notificacao.assunto %></td>
+                <td>
+                  <span class="badge badge-soft-<%= notificacao.estado === 'FALHADA' ? 'danger' : notificacao.estado === 'SIMULADA' ? 'warning' : 'success' %>"><%= notificacao.estado %></span>
+                </td>
+                <td class="small text-muted"><%= notificacao.consulta ? formatarDataHora(notificacao.consulta.inicio) : '-' %></td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#ver<%= notificacao.id %>" title="Ver corpo"><i class="bi bi-eye"></i></button>
+                </td>
+              </tr>
+            <% }); %>
+            <% if (!notificacoes.length) { %>
+              <tr><td colspan="7" class="text-center text-muted py-4">Ainda sem notificações.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="alert alert-info small mt-3">
+      <i class="bi bi-info-circle me-1"></i>
+      Sem SMTP/API configurados, os envios são simulados e registados com o estado <strong>SIMULADA</strong>.
+    </div>
+  </div>
+  <%- include('../partials/pagination') %>
+</section>
+
+<% notificacoes.forEach(function (notificacao) { %>
+  <div class="modal fade" id="ver<%= notificacao.id %>" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title mb-1"><%= notificacao.assunto %></h5>
+            <div class="small text-muted"><%= notificacao.canal %> para <%= notificacao.destinatario %></div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <pre class="mb-0" style="white-space: pre-wrap; font-size: 0.85rem"><%= notificacao.corpo %></pre>
+        </div>
+        <div class="modal-footer">
+          <span class="badge badge-soft-<%= notificacao.estado === 'FALHADA' ? 'danger' : notificacao.estado === 'SIMULADA' ? 'warning' : 'success' %> me-auto"><%= notificacao.estado %></span>
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<% }); %>

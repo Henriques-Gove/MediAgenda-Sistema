@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Utilizador {
+  id                     String    @id @default(cuid())
+  nome                   String
+  email                  String    @unique
+  passwordHash           String
+  perfil                 String
+  telefone               String?
+  preferenciaNotificacao String    @default("EMAIL")
+  ativo                  Boolean   @default(true)
+  emailConfirmado        Boolean   @default(false)
+  tokenConfirmacao       String?   @unique
+  tokenRecuperacao       String?   @unique
+  tokenRecuperacaoExpira DateTime?
+  passwordChangedAt      DateTime  @default(now())
+  tentativasFalhas       Int       @default(0)
+  bloqueadoAte           DateTime?
+  twoFactorSecret        String?
+  twoFactorEnabled       Boolean   @default(false)
+  consentimentoAceiteEm  DateTime?
+  fotoUrl                String?
+  criadoEm               DateTime  @default(now())
+  atualizadoEm           DateTime  @updatedAt
+
+  paciente   Paciente?
+  medico     Medico?
+  auditorias Auditoria[]
+
+  @@index([perfil])
+}
+
+model Paciente {
+  id             String     @id @default(cuid())
+  utilizadorId   String     @unique
+  utilizador     Utilizador @relation(fields: [utilizadorId], references: [id], onDelete: Cascade)
+  dataNascimento DateTime
+  telefone       String
+  endereco       String
+  criadoEm       DateTime   @default(now())
+  atualizadoEm   DateTime   @updatedAt
+
+  consultas   Consulta[]
+  avaliacoes  Avaliacao[]
+  listaEspera ListaEspera[]
+  documentos  DocumentoClinico[]
+}
+
+model Medico {
+  id                     String     @id @default(cuid())
+  utilizadorId           String     @unique
+  utilizador             Utilizador @relation(fields: [utilizadorId], references: [id], onDelete: Cascade)
+  numeroRegisto          String     @unique
+  telefone               String
+  localizacao            String
+  bio                    String?
+  ativo                  Boolean    @default(true)
+  duracaoConsultaMinutos Int        @default(60)
+  maxConsultasDia        Int        @default(10)
+  criadoEm               DateTime   @default(now())
+  atualizadoEm           DateTime   @updatedAt
+
+  especialidades   MedicoEspecialidade[]
+  disponibilidades Disponibilidade[]
+  bloqueios        Bloqueio[]
+  consultas        Consulta[]
+  avaliacoes       Avaliacao[]
+  listaEspera      ListaEspera[]
+  documentos       DocumentoClinico[]
+
+  @@index([ativo])
+}
+
+model Especialidade {
+  id                   String   @id @default(cuid())
+  nome                 String   @unique
+  descricao            String?
+  ativa                Boolean  @default(true)
+  duracaoPadraoMinutos Int      @default(60)
+  criadoEm             DateTime @default(now())
+  atualizadoEm         DateTime @updatedAt
+
+  medicos     MedicoEspecialidade[]
+  consultas   Consulta[]
+  listaEspera ListaEspera[]
+}
+
+model MedicoEspecialidade {
+  medicoId        String
+  especialidadeId String
+  medico          Medico        @relation(fields: [medicoId], references: [id], onDelete: Cascade)
+  especialidade   Especialidade @relation(fields: [especialidadeId], references: [id], onDelete: Cascade)
+
+  @@id([medicoId, especialidadeId])
+}
+
+model Disponibilidade {
+  id         String   @id @default(cuid())
+  medicoId   String
+  medico     Medico   @relation(fields: [medicoId], references: [id], onDelete: Cascade)
+  diaSemana  Int
+  horaInicio String
+  horaFim    String
+  ativo      Boolean  @default(true)
+  criadoEm   DateTime @default(now())
+
+  @@index([medicoId, diaSemana])
+}
+
+model Bloqueio {
+  id       String   @id @default(cuid())
+  medicoId String
+  medico   Medico   @relation(fields: [medicoId], references: [id], onDelete: Cascade)
+  inicio   DateTime
+  fim      DateTime
+  motivo   String
+  criadoEm DateTime @default(now())
+
+  @@index([medicoId, inicio, fim])
+}
+
+model Consulta {
+  id                  String         @id @default(cuid())
+  pacienteId          String
+  paciente            Paciente       @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  medicoId            String
+  medico              Medico         @relation(fields: [medicoId], references: [id], onDelete: Cascade)
+  especialidadeId     String?
+  especialidade       Especialidade? @relation(fields: [especialidadeId], references: [id])
+  inicio              DateTime
+  fim                 DateTime
+  estado              String         @default("PENDENTE")
+  motivo              String?
+  confirmacaoToken    String?        @unique
+  expiraConfirmacaoEm DateTime?
+  motivoCancelamento  String?
+  canceladaPor        String?
+  cancelamentoTardio  Boolean        @default(false)
+  criadoEm            DateTime       @default(now())
+  atualizadoEm        DateTime       @updatedAt
+
+  avaliacao    Avaliacao?
+  notificacoes Notificacao[]
+  documentos   DocumentoClinico[]
+
+  @@index([medicoId, inicio])
+  @@index([pacienteId, inicio])
+  @@index([estado])
+}
+
+model Avaliacao {
+  id         String   @id @default(cuid())
+  consultaId String   @unique
+  consulta   Consulta @relation(fields: [consultaId], references: [id], onDelete: Cascade)
+  pacienteId String
+  paciente   Paciente @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  medicoId   String
+  medico     Medico   @relation(fields: [medicoId], references: [id], onDelete: Cascade)
+  estrelas   Int
+  comentario String?
+  criadoEm   DateTime @default(now())
+
+  @@index([medicoId])
+}
+
+model Auditoria {
+  id           String      @id @default(cuid())
+  utilizadorId String?
+  utilizador   Utilizador? @relation(fields: [utilizadorId], references: [id], onDelete: SetNull)
+  acao         String
+  entidade     String?
+  entidadeId   String?
+  detalhes     String?
+  ip           String?
+  criadoEm     DateTime    @default(now())
+
+  @@index([criadoEm])
+  @@index([acao])
+}
+
+model Notificacao {
+  id           String    @id @default(cuid())
+  consultaId   String?
+  consulta     Consulta? @relation(fields: [consultaId], references: [id], onDelete: SetNull)
+  destinatario String
+  canal        String
+  assunto      String
+  corpo        String
+  estado       String    @default("ENVIADA")
+  enviadoEm    DateTime  @default(now())
+
+  @@index([consultaId])
+}
+
+model Configuracao {
+  chave     String  @id
+  valor     String
+  descricao String?
+}
+
+model Sessao {
+  sid      String   @id
+  dados    String
+  expiraEm DateTime
+
+  @@index([expiraEm])
+}
+
+model ListaEspera {
+  id              String         @id @default(cuid())
+  pacienteId      String
+  paciente        Paciente       @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  medicoId        String
+  medico          Medico         @relation(fields: [medicoId], references: [id], onDelete: Cascade)
+  especialidadeId String?
+  especialidade   Especialidade? @relation(fields: [especialidadeId], references: [id], onDelete: SetNull)
+  dataPreferida   DateTime?
+  periodo         String?
+  estado          String         @default("ATIVA")
+  criadoEm        DateTime       @default(now())
+  atualizadoEm    DateTime       @updatedAt
+
+  @@index([medicoId, estado])
+  @@index([pacienteId, estado])
+}
+
+model DocumentoClinico {
+  id              String    @id @default(cuid())
+  consultaId      String?
+  consulta        Consulta? @relation(fields: [consultaId], references: [id], onDelete: SetNull)
+  pacienteId      String
+  paciente        Paciente  @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  medicoId        String
+  medico          Medico    @relation(fields: [medicoId], references: [id], onDelete: Cascade)
+  tipo            String
+  titulo          String
+  conteudo        String?
+  ficheiroNome    String?
+  ficheiroCaminho String?
+  ficheiroTipo    String?
+  criadoEm        DateTime  @default(now())
+
+  @@index([pacienteId, criadoEm])
+  @@index([medicoId, criadoEm])
+}

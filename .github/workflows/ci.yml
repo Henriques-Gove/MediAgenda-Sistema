@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualidade:
+    name: Tipos, testes, cobertura e build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx tsc --noEmit
+      - run: npm run test:coverage
+      - run: npm run build
+      - run: npm audit --audit-level=high
+
+      - name: Guardar cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura
+          path: coverage
+          retention-days: 7
+
+      - name: Guardar build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: dist
+          retention-days: 7
+
+  e2e:
+    name: Testes E2E e acessibilidade
+    runs-on: ubuntu-latest
+    needs: qualidade
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          CI: "true"
+
+      - name: Guardar relatório Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
+  carga:
+    name: Teste de carga
+    runs-on: ubuntu-latest
+    needs: qualidade
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run build
+
+      - name: Preparar base de dados
+        run: |
+          npx prisma db push --force-reset --skip-generate
+          npx tsx prisma/seed.ts
+        env:
+          NODE_ENV: development
+          DATABASE_URL: file:./load.db
+          SESSION_SECRET: mediagenda-load-secret
+
+      - name: Arrancar aplicação
+        run: |
+          node dist/server.js > load-server.log 2>&1 &
+          echo $! > load-server.pid
+        env:
+          NODE_ENV: development
+          PORT: 3101
+          APP_URL: http://127.0.0.1:3101
+          DATABASE_URL: file:./load.db
+          SESSION_SECRET: mediagenda-load-secret
+          COOKIE_SECURE: "false"
+          LOG_LEVEL: warn
+
+      - name: Executar carga
+        run: npm run test:load
+        env:
+          BASE_URL: http://127.0.0.1:3101
+          LOAD_DURATION: "5"
+          LOAD_CONNECTIONS: "10"
+
+      - name: Mostrar registo do servidor
+        if: failure()
+        run: cat load-server.log
+
+      - name: Parar aplicação
+        if: always()
+        run: |
+          if [ -f load-server.pid ]; then kill "$(cat load-server.pid)" || true; fi

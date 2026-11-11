@@ -1,0 +1,79 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Avaliações</h1>
+        <p class="lead mb-0">Feedback dos pacientes sobre as consultas realizadas.</p>
+      </div>
+      <a class="btn btn-outline-ma" href="/admin/dashboard"><i class="bi bi-arrow-left me-1"></i> Painel</a>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <% const mediaGeral = avaliacoes.length ? (avaliacoes.reduce(function (soma, a) { return soma + a.estrelas; }, 0) / avaliacoes.length) : null; %>
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-4">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value"><%= avaliacoes.length %></div>
+          <div class="small text-muted">avaliações recentes</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-4">
+        <div class="stat-card">
+          <div class="stat-label">Média geral</div>
+          <div class="stat-value"><%= mediaGeral ? mediaGeral.toFixed(1) : '-' %></div>
+          <div class="rating">
+            <% if (mediaGeral) { for (let i = 1; i <= 5; i += 1) { %><i class="bi <%= i <= Math.round(mediaGeral) ? 'bi-star-fill' : 'bi-star' %>"></i><% } } %>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="stat-card">
+          <div class="stat-label">Satisfação</div>
+          <div class="stat-value"><%= mediaGeral ? Math.round((mediaGeral / 5) * 100) : 0 %>%</div>
+          <div class="progress mt-2"><div class="progress-bar" style="width: <%= mediaGeral ? (mediaGeral / 5) * 100 : 0 %>%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="bi bi-chat-square-quote me-1"></i> Comentários dos pacientes</div>
+      <div class="card-body">
+        <% avaliacoes.forEach(function (avaliacao) { %>
+          <div class="d-flex gap-3 py-3 border-bottom">
+            <span class="avatar"><%= avaliacao.paciente.utilizador.nome.charAt(0).toUpperCase() %></span>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between flex-wrap gap-2">
+                <div>
+                  <div class="fw-semibold"><%= avaliacao.paciente.utilizador.nome %></div>
+                  <div class="small text-muted">Consulta com <%= avaliacao.medico.utilizador.nome %> &middot; <%= formatarData(avaliacao.criadoEm) %></div>
+                </div>
+                <div class="text-end">
+                  <div class="rating">
+                    <% for (let i = 1; i <= 5; i += 1) { %><i class="bi <%= i <= avaliacao.estrelas ? 'bi-star-fill' : 'bi-star' %>"></i><% } %>
+                  </div>
+                  <div class="small text-muted"><%= avaliacao.estrelas %>/5</div>
+                </div>
+              </div>
+              <% if (avaliacao.comentario) { %>
+                <p class="mb-0 mt-2 small"><%= avaliacao.comentario %></p>
+              <% } else { %>
+                <p class="mb-0 mt-2 small text-muted fst-italic">Sem comentário.</p>
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+        <% if (!avaliacoes.length) { %>
+          <div class="empty-state py-4">
+            <i class="bi bi-star"></i>
+            <p class="mb-0">Ainda não existem avaliações registadas.</p>
+          </div>
+        <% } %>
+      </div>
+      <%- include('../partials/pagination') %>
+    </div>
+  </div>
+</section>

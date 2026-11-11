@@ -1,0 +1,170 @@
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <span class="badge badge-soft-primary mb-2">Área do médico</span>
+        <h1 class="h2 mb-1">Bom dia, <%= medico.utilizador.nome.replace('Dr. ', '').replace('Dra. ', '').split(' ')[0] %>!</h1>
+        <p class="lead mb-0"><%= formatarDiaSemana(hoje) %></p>
+      </div>
+      <div class="d-flex gap-2">
+        <a class="btn btn-outline-ma" href="/medico/agenda"><i class="bi bi-calendar3 me-1"></i> Agenda</a>
+        <a class="btn btn-ma" href="/medico/disponibilidade"><i class="bi bi-clock me-1"></i> Disponibilidade</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <span class="stat-icon"><i class="bi bi-calendar-day"></i></span>
+            <div><div class="stat-value"><%= estatisticas.hoje %></div><div class="stat-label">Hoje</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <span class="stat-icon"><i class="bi bi-hourglass-split"></i></span>
+            <div><div class="stat-value"><%= estatisticas.pendentes %></div><div class="stat-label">Pendentes</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <span class="stat-icon"><i class="bi bi-check2-circle"></i></span>
+            <div><div class="stat-value"><%= estatisticas.realizadas %></div><div class="stat-label">Realizadas</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <span class="stat-icon"><i class="bi bi-x-circle"></i></span>
+            <div><div class="stat-value"><%= estatisticas.canceladas %></div><div class="stat-label">Canceladas</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-calendar-day me-1"></i> Agenda de hoje</span>
+            <span class="small text-muted"><%= agendaHoje.length %> consulta(s)</span>
+          </div>
+          <div class="card-body">
+            <% if (agendaHoje.length) { %>
+              <div class="timeline">
+                <% agendaHoje.forEach(function (consulta) { %>
+                  <div class="timeline-item">
+                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                      <div>
+                        <div class="fw-semibold">
+                          <span class="text-success"><%= formatarHora(consulta.inicio) %></span>
+                          <%= consulta.paciente.utilizador.nome %>
+                        </div>
+                        <div class="small text-muted">
+                          <%= consulta.especialidade ? consulta.especialidade.nome : 'Consulta geral' %>
+                          <% if (consulta.motivo) { %> &middot; <%= consulta.motivo %><% } %>
+                        </div>
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="badge badge-soft-<%= coresEstado[consulta.estado] %>"><%= rotulosEstado[consulta.estado] %></span>
+                        <% if (consulta.estado === 'CONFIRMADA') { %>
+                          <form action="/medico/consultas/<%= consulta.id %>/realizar" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                            <button class="btn btn-sm btn-outline-ma" type="submit" title="Marcar como realizada"><i class="bi bi-check2"></i></button>
+                          </form>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } else { %>
+              <div class="empty-state py-4">
+                <i class="bi bi-cup-hot"></i>
+                <p class="fw-semibold mb-1">Sem consultas hoje</p>
+                <p class="small mb-0">Aproveite para atualizar a sua disponibilidade.</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><i class="bi bi-calendar-week me-1"></i> Resumo da semana</div>
+          <div class="card-body">
+            <%- include('../partials/grafico-barras', {
+              dados: agendaSemana.map(function (dia) {
+                return { rotulo: formatarData(dia.data).slice(0, 5), valor: dia.consultas.length };
+              }),
+              titulo: 'Consultas por dia na semana'
+            }) %>
+            <div class="row g-2 mt-2">
+              <% agendaSemana.forEach(function (dia) { %>
+                <div class="col-6 col-md-3 col-xl">
+                  <a class="day-row d-block text-decoration-none text-dark h-100" href="/medico/agenda?data=<%= formatarDataInput(dia.data) %>">
+                    <div class="small text-muted"><%= diasSemana[dia.data.getDay()].slice(0, 3) %></div>
+                    <div class="fw-bold"><%= formatarData(dia.data).slice(0, 5) %></div>
+                    <div class="small <%= dia.consultas.length ? 'text-success fw-semibold' : 'text-muted' %>">
+                      <%= dia.consultas.length %> consulta(s)
+                    </div>
+                  </a>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-calendar-check me-1"></i> Próximas confirmadas</div>
+          <div class="card-body">
+            <% if (proximas.length) { %>
+              <% proximas.forEach(function (consulta) { %>
+                <div class="d-flex gap-2 py-2 border-bottom">
+                  <span class="avatar avatar-sm"><%= consulta.paciente.utilizador.nome.charAt(0).toUpperCase() %></span>
+                  <div class="flex-grow-1">
+                    <div class="small fw-semibold"><%= consulta.paciente.utilizador.nome %></div>
+                    <div class="small text-muted"><%= formatarData(consulta.inicio) %> as <%= formatarHora(consulta.inicio) %></div>
+                  </div>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <p class="small text-muted mb-0">Nenhuma consulta confirmada no futuro.</p>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header"><i class="bi bi-person-vcard me-1"></i> Perfil profissional</div>
+          <div class="card-body small">
+            <div class="d-flex justify-content-between py-1"><span class="text-muted">Registo</span><span class="fw-semibold"><%= medico.numeroRegisto %></span></div>
+            <div class="d-flex justify-content-between py-1"><span class="text-muted">Duração</span><span class="fw-semibold"><%= medico.duracaoConsultaMinutos %> min</span></div>
+            <div class="d-flex justify-content-between py-1"><span class="text-muted">Max./dia</span><span class="fw-semibold"><%= medico.maxConsultasDia %></span></div>
+            <div class="d-flex justify-content-between py-1"><span class="text-muted">Local</span><span class="fw-semibold text-end"><%= medico.localizacao %></span></div>
+            <a class="btn btn-outline-ma btn-sm w-100 mt-3" href="/medico/perfil">Editar perfil</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><i class="bi bi-tags me-1"></i> Especialidades</div>
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-1">
+              <% medico.especialidades.forEach(function (vinculo) { %>
+                <span class="specialty-pill"><%= vinculo.especialidade.nome %></span>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

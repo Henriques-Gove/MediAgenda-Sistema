@@ -1,0 +1,148 @@
+<%
+  const caminhoNav = typeof caminho !== 'undefined' ? caminho : '/';
+  const perfilNav = utilizador ? utilizador.perfil : null;
+  const inicioPainel = !perfilNav
+    ? '/'
+    : perfilNav === 'PACIENTE'
+      ? '/paciente/dashboard'
+      : perfilNav === 'MEDICO'
+        ? '/medico/dashboard'
+        : perfilNav === 'SECRETARIO'
+          ? '/secretario/dashboard'
+          : '/admin/dashboard';
+  const rotulosPerfilNav = {
+    PACIENTE: 'Paciente',
+    MEDICO: 'Médico',
+    SECRETARIO: 'Secretaria',
+    ADMINISTRADOR: 'Administrador'
+  };
+%>
+<nav class="navbar navbar-expand-lg navbar-ma sticky-top">
+  <% if (!utilizador) { %>
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+        <span>MediAgenda</span>
+      </a>
+      <button
+        class="navbar-toggler border-0"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#menuPrincipal"
+        aria-controls="menuPrincipal"
+        aria-expanded="false"
+        aria-label="Abrir menu"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="menuPrincipal">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+          <li class="nav-item">
+            <a class="nav-link <%= caminhoNav === '/' ? 'active' : '' %>" href="/"><%= t('nav.inicio') %></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= caminhoNav.indexOf('/medicos') === 0 ? 'active' : '' %>" href="/medicos"><%= t('nav.medicos') %></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= caminhoNav === '/sobre' ? 'active' : '' %>" href="/sobre"><%= t('nav.sobre') %></a>
+          </li>
+        </ul>
+
+        <ul class="navbar-nav align-items-lg-center gap-lg-2">
+          <li class="nav-item">
+            <button class="btn-icon" type="button" data-toggle-tema aria-label="<%= t('tema.ativarEscuro') %>">
+              <i class="bi bi-moon-stars"></i>
+            </button>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right me-1"></i><%= t('nav.entrar') %></a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-ma btn-sm px-3" href="/registo"><%= t('nav.criarConta') %></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="container-fluid px-3 px-lg-4">
+      <a class="navbar-brand" href="<%= inicioPainel %>">
+        <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+        <span>MediAgenda</span>
+      </a>
+
+      <button
+        class="btn-icon d-lg-none ms-2"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#menuLateral"
+        aria-controls="menuLateral"
+        aria-label="Abrir menu de navegação"
+      >
+        <i class="bi bi-list fs-5"></i>
+      </button>
+
+      <div class="d-flex align-items-center gap-1 gap-lg-2 ms-auto">
+        <% if (perfilNav === 'PACIENTE') { %>
+          <a class="btn btn-ma btn-sm d-none d-md-inline-flex align-items-center gap-1" href="/medicos">
+            <i class="bi bi-calendar2-plus"></i><span><%= t('nav.novaConsulta') %></span>
+          </a>
+        <% } %>
+        <a class="nav-link d-none d-lg-inline-flex align-items-center gap-1" href="/" title="<%= t('nav.sitePublico') %>">
+          <i class="bi bi-globe2"></i><span class="d-none d-xl-inline"><%= t('nav.sitePublico') %></span>
+        </a>
+
+        <button class="btn-icon" type="button" data-toggle-tema aria-label="<%= t('tema.ativarEscuro') %>">
+          <i class="bi bi-moon-stars"></i>
+        </button>
+
+        <div class="dropdown">
+          <a
+            class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+            href="#"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <span class="avatar avatar-sm"><%= utilizador.nome.charAt(0).toUpperCase() %></span>
+            <span class="d-none d-sm-inline"><%= utilizador.nome.split(' ')[0] %></span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li class="px-3 py-2">
+              <div class="fw-semibold"><%= utilizador.nome %></div>
+              <div class="small text-muted"><%= utilizador.email %></div>
+              <span class="badge badge-soft-primary mt-1"><%= rotulosPerfilNav[perfilNav] || perfilNav %></span>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item" href="<%= inicioPainel %>">
+                <i class="bi bi-grid-1x2 me-2"></i><%= t('nav.painel') %>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="/conta/seguranca">
+                <i class="bi bi-shield-lock me-2"></i><%= t('nav.seguranca') %>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="/conta/password">
+                <i class="bi bi-key me-2"></i><%= t('nav.alterarPassword') %>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="/">
+                <i class="bi bi-house me-2"></i><%= t('nav.paginaInicial') %>
+              </a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item text-danger" href="/logout">
+                <i class="bi bi-box-arrow-right me-2"></i><%= t('nav.terminarSessao') %>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</nav>

@@ -1,0 +1,67 @@
+<section class="auth-page">
+  <div class="auth-frame auth-frame-sm">
+    <%- include('../partials/auth-brand', {
+      authBadge: 'Nova palavra-passe',
+      authTitulo: 'Volte a entrar com segurança.',
+      authTexto: 'Defina uma nova palavra-passe com pelo menos 8 caracteres e retome o acesso à sua conta.'
+    }) %>
+
+    <div class="auth-panel">
+      <a class="auth-mobile-brand d-lg-none" href="/">
+        <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+        <span>MediAgenda</span>
+      </a>
+
+      <div class="auth-panel-header">
+        <h2>Nova palavra-passe</h2>
+        <p>Defina uma palavra-passe com pelo menos 8 caracteres.</p>
+      </div>
+
+      <form action="/repor-password/<%= token %>" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="mb-2">
+          <label class="form-label" for="password">Nova palavra-passe</label>
+          <div class="input-group">
+            <input class="form-control" id="password" name="password" type="password" minlength="8" required autofocus autocomplete="new-password" />
+            <button class="btn btn-outline-secondary" type="button" data-toggle-password="password" aria-label="Mostrar palavra-passe">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="confirmar">Confirmar palavra-passe</label>
+          <div class="input-group">
+            <input class="form-control" id="confirmar" name="confirmar" type="password" minlength="8" required autocomplete="new-password" />
+            <button class="btn btn-outline-secondary" type="button" data-toggle-password="confirmar" aria-label="Mostrar palavra-passe">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          <div class="invalid-feedback">As palavras-passe não coincidem.</div>
+        </div>
+
+        <button class="btn btn-ma w-100" type="submit">
+          <i class="bi bi-check2-circle me-1"></i> Guardar nova palavra-passe
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        <a href="/login"><i class="bi bi-arrow-left me-1"></i>Voltar ao início de sessão</a>
+      </p>
+      <a class="auth-back" href="/">Ir para a página inicial</a>
+    </div>
+  </div>
+</section>
+
+<script nonce="<%= cspNonce %>">
+  document.addEventListener('DOMContentLoaded', function () {
+    var form = document.querySelector('form');
+    var password = document.getElementById('password');
+    var confirmar = document.getElementById('confirmar');
+    form.addEventListener('submit', function (evento) {
+      var iguais = password.value === confirmar.value;
+      confirmar.classList.toggle('is-invalid', !iguais);
+      if (!iguais) evento.preventDefault();
+    });
+  });
+</script>

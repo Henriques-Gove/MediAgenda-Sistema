@@ -1,0 +1,39 @@
+<%
+  const dadosGrafico = typeof dados !== 'undefined' && Array.isArray(dados) ? dados : [];
+  const maxGrafico = Math.max(1, ...dadosGrafico.map(function (item) { return Number(item.valor) || 0; }));
+  const larguraGrafico = 400;
+  const alturaGrafico = 150;
+  const baseGrafico = 115;
+  const topoGrafico = 12;
+  const passoGrafico = dadosGrafico.length ? larguraGrafico / dadosGrafico.length : larguraGrafico;
+  const larguraBarra = Math.min(38, passoGrafico * 0.58);
+%>
+<% if (dadosGrafico.length) { %>
+  <svg
+    class="w-100"
+    viewBox="0 0 <%= larguraGrafico %> <%= alturaGrafico %>"
+    role="img"
+    aria-label="<%= typeof titulo !== 'undefined' ? titulo : 'Gráfico de barras' %>"
+    style="max-height: 220px"
+  >
+    <line x1="0" y1="<%= baseGrafico %>" x2="<%= larguraGrafico %>" y2="<%= baseGrafico %>" stroke="#e5e7eb" stroke-width="1" />
+    <% dadosGrafico.forEach(function (item, indice) { %>
+      <%
+        const valor = Number(item.valor) || 0;
+        const alturaBarra = Math.round(((baseGrafico - topoGrafico) * valor) / maxGrafico);
+        const x = Math.round(indice * passoGrafico + (passoGrafico - larguraBarra) / 2);
+        const y = baseGrafico - alturaBarra;
+        const rotulo = String(item.rotulo || '');
+      %>
+      <rect x="<%= x %>" y="<%= y %>" width="<%= larguraBarra %>" height="<%= Math.max(alturaBarra, valor ? 2 : 0) %>" rx="3" fill="#0f766e" opacity="<%= valor ? 0.9 : 0.2 %>">
+        <title><%= rotulo %>: <%= valor %></title>
+      </rect>
+      <% if (valor) { %>
+        <text x="<%= x + larguraBarra / 2 %>" y="<%= Math.max(9, y - 4) %>" text-anchor="middle" font-size="9" fill="#374151"><%= valor %></text>
+      <% } %>
+      <text x="<%= x + larguraBarra / 2 %>" y="<%= baseGrafico + 14 %>" text-anchor="middle" font-size="9" fill="#6b7280"><%= rotulo.length > 10 ? rotulo.slice(0, 9) + '…' : rotulo %></text>
+    <% }); %>
+  </svg>
+<% } else { %>
+  <p class="small text-muted mb-0">Sem dados para apresentar.</p>
+<% } %>

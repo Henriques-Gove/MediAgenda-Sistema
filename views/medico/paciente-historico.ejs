@@ -1,0 +1,131 @@
+<section class="page-header">
+  <div class="container">
+    <a class="small text-decoration-none text-muted" href="/medico/consultas"><i class="bi bi-arrow-left me-1"></i>Voltar as consultas</a>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-body p-4">
+            <div class="text-center mb-3">
+              <span class="avatar avatar-lg mx-auto mb-3"><%= paciente.utilizador.nome.charAt(0).toUpperCase() %></span>
+              <h1 class="h4 fw-bold mb-1"><%= paciente.utilizador.nome %></h1>
+              <div class="small text-muted"><%= idade(paciente.dataNascimento) %> anos</div>
+            </div>
+            <hr />
+            <div class="small">
+              <div class="d-flex justify-content-between py-1"><span class="text-muted">E-mail</span><span class="fw-semibold text-end"><%= paciente.utilizador.email %></span></div>
+              <div class="d-flex justify-content-between py-1"><span class="text-muted">Telefone</span><span class="fw-semibold"><%= paciente.telefone %></span></div>
+              <div class="d-flex justify-content-between py-1"><span class="text-muted">Nascimento</span><span class="fw-semibold"><%= formatarData(paciente.dataNascimento) %></span></div>
+              <div class="d-flex justify-content-between py-1"><span class="text-muted">Endereço</span><span class="fw-semibold text-end"><%= paciente.endereco %></span></div>
+              <div class="d-flex justify-content-between py-1"><span class="text-muted">Canal</span><span class="fw-semibold"><%= paciente.utilizador.preferenciaNotificacao %></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-clock-history me-1"></i> Histórico com <%= medico.utilizador.nome %></span>
+            <span class="small text-muted"><%= consultas.length %> consulta(s)</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Especialidade</th>
+                  <th>Motivo</th>
+                  <th>Estado</th>
+                  <th>Avaliação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% consultas.forEach(function (consulta) { %>
+                  <tr>
+                    <td class="small">
+                      <div class="fw-semibold"><%= formatarData(consulta.inicio) %></div>
+                      <div class="text-muted"><%= formatarHora(consulta.inicio) %></div>
+                    </td>
+                    <td class="small"><%= consulta.especialidade ? consulta.especialidade.nome : 'Consulta geral' %></td>
+                    <td class="small text-muted"><%= consulta.motivo || '-' %></td>
+                    <td><span class="badge badge-soft-<%= coresEstado[consulta.estado] %>"><%= rotulosEstado[consulta.estado] %></span></td>
+                    <td class="small">
+                      <% if (consulta.avaliacao) { %>
+                        <span class="rating">
+                          <% for (let i = 1; i <= 5; i += 1) { %><i class="bi <%= i <= consulta.avaliacao.estrelas ? 'bi-star-fill' : 'bi-star' %>"></i><% } %>
+                        </span>
+                        <% if (consulta.avaliacao.comentario) { %>
+                          <div class="text-muted small mt-1"><%= consulta.avaliacao.comentario %></div>
+                        <% } %>
+                      <% } else { %>
+                        <span class="text-muted">-</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="card-header"><i class="bi bi-folder-plus me-1"></i> Documentos clínicos</div>
+          <div class="card-body">
+            <%- include('../partials/lista-documentos', { documentos: documentos, modo: 'medico' }) %>
+
+            <hr class="my-4" />
+
+            <h2 class="h6 fw-bold mb-3">Novo documento</h2>
+            <form action="/medico/pacientes/<%= paciente.id %>/documentos" method="post" enctype="multipart/form-data">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label" for="tipo">Tipo</label>
+                  <select class="form-select" id="tipo" name="tipo" required>
+                    <option value="NOTA">Nota clínica</option>
+                    <option value="RECEITA">Receita</option>
+                    <option value="ATESTADO">Atestado</option>
+                    <option value="ANEXO">Anexo</option>
+                  </select>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label" for="titulo">Título</label>
+                  <input class="form-control" id="titulo" name="titulo" type="text" maxlength="140" required placeholder="Ex.: Receita de antibiótico" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="consultaId">Consulta associada (opcional)</label>
+                  <select class="form-select" id="consultaId" name="consultaId">
+                    <option value="">Sem consulta associada</option>
+                    <% consultas.forEach(function (consulta) { %>
+                      <option value="<%= consulta.id %>"><%= formatarData(consulta.inicio) %> · <%= consulta.especialidade ? consulta.especialidade.nome : 'Consulta geral' %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="documento-conteudo">Conteúdo</label>
+                  <textarea class="form-control" id="documento-conteudo" name="conteudo" rows="4" maxlength="4000" placeholder="Escreva a receita, o atestado ou as notas clínicas."></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="ficheiro">Ficheiro (opcional)</label>
+                  <input class="form-control" id="ficheiro" name="ficheiro" type="file" accept="application/pdf,image/jpeg,image/png" />
+                  <div class="form-text">PDF, JPG ou PNG até 5 MB. Pode escrever o conteúdo, anexar um ficheiro ou ambos.</div>
+                </div>
+              </div>
+              <button class="btn btn-ma mt-3" type="submit"><i class="bi bi-check2-circle me-1"></i> Guardar documento</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="alert alert-info mt-3 small">
+          <i class="bi bi-shield-lock me-1"></i>
+          Acesso restrito ao histórico de pacientes que já teve consultas consigo.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

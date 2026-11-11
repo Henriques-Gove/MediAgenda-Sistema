@@ -1,0 +1,46 @@
+<section class="auth-page">
+  <div class="auth-frame auth-frame-sm">
+    <%- include('../partials/auth-brand', {
+      authBadge: 'Recuperação segura',
+      authTitulo: 'Recupere o acesso à sua conta.',
+      authTexto: 'Indique o e-mail associado à sua conta e enviamos as instruções para definir uma nova palavra-passe.'
+    }) %>
+
+    <div class="auth-panel">
+      <a class="auth-mobile-brand d-lg-none" href="/">
+        <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+        <span>MediAgenda</span>
+      </a>
+
+      <div class="auth-panel-header">
+        <h2>Recuperar palavra-passe</h2>
+        <p>Indique o e-mail associado a sua conta.</p>
+      </div>
+
+      <form action="/recuperar" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="mb-3">
+          <label class="form-label" for="email">E-mail</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+            <input class="form-control" id="email" name="email" type="email" placeholder="nome@exemplo.com" required autofocus autocomplete="email" />
+          </div>
+        </div>
+
+        <button class="btn btn-ma w-100" type="submit">
+          <i class="bi bi-send me-1"></i> Enviar instruções
+        </button>
+      </form>
+
+      <div class="auth-note">
+        <i class="bi bi-shield-check me-1"></i>
+        Por segurança, não confirmamos se o e-mail existe. Se estiver registado, recebera as instruções.
+      </div>
+
+      <p class="auth-switch">
+        <a href="/login"><i class="bi bi-arrow-left me-1"></i>Voltar ao início de sessão</a>
+      </p>
+      <a class="auth-back" href="/">Ir para a página inicial</a>
+    </div>
+  </div>
+</section>
