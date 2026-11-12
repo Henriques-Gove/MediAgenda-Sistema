@@ -25,7 +25,8 @@
     "db:restore": "node scripts/restaurar.mjs",
     "db:prepare-postgres": "node scripts/preparar-postgres.mjs",
     "icons": "node scripts/gerar-icones-pwa.mjs",
-    "setup": "prisma generate && prisma db push && tsx prisma/seed.ts"
+    "setup": "node scripts/preparar-ambiente.mjs",
+    "deploy:verificar": "node scripts/verificar-deploy.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

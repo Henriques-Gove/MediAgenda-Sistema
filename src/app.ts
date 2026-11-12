@@ -62,6 +62,8 @@ export async function criarAplicacao(): Promise<Aplicacao> {
   app.use(express.static(path.join(__dirname, '..', 'public')));
 
   // Verificação de saúde para orquestradores, balanceadores e monitorização.
+  // Inclui o commit publicado para ser possível confirmar que o deploy está atualizado.
+  const commitPublicado = (process.env.RENDER_GIT_COMMIT ?? process.env.GIT_COMMIT ?? 'local').slice(0, 7);
   app.get('/health', async (_req, res) => {
     try {
       await prisma.$queryRaw`SELECT 1`;
@@ -69,6 +71,7 @@ export async function criarAplicacao(): Promise<Aplicacao> {
         estado: 'ok',
         servico: 'mediagenda',
         versao: process.env.APP_VERSION ?? '1.0.0',
+        commit: commitPublicado,
         ambiente: env.nodeEnv,
         uptimeSegundos: Math.round(process.uptime()),
         baseDados: 'ok',

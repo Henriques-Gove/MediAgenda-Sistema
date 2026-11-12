@@ -68,7 +68,11 @@ SMS_FROM=MediAgenda
 npm run setup
 ```
 
-Este comando executa `prisma generate`, `prisma db push` e o seed. Para repetir apenas o seed:
+Este comando gera o cliente Prisma (apenas se ainda não existir), sincroniza o schema (`prisma db push`) e carrega os dados de demonstração. O seed é idempotente: correr o comando várias vezes não duplica consultas.
+
+> **Windows:** se aparecer `EPERM ... query_engine-windows.dll.node`, é porque o servidor de desenvolvimento está a correr e mantém a biblioteca do Prisma aberta. Pare o `npm run dev` (Ctrl+C) ou feche a depuração do VS Code e repita. O script já explica isto em vez de mostrar o erro técnico.
+
+Para repetir apenas o seed:
 
 ```bash
 npm run db:seed
@@ -90,11 +94,41 @@ A aplicação fica disponível em `http://localhost:3101`.
 
 > A porta 3000 pode estar ocupada por outro processo nesta máquina, por isso o `.env` usa a **3101**. Para mudar de porta, altere `PORT` e `APP_URL` no `.env` e reinicie o servidor.
 
+### VS Code (passo a passo)
+
+1. `Ficheiro > Abrir Pasta` e escolha a pasta do projeto.
+2. Abra o terminal integrado (`Ctrl` + `` ` ``).
+3. Na primeira vez: `npm install` e `npm run setup`.
+4. Arranque com `npm run dev` ou prima `F5` e escolha **MediAgenda - Desenvolvimento (tsx)**.
+5. Abra `http://localhost:3101` no navegador.
+
+A pasta `.vscode` já inclui:
+
+| Ficheiro | Para que serve |
+| --- | --- |
+| `launch.json` | Depuração com F5 (desenvolvimento com `tsx` e produção a partir de `dist`) |
+| `settings.json` | Formatação ao guardar, ESLint, tabs, codificação UTF-8 |
+| `extensions.json` | Extensões recomendadas (Prettier, ESLint, Prisma, Docker) |
+
+Ao abrir o projeto, o VS Code sugere as extensões recomendadas em **Extensões > Recomendadas**.
+
 ### Build e execução em produção
 
 ```bash
 npm run build
 npm start
+```
+
+### Verificar se o site publicado está atualizado
+
+```bash
+npm run deploy:verificar
+```
+
+O script consulta `/health` (que expõe o commit publicado pelo Render), compara com o commit local e diz se o site está atualizado. Também confirma que o login já não mostra contas de demonstração. Aceita outro endereço:
+
+```bash
+npm run deploy:verificar -- https://o-meu-servico.onrender.com
 ```
 
 ### Docker
@@ -292,7 +326,8 @@ O histórico de notificações pode ser consultado em `/admin/notificacoes`.
 | `npm run dev` | Servidor de desenvolvimento com `tsx watch` |
 | `npm run build` | Compila TypeScript para `dist/` |
 | `npm start` | Executa a versão compilada |
-| `npm run setup` | Gera Prisma Client, sincroniza o schema e executa o seed |
+| `npm run setup` | Gera Prisma Client (se necessário), sincroniza o schema e executa o seed |
+| `npm run deploy:verificar` | Confirma se o site publicado está a correr o commit mais recente |
 | `npm run db:push` | Sincroniza o schema com a base de dados |
 | `npm run db:seed` | Executa o seed de demonstração |
 | `npm run db:reset` | Recria a base de dados e volta a executar o seed |
@@ -322,4 +357,5 @@ O âmbito funcional está concluído. Para uma utilização real em produção, 
 1. **Configurar SMTP e SMS reais** através das variáveis de ambiente.
 2. **Migrar para PostgreSQL** em produção (basta alterar `DATABASE_URL`; o projeto já inclui o schema correspondente em `prisma/postgresql`).
 3. **Configurar HTTPS** no servidor de implantação (o Render fornece por omissão).
-4. **Aumentar a cobertura de testes** com cenários de cancelamento tardio e relatórios.
+4. **Base de dados persistente no Render** — o plano gratuito não tem disco: a SQLite é recriada a cada reinício. Use uma instância paga com disco em `/var/data` ou PostgreSQL.
+5. **Aumentar a cobertura de testes** com cenários de cancelamento tardio e relatórios.

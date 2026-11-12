@@ -1,6 +1,14 @@
 # Implantação do MediAgenda no Render (Blueprint)
 # Depois de ligar o repositório, use "New + > Blueprint" e o Render cria
 # automaticamente o serviço descrito abaixo.
+#
+# Notas sobre o plano gratuito:
+# - O plano free não suporta discos persistentes. Sem disco, a base de dados
+#   SQLite é recriada a cada reinício (o script de arranque volta a carregar
+#   os dados de demonstração). Para dados permanentes use o bloco "disk"
+#   comentado abaixo com uma instância paga, ou migre para PostgreSQL.
+# - O serviço adormece após alguns minutos sem tráfego; o primeiro pedido
+#   pode demorar cerca de 50 segundos.
 services:
   - type: web
     name: mediagenda
@@ -10,18 +18,21 @@ services:
     buildCommand: npm install --include=dev && npm run build
     startCommand: npx prisma migrate deploy && node scripts/seed-se-necessario.mjs && npm start
     healthCheckPath: /health
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
       - key: SESSION_SECRET
         generateValue: true
       - key: DATABASE_URL
-        # Disco persistente: a base de dados sobrevive a reinícios.
-        value: file:/var/data/mediagenda.db
+        # Plano gratuito: ficheiro local (efémero entre reinícios).
+        value: file:./dev.db
+        # Com disco persistente (instância paga), use:
+        # value: file:/var/data/mediagenda.db
       - key: COOKIE_SECURE
         value: "true"
       - key: APP_URL
-        sync: false # preencher com o endereço público (ex.: https://mediagenda.onrender.com)
+        sync: false # preencher com o endereço público (ex.: https://mediagenda-sistema.onrender.com)
       - key: SMTP_HOST
         sync: false # opcional: e-mails reais (vazio = simulação)
       - key: SMTP_PORT
@@ -34,7 +45,8 @@ services:
         sync: false # opcional: SMS reais (vazio = simulação)
       - key: SMS_API_KEY
         sync: false
-    disk:
-      name: dados
-      mountPath: /var/data
-      sizeGB: 1
+    # Disco persistente (requer instância paga, ex.: starter):
+    # disk:
+    #   name: dados
+    #   mountPath: /var/data
+    #   sizeGB: 1
