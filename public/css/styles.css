@@ -953,6 +953,89 @@ main section.py-5 {
   margin-bottom: 1.1rem;
 }
 
+.auth-brand .auth-tagline {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #ccfbf1;
+  letter-spacing: -0.01em;
+  margin: 0 0 1rem;
+}
+
+.auth-brand .auth-texto {
+  margin-bottom: 1rem;
+}
+
+/* Média do painel de marca: vídeo real ou ilustração animada da receção */
+.auth-media {
+  position: relative;
+  z-index: 1;
+  margin: 1.2rem 0 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 26px 50px -34px rgba(0, 0, 0, 0.7);
+  background: #0b4f4a;
+}
+
+.auth-media-video,
+.auth-media-ilustracao {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.auth-media-pessoa {
+  transform-origin: center bottom;
+  animation: auth-pessoa-respira 7s ease-in-out infinite;
+}
+
+.auth-media-paciente {
+  animation-delay: -2.6s;
+}
+
+.auth-media-planta {
+  transform-origin: center bottom;
+  animation: auth-planta-venta 9s ease-in-out infinite;
+}
+
+.auth-media-brilho {
+  animation: auth-brilho-varre 11s ease-in-out infinite;
+}
+
+@keyframes auth-pessoa-respira {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes auth-planta-venta {
+  0%,
+  100% {
+    transform: rotate(-1.2deg);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
+
+@keyframes auth-brilho-varre {
+  0% {
+    transform: translateX(-55%);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(55%);
+    opacity: 0;
+  }
+}
+
 .auth-benefits {
   list-style: none;
   padding: 0;

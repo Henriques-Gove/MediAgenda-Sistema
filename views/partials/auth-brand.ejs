@@ -1,4 +1,9 @@
-﻿<aside class="auth-brand">
+﻿<%
+  const tituloMarca = typeof authTitulo !== 'undefined' ? authTitulo : 'A sua saúde, agendada em minutos.';
+  const textoMarca = typeof authTexto !== 'undefined' ? authTexto : '';
+  const destaqueMarca = typeof authDestaque !== 'undefined' ? authDestaque : '';
+%>
+<aside class="auth-brand">
   <div class="auth-scene" aria-hidden="true">
     <span class="auth-orb auth-orb-1"></span>
     <span class="auth-orb auth-orb-2"></span>
@@ -7,10 +12,6 @@
     <span class="auth-chip auth-chip-1">
       <i class="bi bi-calendar2-check"></i>
       <span>Consulta confirmada</span>
-    </span>
-    <span class="auth-chip auth-chip-2">
-      <i class="bi bi-bell"></i>
-      <span>Lembrete 24h</span>
     </span>
 
     <svg class="auth-ecg" viewBox="0 0 340 90" fill="none" preserveAspectRatio="none">
@@ -39,20 +40,82 @@
       <i class="bi bi-calendar2-check"></i>
       <%= typeof authBadge !== 'undefined' ? authBadge : 'Agendamento online 24/7' %>
     </span>
-    <h1><%= typeof authTitulo !== 'undefined' ? authTitulo : 'A sua saúde, agendada em minutos.' %></h1>
-    <p>
-      <%= typeof authTexto !== 'undefined' ? authTexto : 'Encontre o médico certo, escolha o horário e receba a confirmação por e-mail ou SMS.' %>
-    </p>
-    <ul class="auth-benefits">
-      <li><i class="bi bi-check2-circle"></i><span>Médicos verificados e avaliados</span></li>
-      <li><i class="bi bi-check2-circle"></i><span>Confirmação e lembretes automáticos</span></li>
-      <li><i class="bi bi-check2-circle"></i><span>Reagendamento e cancelamento online</span></li>
-      <li><i class="bi bi-check2-circle"></i><span>Histórico de consultas sempre disponível</span></li>
-    </ul>
+    <h1><%= tituloMarca %></h1>
+    <% if (destaqueMarca) { %>
+      <p class="auth-tagline"><%= destaqueMarca %></p>
+    <% } %>
+    <% if (textoMarca) { %>
+      <p class="auth-texto"><%= textoMarca %></p>
+    <% } %>
   </div>
 
-  <div class="auth-trust">
-    <i class="bi bi-shield-check"></i>
-    <span>Dados protegidos e sessão segura</span>
-  </div>
+  <figure class="auth-media">
+    <!-- Para usar um vídeo real da clínica, descomente e coloque o ficheiro em public/videos/:
+    <video class="auth-media-video" autoplay muted loop playsinline poster="/img/recepcao.jpg">
+      <source src="/videos/recepcao.mp4" type="video/mp4" />
+    </video>
+    -->
+    <svg
+      class="auth-media-ilustracao"
+      viewBox="0 0 640 320"
+      preserveAspectRatio="xMidYMid slice"
+      role="img"
+      aria-label="Paciente a ser atendida na receção da clínica"
+    >
+      <defs>
+        <linearGradient id="salaFundo" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#0b4f4a" />
+          <stop offset="1" stop-color="#0f766e" />
+        </linearGradient>
+        <linearGradient id="salaLuz" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#5eead4" stop-opacity="0" />
+          <stop offset="0.5" stop-color="#5eead4" stop-opacity="0.28" />
+          <stop offset="1" stop-color="#5eead4" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+
+      <rect width="640" height="320" fill="url(#salaFundo)" />
+
+      <g opacity="0.9">
+        <rect x="42" y="40" width="150" height="96" rx="10" fill="#ffffff" opacity="0.1" />
+        <path d="M117 40 V136 M42 88 H192" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2" />
+      </g>
+
+      <g opacity="0.3">
+        <rect x="300" y="32" width="10" height="34" rx="3" fill="#ccfbf1" />
+        <rect x="288" y="44" width="34" height="10" rx="3" fill="#ccfbf1" />
+      </g>
+
+      <rect y="248" width="640" height="72" fill="#083f3b" opacity="0.55" />
+
+      <g class="auth-media-planta">
+        <rect x="556" y="196" width="44" height="52" rx="8" fill="#0b5d57" />
+        <path d="M578 196 c-26 -8 -34 -34 -30 -52 c22 6 30 28 30 52z" fill="#34d399" opacity="0.85" />
+        <path d="M578 196 c24 -6 34 -30 30 -50 c-22 4 -30 26 -30 50z" fill="#10b981" opacity="0.8" />
+        <path d="M578 196 v-56" stroke="#065f46" stroke-width="3" />
+      </g>
+
+      <rect x="150" y="206" width="330" height="14" rx="7" fill="#e6fffb" opacity="0.92" />
+      <rect x="162" y="220" width="306" height="66" rx="10" fill="#0b5d57" />
+      <rect x="162" y="220" width="306" height="66" rx="10" fill="#ffffff" opacity="0.06" />
+
+      <g class="auth-media-pessoa">
+        <circle cx="248" cy="150" r="24" fill="#f6d0b0" />
+        <path d="M224 150 a24 24 0 0 1 48 0 v-8 a24 24 0 0 0 -48 0z" fill="#0f172a" opacity="0.85" />
+        <rect x="240" y="170" width="16" height="16" rx="6" fill="#f6d0b0" />
+        <path d="M212 206 v-16 a36 36 0 0 1 72 0 v16z" fill="#ffffff" />
+        <path d="M248 178 v28" stroke="#cbd5e1" stroke-width="2" />
+      </g>
+
+      <g class="auth-media-pessoa auth-media-paciente">
+        <circle cx="430" cy="146" r="26" fill="#e8b48f" />
+        <path d="M404 146 a26 26 0 0 1 52 0 v-6 a26 26 0 0 0 -52 0z" fill="#0f172a" opacity="0.8" />
+        <rect x="421" y="168" width="18" height="16" rx="6" fill="#e8b48f" />
+        <path d="M396 250 v-52 a34 34 0 0 1 68 0 v52z" fill="#14b8a6" />
+        <rect x="412" y="196" width="36" height="10" rx="5" fill="#0f766e" />
+      </g>
+
+      <rect width="640" height="320" fill="url(#salaLuz)" class="auth-media-brilho" />
+    </svg>
+  </figure>
 </aside>

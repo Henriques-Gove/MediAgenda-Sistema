@@ -92,6 +92,60 @@
   z-index: 1;
 }
 
+/* Cena de fundo: ícones clínicos a flutuar (sem imagens nem vídeos) */
+.dashboard-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.dashboard-scene i {
+  position: absolute;
+  color: var(--perfil-cor);
+  opacity: 0.08;
+  animation: cena-flutuar 20s ease-in-out infinite;
+}
+
+.dashboard-scene i:nth-child(1) {
+  top: 10%;
+  left: 5%;
+  font-size: 5rem;
+  animation-delay: 0s;
+}
+
+.dashboard-scene i:nth-child(2) {
+  top: 55%;
+  right: 6%;
+  font-size: 4rem;
+  animation-delay: -6s;
+}
+
+.dashboard-scene i:nth-child(3) {
+  bottom: 8%;
+  left: 36%;
+  font-size: 3rem;
+  animation-delay: -12s;
+}
+
+.dashboard-scene i:nth-child(4) {
+  top: 28%;
+  right: 30%;
+  font-size: 2.4rem;
+  animation-delay: -3s;
+}
+
+@keyframes cena-flutuar {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-4deg);
+  }
+  50% {
+    transform: translate3d(0, -18px, 0) rotate(4deg);
+  }
+}
+
 .dashboard-header {
   padding: 1.75rem 0 1.25rem;
 }
@@ -386,11 +440,21 @@
     align-items: flex-start;
     gap: 0.5rem;
   }
+
+  .dashboard-scene i:nth-child(3),
+  .dashboard-scene i:nth-child(4) {
+    display: none;
+  }
+
+  .dashboard-scene i {
+    opacity: 0.06;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dashboard-bg::before,
-  .dashboard-bg::after {
+  .dashboard-bg::after,
+  .dashboard-scene i {
     animation: none;
   }
 
