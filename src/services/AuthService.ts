@@ -457,6 +457,38 @@ export class AuthService {
     });
   }
 
+  async definirPerfil(utilizadorId: string, perfil: Perfil): Promise<void> {
+    const utilizador = await this.db.utilizador.findUnique({
+      where: { id: utilizadorId },
+      include: { medico: true, paciente: true },
+    });
+    if (!utilizador) throw new ErroNaoEncontrado('Utilizador nao encontrado.');
+    if (utilizador.perfil === perfil) throw new ErroValidacao('O utilizador ja tem este perfil.');
+
+    await this.db.$transaction(async (tx) => {
+      await tx.utilizador.update({ where: { id: utilizadorId }, data: { perfil } });
+
+      // Quando se deixa de ser medico, desativa o registo medico (mantem historico)
+      if (utilizador.perfil === 'MEDICO' && perfil !== 'MEDICO' && utilizador.medico) {
+        await tx.medico.update({ where: { id: utilizador.medico.id }, data: { ativo: false } });
+      }
+      // Quando se torna medico e nao tem registo, cria um registo minimo
+      if (perfil === 'MEDICO' && !utilizador.medico) {
+        await tx.medico.create({
+          data: {
+            utilizadorId,
+            numeroRegisto: 'PENDENTE',
+            telefone: utilizador.telefone ?? '',
+            localizacao: '',
+            duracaoConsultaMinutos: 60,
+            maxConsultasDia: 10,
+            ativo: true,
+          },
+        });
+      }
+    });
+  }
+
   async atualizarPreferencias(
     utilizadorId: string,
     dados: { nome?: string; telefone?: string | null; preferenciaNotificacao?: string },

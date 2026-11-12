@@ -802,9 +802,54 @@ main section.py-5 {
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---------- Fundo animado do login ---------- */
+.auth-bg-video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.auth-bg-video video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+}
+.auth-bg-gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(158deg, rgba(11, 79, 74, 0.72) 0%, rgba(15, 118, 110, 0.68) 56%, rgba(13, 148, 136, 0.72) 100%);
+}
+.auth-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  animation: auth-particle-float 12s ease-in-out infinite;
+}
+@keyframes auth-particle-float {
+  0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.6; }
+  33% { transform: translate3d(1.4rem, -1.6rem, 0); opacity: 0.9; }
+  66% { transform: translate3d(-1rem, 1.1rem, 0); opacity: 0.5; }
+}
+.auth-page {
+  position: static;
 }
 
 .auth-frame {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: 0.92fr 1.08fr;
   width: 100%;
@@ -1562,4 +1607,354 @@ html[data-bs-theme="dark"] .btn-close {
 
 html[data-bs-theme="dark"] .agenda-mes td {
   border-color: var(--ma-border);
+}
+
+/* ---------- Entrada direta no login e cena animada da marca ---------- */
+.auth-brand {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(94, 234, 212, 0.28), transparent 42%),
+    radial-gradient(circle at 88% 78%, rgba(13, 148, 136, 0.5), transparent 46%),
+    linear-gradient(158deg, #0b4f4a 0%, #0f766e 52%, #0d9488 100%);
+  background-size: 160% 160%;
+  animation: auth-gradient 18s ease-in-out infinite;
+}
+
+@keyframes auth-gradient {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+}
+
+.auth-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-orb {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: auth-orb-float 16s ease-in-out infinite;
+}
+
+.auth-orb-1 {
+  width: 15rem;
+  height: 15rem;
+  top: -5.5rem;
+  right: -4.5rem;
+  background: radial-gradient(circle at 32% 32%, rgba(45, 212, 191, 0.55), transparent 68%);
+}
+
+.auth-orb-2 {
+  width: 12rem;
+  height: 12rem;
+  bottom: 6%;
+  left: -5rem;
+  background: radial-gradient(circle at 42% 42%, rgba(94, 234, 212, 0.36), transparent 70%);
+  animation-delay: -6s;
+}
+
+.auth-orb-3 {
+  width: 8.5rem;
+  height: 8.5rem;
+  top: 46%;
+  right: 10%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2), transparent 72%);
+  animation-duration: 20s;
+  animation-delay: -9s;
+}
+
+@keyframes auth-orb-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(0.7rem, -1.1rem, 0) scale(1.06);
+  }
+  66% {
+    transform: translate3d(-0.6rem, 0.9rem, 0) scale(0.96);
+  }
+}
+
+.auth-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.42rem 0.7rem;
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #ecfdf5;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 20px 32px -24px rgba(2, 44, 34, 0.9);
+  animation: auth-chip-float 7s ease-in-out infinite;
+}
+
+.auth-chip i {
+  font-size: 0.85rem;
+  color: #a7f3d0;
+}
+
+.auth-chip-1 {
+  top: 5rem;
+  right: 1.1rem;
+  animation-delay: -1s;
+}
+
+.auth-chip-2 {
+  bottom: 6.6rem;
+  left: 1.1rem;
+  animation-delay: -3.6s;
+}
+
+@keyframes auth-chip-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+.auth-ecg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 5.4rem;
+  width: 100%;
+  height: 88px;
+  opacity: 0.55;
+}
+
+.auth-ecg-track {
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 2;
+}
+
+.auth-ecg-line {
+  stroke: #a7f3d0;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 0.16 0.84;
+  animation: auth-ecg-run 4.6s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(167, 243, 208, 0.85));
+}
+
+@keyframes auth-ecg-run {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.auth-pulse-dot {
+  position: absolute;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: #a7f3d0;
+  box-shadow: 0 0 0 0 rgba(167, 243, 208, 0.6);
+  animation: auth-dot 2.8s ease-out infinite;
+}
+
+.auth-pulse-dot-1 {
+  top: 30%;
+  right: 2.6rem;
+}
+
+.auth-pulse-dot-2 {
+  bottom: 10.5rem;
+  right: 5.5rem;
+  animation-delay: -1.4s;
+}
+
+@keyframes auth-dot {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(167, 243, 208, 0.55);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 0.7rem rgba(167, 243, 208, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(167, 243, 208, 0);
+  }
+}
+
+.brand-mark-pulse {
+  position: relative;
+}
+
+.brand-mark-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(167, 243, 208, 0.75);
+  animation: auth-ring 2.6s ease-out infinite;
+}
+
+@keyframes auth-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  70% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.auth-brand-content > * {
+  animation: auth-rise 0.75s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+.auth-brand-content > *:nth-child(1) {
+  animation-delay: 0.08s;
+}
+
+.auth-brand-content > *:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.auth-brand-content > *:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.auth-brand-content > *:nth-child(4) {
+  animation-delay: 0.32s;
+}
+
+.auth-benefits li {
+  animation: auth-rise 0.6s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+.auth-benefits li:nth-child(1) {
+  animation-delay: 0.38s;
+}
+
+.auth-benefits li:nth-child(2) {
+  animation-delay: 0.46s;
+}
+
+.auth-benefits li:nth-child(3) {
+  animation-delay: 0.54s;
+}
+
+.auth-benefits li:nth-child(4) {
+  animation-delay: 0.62s;
+}
+
+.auth-trust {
+  animation: auth-rise 0.7s cubic-bezier(0.22, 0.9, 0.32, 1) 0.7s both;
+}
+
+@keyframes auth-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-panel {
+  animation: auth-panel-in 0.8s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+@keyframes auth-panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.auth-panel .form-control:focus,
+.auth-panel .form-select:focus {
+  border-color: var(--ma-primary);
+  box-shadow: 0 0 0 0.25rem rgba(15, 118, 110, 0.16);
+}
+
+.auth-panel .btn-ma {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-panel .btn-ma::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+  transform: skewX(-18deg);
+  animation: auth-shine 4.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes auth-shine {
+  0%,
+  55% {
+    left: -60%;
+  }
+  85%,
+  100% {
+    left: 135%;
+  }
+}
+
+.demo-chip {
+  transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.demo-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px -14px rgba(15, 118, 110, 0.65);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-brand,
+  .auth-orb,
+  .auth-chip,
+  .auth-ecg-line,
+  .auth-pulse-dot,
+  .brand-mark-pulse::after,
+  .auth-brand-content > *,
+  .auth-benefits li,
+  .auth-trust,
+  .auth-panel,
+  .auth-panel .btn-ma::after {
+    animation: none !important;
+  }
 }

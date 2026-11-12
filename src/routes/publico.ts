@@ -58,8 +58,18 @@ async function iniciarSessao(
 export function rotasPublicas(container: Container): Router {
   const router = Router();
 
+  router.get('/', (req, res) => {
+    // A entrada no sistema passa sempre pelo login; quem já tem sessão vai
+    // diretamente para o painel do seu perfil.
+    if (req.session.utilizador) {
+      res.redirect(destinoPorPerfil(req.session.utilizador.perfil));
+      return;
+    }
+    res.redirect('/login');
+  });
+
   router.get(
-    '/',
+    '/inicio',
     asyncHandler(async (_req, res) => {
       const [especialidades, medicos] = await Promise.all([
         container.especialidades.listar(),

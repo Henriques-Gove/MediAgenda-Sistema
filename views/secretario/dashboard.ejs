@@ -1,175 +1,202 @@
-<section class="page-header">
-  <div class="container">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-      <div>
-        <span class="badge badge-soft-primary mb-2">Área da secretaria</span>
-        <h1 class="h2 mb-1">Painel de atendimento</h1>
-        <p class="lead mb-0"><%= formatarDiaSemana(hoje) %></p>
+<section class="dashboard-page dashboard-secretario">
+  <div class="dashboard-bg"></div>
+
+  <div class="dashboard-shell">
+    <header class="dashboard-header">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+          <span class="badge badge-soft-primary mb-2">Área da Secretaria</span>
+          <h1 class="h2 mb-1">Painel de atendimento</h1>
+          <p class="lead mb-0"><%= formatarDiaSemana(hoje) %></p>
+        </div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-ma" href="/secretario/pacientes"><i class="bi bi-person-plus me-1"></i> Paciente</a>
+          <a class="btn btn-ma" href="/secretario/agendas"><i class="bi bi-calendar2-plus me-1"></i> Marcar consulta</a>
+        </div>
       </div>
-      <div class="d-flex gap-2">
-        <a class="btn btn-outline-ma" href="/secretario/pacientes"><i class="bi bi-person-plus me-1"></i> Paciente</a>
-        <a class="btn btn-ma" href="/secretario/agendas"><i class="bi bi-calendar2-plus me-1"></i> Marcar consulta</a>
+    </header>
+
+    <div class="dashboard-body container pb-5">
+      <!-- Estatísticas rápidas -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="d-flex align-items-center gap-3">
+              <span class="stat-icon stat-icon-hoje"><i class="bi bi-calendar-day"></i></span>
+              <div>
+                <div class="stat-value"><%= consultasHoje.length %></div>
+                <div class="stat-label">Consultas hoje</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="d-flex align-items-center gap-3">
+              <span class="stat-icon stat-icon-pacientes"><i class="bi bi-people"></i></span>
+              <div>
+                <div class="stat-value"><%= pacientes.length %></div>
+                <div class="stat-label">Pacientes</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="d-flex align-items-center gap-3">
+              <span class="stat-icon stat-icon-medicos"><i class="bi bi-person-badge"></i></span>
+              <div>
+                <div class="stat-value"><%= medicos.length %></div>
+                <div class="stat-label">Médicos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="d-flex align-items-center gap-3">
+              <span class="stat-icon stat-icon-especialidades"><i class="bi bi-tags"></i></span>
+              <div>
+                <div class="stat-value"><%= especialidades.length %></div>
+                <div class="stat-label">Especialidades</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tiles de ação principal -->
+      <div class="dashboard-tiles row g-4 mb-4">
+        <div class="col-12 col-lg-6 col-xl-4">
+          <div class="tile tile-marcar" data-tile="marcar">
+            <div class="tile-front">
+              <div class="tile-icon"><i class="bi bi-calendar2-plus"></i></div>
+              <h3 class="tile-title">Marcar consulta</h3>
+              <p class="tile-subtitle">Agende consultas para qualquer paciente</p>
+              <span class="tile-badge">Agendamento</span>
+            </div>
+            <div class="tile-back">
+              <i class="bi bi-arrow-right-circle"></i>
+              <span>Marcar nova consulta</span>
+            </div>
+            <a class="tile-link" href="/secretario/agendas"></a>
+          </div>
+        </div>
+        <div class="col-12 col-lg-6 col-xl-4">
+          <div class="tile tile-pacientes" data-tile="pacientes">
+            <div class="tile-front">
+              <div class="tile-icon"><i class="bi bi-people"></i></div>
+              <h3 class="tile-title">Gestão de pacientes</h3>
+              <p class="tile-subtitle">Cadastre e edite pacientes da clínica</p>
+              <span class="tile-badge"><%= pacientes.length %> cadastrados</span>
+            </div>
+            <div class="tile-back">
+              <i class="bi bi-arrow-right-circle"></i>
+              <span>Ver lista de pacientes</span>
+            </div>
+            <a class="tile-link" href="/secretario/pacientes"></a>
+          </div>
+        </div>
+        <div class="col-12 col-lg-4 col-xl-4">
+          <div class="tile tile-lista-espera" data-tile="lista-espera">
+            <div class="tile-front">
+              <div class="tile-icon"><i class="bi bi-clock"></i></div>
+              <h3 class="tile-title">Lista de espera</h3>
+              <p class="tile-subtitle">Gerencie pacientes à espera de vaga</p>
+              <span class="tile-badge">Espera</span>
+            </div>
+            <div class="tile-back">
+              <i class="bi bi-arrow-right-circle"></i>
+              <span>Ver lista de espera</span>
+            </div>
+            <a class="tile-link" href="/secretario/lista-espera"></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agenda de hoje -->
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="card dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-calendar-day me-1"></i> Agenda de hoje</span>
+              <a class="small text-decoration-none" href="/secretario/agendas">Gerir agendas</a>
+            </div>
+            <div class="card-body p-0">
+              <% if (consultasHoje.length) { %>
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0">
+                    <thead>
+                      <tr>
+                        <th>Hora</th>
+                        <th>Paciente</th>
+                        <th>Médico</th>
+                        <th>Estado</th>
+                        <th class="text-end">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% consultasHoje.forEach(function (consulta) { %>
+                        <tr>
+                          <td class="small"><%= formatarHora(consulta.inicio) %></td>
+                          <td class="small fw-semibold"><%= consulta.paciente.utilizador.nome %></td>
+                          <td class="small"><%= consulta.medico.utilizador.nome %></td>
+                          <td><span class="badge badge-soft-<%= coresEstado[consulta.estado] %>"><%= rotulosEstado[consulta.estado] %></span></td>
+                          <td class="text-end small">
+                            <a class="btn btn-outline-primary btn-sm" href="/secretario/consultas/<%= consulta.id %>"><i class="bi bi-pencil me-1"></i></a>
+                          </td>
+                        </tr>
+                      <% }); %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } else { %>
+                <div class="empty-state py-5 text-center">
+                  <i class="bi bi-calendar-check display-4 text-muted mb-3"></i>
+                  <p class="fw-semibold mb-1">Sem consultas hoje</p>
+                  <p class="small mb-4">Use o agendamento para marcar novas consultas.</p>
+                  <a class="btn btn-ma" href="/secretario/agendas">Marcar consulta</a>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card dashboard-card mb-4">
+            <div class="card-header"><i class="bi bi-lightning-charge me-1"></i> Ações rápidas</div>
+            <div class="list-group list-group-flush">
+              <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="/secretario/pacientes">
+                <i class="bi bi-person-plus text-success"></i> Cadastrar paciente
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="/secretario/medicos">
+                <i class="bi bi-person-badge text-info"></i> Gestão de médicos
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="/secretario/lista-espera">
+                <i class="bi bi-clock text-warning"></i> Lista de espera
+              </a>
+              <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="/secretario/consultas">
+                <i class="bi bi-calendar text-secondary"></i> Todas as consultas
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="pb-5">
-  <div class="container">
-    <div class="row g-3 mb-4">
-      <div class="col-6 col-lg-3">
-        <div class="stat-card">
-          <div class="d-flex align-items-center gap-3">
-            <span class="stat-icon"><i class="bi bi-calendar-day"></i></span>
-            <div><div class="stat-value"><%= consultasHoje.length %></div><div class="stat-label">Hoje</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3">
-        <div class="stat-card">
-          <div class="d-flex align-items-center gap-3">
-            <span class="stat-icon"><i class="bi bi-people"></i></span>
-            <div><div class="stat-value"><%= pacientes.length %></div><div class="stat-label">Pacientes</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3">
-        <div class="stat-card">
-          <div class="d-flex align-items-center gap-3">
-            <span class="stat-icon"><i class="bi bi-person-badge"></i></span>
-            <div><div class="stat-value"><%= medicos.length %></div><div class="stat-label">Médicos</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="col-6 col-lg-3">
-        <div class="stat-card">
-          <div class="d-flex align-items-center gap-3">
-            <span class="stat-icon"><i class="bi bi-tags"></i></span>
-            <div><div class="stat-value"><%= especialidades.length %></div><div class="stat-label">Especialidades</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row g-4">
-      <div class="col-lg-7">
-        <div class="card mb-4">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-calendar-day me-1"></i> Agenda de hoje</span>
-            <a class="small text-decoration-none" href="/secretario/agendas">Gerir agendas</a>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead>
-                <tr><th>Hora</th><th>Paciente</th><th>Médico</th><th>Estado</th></tr>
-              </thead>
-              <tbody>
-                <% consultasHoje.forEach(function (consulta) { %>
-                  <tr>
-                    <td class="small fw-semibold text-success"><%= formatarHora(consulta.inicio) %></td>
-                    <td class="small">
-                      <div class="fw-semibold"><%= consulta.paciente.utilizador.nome %></div>
-                      <div class="text-muted"><%= consulta.especialidade ? consulta.especialidade.nome : 'Consulta geral' %></div>
-                    </td>
-                    <td class="small"><%= consulta.medico.utilizador.nome %></td>
-                    <td><span class="badge badge-soft-<%= coresEstado[consulta.estado] %>"><%= rotulosEstado[consulta.estado] %></span></td>
-                  </tr>
-                <% }); %>
-                <% if (!consultasHoje.length) { %>
-                  <tr><td colspan="4" class="text-center text-muted small py-4">Sem consultas marcadas para hoje.</td></tr>
-                <% } %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><i class="bi bi-clock-history me-1"></i> Marcações recentes</div>
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead>
-                <tr><th>Data</th><th>Paciente</th><th>Médico</th><th>Estado</th></tr>
-              </thead>
-              <tbody>
-                <% recentes.forEach(function (consulta) { %>
-                  <tr>
-                    <td class="small"><%= formatarData(consulta.inicio) %> <span class="text-muted"><%= formatarHora(consulta.inicio) %></span></td>
-                    <td class="small"><%= consulta.paciente.utilizador.nome %></td>
-                    <td class="small"><%= consulta.medico.utilizador.nome %></td>
-                    <td><span class="badge badge-soft-<%= coresEstado[consulta.estado] %>"><%= rotulosEstado[consulta.estado] %></span></td>
-                  </tr>
-                <% }); %>
-                <% if (!recentes.length) { %>
-                  <tr><td colspan="4" class="text-center text-muted small py-4">Ainda sem marcações.</td></tr>
-                <% } %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-5">
-        <div class="card mb-4">
-          <div class="card-header"><i class="bi bi-lightning-charge me-1"></i> Marcação rápida</div>
-          <div class="card-body p-4">
-            <form action="/secretario/marcar" method="post">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-              <div class="mb-3">
-                <label class="form-label" for="pacienteId">Paciente</label>
-                <select class="form-select" id="pacienteId" name="pacienteId" required>
-                  <option value="">Selecione o paciente</option>
-                  <% pacientes.forEach(function (paciente) { %>
-                    <option value="<%= paciente.id %>"><%= paciente.utilizador.nome %> (<%= paciente.telefone %>)</option>
-                  <% }); %>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label class="form-label" for="medicoId">Médico</label>
-                <select class="form-select" id="medicoId" name="medicoId" required>
-                  <option value="">Selecione o médico</option>
-                  <% medicos.forEach(function (medico) { %>
-                    <option value="<%= medico.id %>"><%= medico.utilizador.nome %> - <%= medico.especialidades.map(function (e) { return e.especialidade.nome; }).join(', ') %></option>
-                  <% }); %>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label class="form-label" for="especialidadeId">Especialidade (opcional)</label>
-                <select class="form-select" id="especialidadeId" name="especialidadeId">
-                  <option value="">Escolher automaticamente</option>
-                  <% especialidades.forEach(function (especialidade) { %>
-                    <option value="<%= especialidade.id %>"><%= especialidade.nome %></option>
-                  <% }); %>
-                </select>
-              </div>
-              <div class="row g-2 mb-3">
-                <div class="col-7">
-                  <label class="form-label" for="data">Data</label>
-                  <input class="form-control" id="data" name="data" type="date" min="<%= hoje %>" value="<%= hoje %>" required />
-                </div>
-                <div class="col-5">
-                  <label class="form-label" for="hora">Hora</label>
-                  <input class="form-control" id="hora" name="hora" type="time" required />
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label" for="motivo">Motivo (opcional)</label>
-                <input class="form-control" id="motivo" name="motivo" type="text" maxlength="180" placeholder="Ex.: primeira consulta" />
-              </div>
-              <button class="btn btn-ma w-100" type="submit"><i class="bi bi-calendar2-check me-1"></i> Marcar consulta</button>
-              <p class="small text-muted text-center mt-2 mb-0">A consulta fica pendente até confirmação do paciente.</p>
-            </form>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><i class="bi bi-info-circle me-1"></i> Apoio ao paciente</div>
-          <div class="card-body small text-muted">
-            <p class="mb-2"><i class="bi bi-check2 text-success me-1"></i>Pode criar contas de paciente com credenciais iniciais.</p>
-            <p class="mb-2"><i class="bi bi-check2 text-success me-1"></i>Consulte a agenda de cada médico antes de marcar.</p>
-            <p class="mb-0"><i class="bi bi-check2 text-success me-1"></i>Todas as ações ficam registadas na auditoria.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+<style>
+  .dashboard-secretario .dashboard-bg {
+    background:
+      radial-gradient(circle at 25% 35%, rgba(249, 115, 22, 0.18), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(251, 191, 36, 0.12), transparent 50%),
+      linear-gradient(135deg, #fffbeb 0%, #fef3c7 60%, #fde68a 100%);
+  }
+  .dashboard-secretario .stat-icon-hoje { background: #fef3c7; color: #d97706; }
+  .dashboard-secretario .stat-icon-pacientes { background: #dcfce7; color: #15803d; }
+  .dashboard-secretario .stat-icon-medicos { background: #dbeafe; color: #2563eb; }
+  .dashboard-secretario .stat-icon-especialidades { background: #fce7f3; color: #be185d; }
+  .dashboard-secretario .tile-icon { color: #d97706; background: #fef3c7; }
+  .dashboard-secretario .tile-back { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); }
+</style>

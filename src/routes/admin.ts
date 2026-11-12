@@ -295,6 +295,22 @@ export function rotasAdmin(container: Container): Router {
     }),
   );
 
+  router.post(
+    '/utilizadores/:id/promover',
+    asyncHandler(async (req, res) => {
+      const { perfil } = req.body;
+      const validos = ['PACIENTE', 'MEDICO', 'SECRETARIO', 'ADMINISTRADOR'];
+      if (!perfil || !validos.includes(perfil)) {
+        req.session.flash = { tipo: 'danger', mensagem: 'Perfil invalido.' };
+        res.redirect('/admin/utilizadores');
+        return;
+      }
+      await container.auth.definirPerfil(req.params.id, perfil as Perfil);
+      req.session.flash = { tipo: 'success', mensagem: 'Perfil do utilizador actualizado.' };
+      res.redirect('/admin/utilizadores');
+    }),
+  );
+
   router.get(
     '/relatorios',
     asyncHandler(async (req, res) => {

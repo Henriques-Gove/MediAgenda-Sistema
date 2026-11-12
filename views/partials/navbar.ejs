@@ -1,4 +1,4 @@
-<%
+﻿<%
   const caminhoNav = typeof caminho !== 'undefined' ? caminho : '/';
   const perfilNav = utilizador ? utilizador.perfil : null;
   const inicioPainel = !perfilNav
@@ -20,7 +20,7 @@
 <nav class="navbar navbar-expand-lg navbar-ma sticky-top">
   <% if (!utilizador) { %>
     <div class="container">
-      <a class="navbar-brand" href="/">
+      <a class="navbar-brand" href="/inicio">
         <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
         <span>MediAgenda</span>
       </a>
@@ -39,7 +39,7 @@
       <div class="collapse navbar-collapse" id="menuPrincipal">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
           <li class="nav-item">
-            <a class="nav-link <%= caminhoNav === '/' ? 'active' : '' %>" href="/"><%= t('nav.inicio') %></a>
+            <a class="nav-link <%= caminhoNav === '/inicio' ? 'active' : '' %>" href="/inicio"><%= t('nav.inicio') %></a>
           </li>
           <li class="nav-item">
             <a class="nav-link <%= caminhoNav.indexOf('/medicos') === 0 ? 'active' : '' %>" href="/medicos"><%= t('nav.medicos') %></a>
@@ -88,7 +88,7 @@
             <i class="bi bi-calendar2-plus"></i><span><%= t('nav.novaConsulta') %></span>
           </a>
         <% } %>
-        <a class="nav-link d-none d-lg-inline-flex align-items-center gap-1" href="/" title="<%= t('nav.sitePublico') %>">
+        <a class="nav-link d-none d-lg-inline-flex align-items-center gap-1" href="/inicio" title="<%= t('nav.sitePublico') %>">
           <i class="bi bi-globe2"></i><span class="d-none d-xl-inline"><%= t('nav.sitePublico') %></span>
         </a>
 
@@ -130,7 +130,7 @@
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="/">
+              <a class="dropdown-item" href="/inicio">
                 <i class="bi bi-house me-2"></i><%= t('nav.paginaInicial') %>
               </a>
             </li>

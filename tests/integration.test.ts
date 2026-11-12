@@ -145,8 +145,13 @@ afterAll(async () => {
 });
 
 describe('Integracao - paginas publicas e API', () => {
-  it('apresenta a pagina inicial', async () => {
-    const resposta = await request(app).get('/').expect(200);
+  it('redireciona a entrada para o login', async () => {
+    const resposta = await request(app).get('/').expect(302);
+    expect(resposta.headers.location).toBe('/login');
+  });
+
+  it('apresenta a pagina inicial publica', async () => {
+    const resposta = await request(app).get('/inicio').expect(200);
     expect(resposta.text).toContain('MediAgenda');
   });
 

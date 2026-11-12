@@ -92,6 +92,16 @@
                       <button class="btn btn-sm btn-outline-success" type="submit"><i class="bi bi-arrow-clockwise me-1"></i>Ativar</button>
                     </form>
                   <% } %>
+                  <form action="/admin/utilizadores/<%= conta.id %>/promover" method="post" class="d-inline">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <select class="form-select form-select-sm d-inline-block w-auto" name="perfil" style="width:auto;">
+                      <% const perfisDisponiveis = conta.perfil === 'ADMINISTRADOR' ? [] : ['PACIENTE', 'MEDICO', 'SECRETARIO', 'ADMINISTRADOR'].filter(p => p !== conta.perfil); %>
+                      <% perfisDisponiveis.forEach(function (p) { %>
+                        <option value="<%= p %>" <%= conta.perfil === p ? 'selected' : '' %>><%= rotulosPerfil[p] || p %></option>
+                      <% }); %>
+                    </select>
+                    <button class="btn btn-sm btn-outline-ma" type="submit"><i class="bi bi-arrow-up-circle me-1"></i></button>
+                  </form>
                 </td>
               </tr>
             <% }); %>

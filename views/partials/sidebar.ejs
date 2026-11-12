@@ -1,4 +1,4 @@
-<%
+﻿<%
   const perfilAtual = utilizador.perfil;
   const caminhoAtual = typeof caminho !== 'undefined' ? caminho : '';
   const rotulosPerfil = {
@@ -140,6 +140,6 @@
 </nav>
 
 <div class="sidebar-foot">
-  <a class="sidebar-link" href="/"><i class="bi bi-house"></i><span><%= t('nav.paginaInicial') %></span></a>
+  <a class="sidebar-link" href="/inicio"><i class="bi bi-house"></i><span><%= t('nav.paginaInicial') %></span></a>
   <a class="sidebar-link text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i><span><%= t('nav.terminarSessao') %></span></a>
 </div>

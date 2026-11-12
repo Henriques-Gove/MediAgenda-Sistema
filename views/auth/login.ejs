@@ -1,4 +1,16 @@
-<section class="auth-page">
+﻿<section class="auth-page">
+  <div class="auth-bg-video">
+    <!-- Coloque aqui o vídeo de fundo do login (ex.: clínica, médicos a trabalhar): -->
+    <!-- <video loop muted playsinline autoplay poster="/img/auth-login-poster.jpg">
+      <source src="/videos/auth-login.mp4" type="video/mp4" />
+    </video> -->
+    <div class="auth-bg-gradient"></div>
+    <span class="auth-particle" style="width: 4rem; height: 4rem; top: 10%; left: 8%; animation-delay: 0s;"></span>
+    <span class="auth-particle" style="width: 2.5rem; height: 2.5rem; top: 42%; left: 88%; animation-delay: -3s;"></span>
+    <span class="auth-particle" style="width: 3.5rem; height: 3.5rem; top: 78%; left: 12%; animation-delay: -6s;"></span>
+    <span class="auth-particle" style="width: 2rem; height: 2rem; top: 22%; left: 55%; animation-delay: -9s;"></span>
+  </div>
+
   <div class="auth-frame">
     <%- include('../partials/auth-brand', {
       authBadge: 'Agendamento online 24/7',
@@ -7,7 +19,7 @@
     }) %>
 
     <div class="auth-panel">
-      <a class="auth-mobile-brand d-lg-none" href="/">
+      <a class="auth-mobile-brand d-lg-none" href="/inicio">
         <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
         <span>MediAgenda</span>
       </a>
@@ -67,24 +79,11 @@
         </button>
       </form>
 
-      <div class="auth-demo">
-        <div class="auth-demo-title">
-          <i class="bi bi-info-circle"></i>
-          <span>Contas de demonstração</span>
-        </div>
-        <div class="demo-chips">
-          <button type="button" class="demo-chip" data-demo-email="paciente@mediagenda.co.mz" data-demo-password="Medi@2026">Paciente</button>
-          <button type="button" class="demo-chip" data-demo-email="medico@mediagenda.co.mz" data-demo-password="Medi@2026">Médico</button>
-          <button type="button" class="demo-chip" data-demo-email="secretaria@mediagenda.co.mz" data-demo-password="Medi@2026">Secretaria</button>
-          <button type="button" class="demo-chip" data-demo-email="admin@mediagenda.co.mz" data-demo-password="Medi@2026">Administrador</button>
-        </div>
-        <div class="auth-demo-hint">Clique num perfil para preencher as credenciais. Senha comum: <span class="mono">Medi@2026</span></div>
-      </div>
-
       <p class="auth-switch">
-        Ainda não tem conta? <a href="/registo">Criar conta</a>
+        Ainda não tem conta? <a href="/registo">Criar conta de paciente</a>
       </p>
-      <a class="auth-back" href="/"><i class="bi bi-arrow-left"></i>Voltar ao site</a>
+      <a class="auth-back" href="/inicio"><i class="bi bi-arrow-left"></i>Voltar ao site</a>
     </div>
+  </div>
   </div>
 </section>
