@@ -3,154 +3,121 @@
 
   <div class="dashboard-shell">
     <header class="dashboard-header">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-        <div>
-          <span class="badge badge-soft-primary mb-2">Área do Paciente</span>
-          <h1 class="h2 mb-1">Olá, <%= paciente.utilizador.nome.split(' ')[0] %>!</h1>
-          <p class="lead mb-0">Marque, confirme e acompanhe as suas consultas.</p>
+      <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+          <div>
+            <span class="dashboard-eyebrow"><i class="bi bi-heart-pulse"></i> Área do paciente</span>
+            <h1>Olá, <%= paciente.utilizador.nome.split(' ')[0] %></h1>
+            <p class="dashboard-lead">Marque, confirme e acompanhe as suas consultas.</p>
+          </div>
+          <a class="btn btn-ma" href="/medicos"><i class="bi bi-calendar2-plus me-1"></i> Marcar consulta</a>
         </div>
-        <a class="btn btn-ma" href="/medicos"><i class="bi bi-calendar2-plus me-1"></i> Marcar nova consulta</a>
       </div>
     </header>
 
-    <div class="dashboard-body container pb-5">
-      <!-- Estatísticas rápidas -->
-      <div class="row g-3 mb-4">
+    <div class="container pb-5">
+      <div class="row g-2 g-md-3 mb-4">
         <div class="col-6 col-lg-3">
           <div class="stat-card">
-            <div class="d-flex align-items-center gap-3">
-              <span class="stat-icon stat-icon-proximas"><i class="bi bi-calendar2-week"></i></span>
-              <div>
-                <div class="stat-value"><%= estatisticas.proximas %></div>
-                <div class="stat-label">Próximas</div>
-              </div>
+            <span class="stat-icon stat-icon-proximas"><i class="bi bi-calendar2-week"></i></span>
+            <div>
+              <div class="stat-value"><%= estatisticas.proximas %></div>
+              <div class="stat-label">Próximas</div>
             </div>
           </div>
         </div>
         <div class="col-6 col-lg-3">
           <div class="stat-card">
-            <div class="d-flex align-items-center gap-3">
-              <span class="stat-icon stat-icon-realizadas"><i class="bi bi-check2-circle"></i></span>
-              <div>
-                <div class="stat-value"><%= estatisticas.realizadas %></div>
-                <div class="stat-label">Realizadas</div>
-              </div>
+            <span class="stat-icon stat-icon-realizadas"><i class="bi bi-check2-circle"></i></span>
+            <div>
+              <div class="stat-value"><%= estatisticas.realizadas %></div>
+              <div class="stat-label">Realizadas</div>
             </div>
           </div>
         </div>
         <div class="col-6 col-lg-3">
           <div class="stat-card">
-            <div class="d-flex align-items-center gap-3">
-              <span class="stat-icon stat-icon-canceladas"><i class="bi bi-x-circle"></i></span>
-              <div>
-                <div class="stat-value"><%= estatisticas.canceladas %></div>
-                <div class="stat-label">Canceladas</div>
-              </div>
+            <span class="stat-icon stat-icon-canceladas"><i class="bi bi-x-circle"></i></span>
+            <div>
+              <div class="stat-value"><%= estatisticas.canceladas %></div>
+              <div class="stat-label">Canceladas</div>
             </div>
           </div>
         </div>
         <div class="col-6 col-lg-3">
           <div class="stat-card">
-            <div class="d-flex align-items-center gap-3">
-              <span class="stat-icon stat-icon-tardias"><i class="bi bi-clock-history"></i></span>
-              <div>
-                <div class="stat-value"><%= estatisticas.tardias %></div>
-                <div class="stat-label">Tardias</div>
-              </div>
+            <span class="stat-icon stat-icon-tardias"><i class="bi bi-clock-history"></i></span>
+            <div>
+              <div class="stat-value"><%= estatisticas.tardias %></div>
+              <div class="stat-label">Tardias</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Tiles de ação principal -->
-      <div class="dashboard-tiles row g-4 mb-4">
-        <div class="col-12 col-lg-6 col-xl-4">
-          <div class="tile tile-marcar" data-tile="marcar">
-            <div class="tile-front">
-              <div class="tile-icon"><i class="bi bi-calendar2-plus"></i></div>
-              <h3 class="tile-title">Marcar consulta</h3>
-              <p class="tile-subtitle">Escolha médico, especialidade e horário</p>
-              <span class="tile-badge">Nova marcação</span>
-            </div>
-            <div class="tile-back">
-              <i class="bi bi-arrow-right-circle"></i>
-              <span>Avançar para a marcação</span>
-            </div>
-            <a class="tile-link" href="/medicos"></a>
-          </div>
-        </div>
-        <div class="col-12 col-lg-6 col-xl-4">
-          <div class="tile tile-consultas" data-tile="consultas">
-            <div class="tile-front">
-              <div class="tile-icon"><i class="bi bi-calendar2-event"></i></div>
-              <h3 class="tile-title">Minhas consultas</h3>
-              <p class="tile-subtitle">Histórico e estado de todas as consultas</p>
-              <span class="tile-badge"><%= proximas.length %> pendentes</span>
-            </div>
-            <div class="tile-back">
-              <i class="bi bi-arrow-right-circle"></i>
-              <span>Ver histórico completo</span>
-            </div>
-            <a class="tile-link" href="/paciente/consultas"></a>
-          </div>
-        </div>
-        <div class="col-12 col-lg-4 col-xl-4">
-          <div class="tile tile-avaliar" data-tile="avaliar">
-            <div class="tile-front">
-              <div class="tile-icon"><i class="bi bi-star"></i></div>
-              <h3 class="tile-title">Avaliar consulta</h3>
-              <p class="tile-subtitle">Dê a sua opinião após a consulta</p>
-              <span class="tile-badge">Avaliação</span>
-            </div>
-            <div class="tile-back">
-              <i class="bi bi-arrow-right-circle"></i>
-              <span>Deixar a sua avaliação</span>
-            </div>
-            <a class="tile-link" href="/paciente/consultas?estado=REALIZADA"></a>
-          </div>
-        </div>
+      <h2 class="dashboard-section-title">O que quer fazer?</h2>
+      <div class="tile-grid mb-4">
+        <a class="tile" href="/medicos">
+          <span class="tile-icon"><i class="bi bi-calendar2-plus"></i></span>
+          <h3 class="tile-title">Marcar consulta</h3>
+          <p class="tile-meta">Escolher médico e horário</p>
+          <i class="bi bi-arrow-right tile-arrow"></i>
+        </a>
+        <a class="tile" href="/paciente/consultas">
+          <span class="tile-icon"><i class="bi bi-calendar2-event"></i></span>
+          <h3 class="tile-title">Minhas consultas</h3>
+          <p class="tile-meta"><%= proximas.length %> por confirmar</p>
+          <i class="bi bi-arrow-right tile-arrow"></i>
+        </a>
+        <a class="tile" href="/paciente/consultas?estado=REALIZADA">
+          <span class="tile-icon"><i class="bi bi-star"></i></span>
+          <h3 class="tile-title">Avaliar consulta</h3>
+          <p class="tile-meta">Deixar a sua opinião</p>
+          <i class="bi bi-arrow-right tile-arrow"></i>
+        </a>
+        <a class="tile" href="/paciente/lista-espera">
+          <span class="tile-icon"><i class="bi bi-hourglass-split"></i></span>
+          <h3 class="tile-title">Lista de espera</h3>
+          <p class="tile-meta">Ser avisado de vagas</p>
+          <i class="bi bi-arrow-right tile-arrow"></i>
+        </a>
       </div>
 
-      <!-- Próximas consultas em destaque -->
-      <div class="row g-4">
+      <div class="row g-3 g-lg-4">
         <div class="col-lg-8">
-          <div class="card dashboard-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="dashboard-card">
+            <div class="card-header">
               <span><i class="bi bi-calendar2-event me-1"></i> Próximas consultas</span>
               <a class="small text-decoration-none" href="/paciente/consultas">Ver todas</a>
             </div>
             <div class="card-body p-0">
               <% if (proximas.length) { %>
                 <% proximas.forEach(function (consulta) { %>
-                  <div class="d-flex flex-column flex-md-row gap-3 py-3 border-bottom">
-                    <div class="text-center bg-light rounded-3 px-3 py-2 align-self-start" style="min-width: 5rem">
-                      <div class="small text-muted text-uppercase"><%= formatarData(consulta.inicio).slice(3, 5) %>/<%= formatarData(consulta.inicio).slice(6, 10) %></div>
-                      <div class="fw-bold fs-5"><%= formatarData(consulta.inicio).slice(0, 2) %></div>
-                      <div class="small fw-semibold text-success"><%= formatarHora(consulta.inicio) %></div>
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="d-flex justify-content-between flex-wrap gap-2">
-                        <div>
-                          <div class="fw-semibold"><%= consulta.medico.utilizador.nome %></div>
-                          <div class="small text-muted">
-                            <i class="bi bi-tags me-1"></i><%= consulta.especialidade ? consulta.especialidade.nome : 'Consulta geral' %>
-                            &middot; <i class="bi bi-geo-alt me-1"></i><%= consulta.medico.localizacao %>
-                          </div>
-                        </div>
-                        <span class="badge badge-soft-<%= coresEstado[consulta.estado] %> align-self-start"><%= rotulosEstado[consulta.estado] %></span>
+                  <div class="p-3 border-bottom">
+                    <div class="d-flex gap-3">
+                      <div class="text-center bg-light rounded-3 px-2 py-1 align-self-start" style="min-width: 4.5rem">
+                        <div class="small text-muted"><%= formatarData(consulta.inicio).slice(0, 5) %></div>
+                        <div class="small fw-semibold text-success"><%= formatarHora(consulta.inicio) %></div>
                       </div>
-                      <% if (consulta.motivo) { %>
-                        <div class="small text-muted mt-1"><i class="bi bi-chat-left-text me-1"></i><%= consulta.motivo %></div>
-                      <% } %>
-                      <div class="d-flex flex-wrap gap-2 mt-2">
-                        <% if (consulta.estado === 'PENDENTE' && consulta.confirmacaoToken) { %>
-                          <a class="btn btn-success btn-sm" href="/confirmar/<%= consulta.confirmacaoToken %>">
-                            <i class="bi bi-check2 me-1"></i>Confirmar
-                          </a>
-                        <% } %>
-                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelar<%= consulta.id %>">
-                          <i class="bi bi-x-circle me-1"></i>Cancelar
-                        </button>
+                      <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between flex-wrap gap-1">
+                          <div class="fw-semibold small"><%= consulta.medico.utilizador.nome %></div>
+                          <span class="badge badge-soft-<%= coresEstado[consulta.estado] %>"><%= rotulosEstado[consulta.estado] %></span>
+                        </div>
+                        <div class="small text-muted">
+                          <%= consulta.especialidade ? consulta.especialidade.nome : 'Consulta geral' %>
+                          &middot; <%= consulta.medico.localizacao %>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                          <% if (consulta.estado === 'PENDENTE' && consulta.confirmacaoToken) { %>
+                            <a class="btn btn-success btn-sm" href="/confirmar/<%= consulta.confirmacaoToken %>">
+                              <i class="bi bi-check2 me-1"></i>Confirmar
+                            </a>
+                          <% } %>
+                          <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelar<%= consulta.id %>">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -158,37 +125,32 @@
                   <div class="modal fade" id="cancelar<%= consulta.id %>" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                       <form class="modal-content" action="/paciente/consultas/<%= consulta.id %>/cancelar" method="post">
-              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                         <div class="modal-header">
                           <h5 class="modal-title">Cancelar consulta</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                         </div>
                         <div class="modal-body">
                           <p class="small text-muted">
-                            Consulta com <strong><%= consulta.medico.utilizador.nome %></strong> em
-                            <strong><%= formatarDataHora(consulta.inicio) %></strong>.
+                            <%= consulta.medico.utilizador.nome %> &middot; <%= formatarDataHora(consulta.inicio) %>
                           </p>
-                          <label class="form-label" for="motivo<%= consulta.id %>">Motivo do cancelamento</label>
+                          <label class="form-label" for="motivo<%= consulta.id %>">Motivo</label>
                           <textarea class="form-control" id="motivo<%= consulta.id %>" name="motivo" rows="2" minlength="3" required placeholder="Indique o motivo"></textarea>
-                          <div class="alert alert-warning small mt-3 mb-0">
-                            <i class="bi bi-exclamation-triangle me-1"></i>
-                            Cancelamentos com menos de 24 horas de antecedência são registados como tardios.
-                          </div>
+                          <p class="form-text mb-0">Cancelamentos com menos de 24 horas ficam registados como tardios.</p>
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-light" data-bs-dismiss="modal">Voltar</button>
-                          <button type="submit" class="btn btn-danger">Confirmar cancelamento</button>
+                          <button type="submit" class="btn btn-danger">Cancelar consulta</button>
                         </div>
                       </form>
                     </div>
                   </div>
                 <% }); %>
               <% } else { %>
-                <div class="empty-state py-5 text-center">
-                  <i class="bi bi-calendar-check display-4 text-muted mb-3"></i>
-                  <p class="fw-semibold mb-1">Sem consultas futuras</p>
-                  <p class="small mb-4">Marque a sua próxima consulta com um dos nossos médicos.</p>
-                  <a class="btn btn-ma" href="/medicos">Encontrar médico</a>
+                <div class="dashboard-empty">
+                  <i class="bi bi-calendar-check"></i>
+                  <p>Não tem consultas marcadas.</p>
+                  <a class="btn btn-ma btn-sm" href="/medicos">Encontrar médico</a>
                 </div>
               <% } %>
             </div>
@@ -196,30 +158,11 @@
         </div>
 
         <div class="col-lg-4">
-          <div class="card dashboard-card mb-4">
-            <div class="card-header"><i class="bi bi-lightning-charge me-1"></i> Ações rápidas</div>
-            <div class="list-group list-group-flush">
-              <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="/medicos">
-                <i class="bi bi-search text-success"></i> Pesquisar médicos
-              </a>
-              <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="/paciente/consultas?estado=PENDENTE">
-                <i class="bi bi-hourglass-split text-warning"></i> Consultas por confirmar
-              </a>
-              <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="/paciente/lista-espera">
-                <i class="bi bi-clock text-info"></i> Lista de espera
-              </a>
-              <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="/paciente/perfil">
-                <i class="bi bi-person-gear text-secondary"></i> Atualizar perfil
-              </a>
-            </div>
-          </div>
-
-          <div class="card dashboard-card">
-            <div class="card-header"><i class="bi bi-bell me-1"></i> Lembretes automáticos</div>
+          <div class="dashboard-card">
+            <div class="card-header"><span><i class="bi bi-bell me-1"></i> Lembretes</span></div>
             <div class="card-body">
-              <p class="small text-muted mb-0">
-                Receberá lembretes 24 horas e 1 hora antes de cada consulta, no canal que escolheu no seu perfil.
-              </p>
+              <p class="small text-muted mb-2">Recebe um aviso 24 horas e 1 hora antes de cada consulta.</p>
+              <a class="small text-decoration-none" href="/paciente/perfil">Alterar forma de contacto</a>
             </div>
           </div>
         </div>
@@ -227,74 +170,3 @@
     </div>
   </div>
 </section>
-
-<style>
-  .dashboard-page { position: relative; overflow-x: hidden; min-height: 100vh; }
-  .dashboard-bg {
-    position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background:
-      radial-gradient(circle at 20% 30%, rgba(15, 118, 110, 0.25), transparent 45%),
-      radial-gradient(circle at 80% 75%, rgba(94, 234, 212, 0.18), transparent 50%),
-      linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    background-attachment: fixed;
-  }
-  .dashboard-paciente .dashboard-bg {
-    background:
-      radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.22), transparent 45%),
-      radial-gradient(circle at 80% 75%, rgba(74, 222, 128, 0.15), transparent 50%),
-      linear-gradient(135deg, #ecfdf5 0%, #d1fae5 60%, #86efac 100%);
-  }
-
-  .dashboard-shell { position: relative; z-index: 2; }
-  .dashboard-header {
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(15, 118, 110, 0.12);
-    padding: 1.4rem 0;
-  }
-  .dashboard-body { background: transparent; }
-
-  .stat-card {
-    height: 100%; border-radius: 1rem; background: #ffffff;
-    border: 1px solid var(--ma-border); box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.12);
-  }
-  .stat-icon { width: 3.2rem; height: 3.2rem; border-radius: 0.9rem; display: grid; place-items: center; font-size: 1.35rem; }
-  .stat-icon-proximas { background: #dcfce7; color: #15803d; }
-  .stat-icon-realizadas { background: #dbeafe; color: #2563eb; }
-  .stat-icon-canceladas { background: #fee2e2; color: #dc2626; }
-  .stat-icon-tardias { background: #fef3c7; color: #d97706; }
-  .stat-value { font-size: 1.75rem; font-weight: 800; color: #0f172a; }
-  .stat-label { font-size: 0.78rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
-
-  /* Tiles de ação */
-  .dashboard-tiles .tile {
-    position: relative; height: 100%; border-radius: 1.25rem; overflow: hidden;
-    background: #ffffff; border: 1px solid var(--ma-border);
-    box-shadow: 0 18px 40px -24px rgba(15, 23, 42, 0.14);
-    cursor: pointer; transition: transform 0.35s ease, box-shadow 0.35s ease;
-  }
-  .dashboard-tiles .tile:hover { transform: translateY(-6px); box-shadow: 0 28px 50px -28px rgba(15, 23, 42, 0.2); }
-  .tile-front { padding: 1.9rem 1.6rem; position: relative; z-index: 2; }
-  .tile-icon { width: 3rem; height: 3rem; border-radius: 0.9rem; background: #e2e8f0; color: #0f766e; display: grid; place-items: center; font-size: 1.4rem; margin-bottom: 0.9rem; }
-  .tile-title { font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 0.35rem; line-height: 1.25; }
-  .tile-subtitle { font-size: 0.82rem; color: #64748b; margin-bottom: 0.9rem; line-height: 1.4; }
-  .tile-badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.7rem; border-radius: 999px; background: #dcfce7; color: #14532d; font-size: 0.7rem; font-weight: 700; }
-  .tile-back {
-    position: absolute; inset: 0; z-index: 1; background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
-    color: #fff; display: grid; place-items: center; text-align: center;
-    transform: translateY(100%); transition: transform 0.4s ease;
-  }
-  .tile:hover .tile-back { transform: translateY(0); }
-  .tile-back i { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
-  .tile-back span { font-weight: 600; font-size: 0.95rem; }
-  .tile-link { position: absolute; inset: 0; z-index: 3; }
-
-  .dashboard-card { border: 1px solid var(--ma-border); border-radius: 1rem; overflow: hidden; box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.1); }
-  .dashboard-card .card-header { background: #ffffff; border-bottom: 1px solid var(--ma-border); font-weight: 700; }
-  .empty-state i { opacity: 0.45; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .dashboard-bg { animation: none; }
-    .tile { transition: none; }
-  }
-</style>

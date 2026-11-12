@@ -3,12 +3,13 @@
  * autenticadas nunca são guardadas em cache, para evitar que dados clínicos
  * fiquem acessíveis num dispositivo partilhado.
  */
-const VERSAO = 'mediagenda-v1';
+const VERSAO = 'mediagenda-v2';
 const CACHE_ESTATICOS = `${VERSAO}-estaticos`;
 const CACHE_PAGINAS = `${VERSAO}-paginas`;
 
 const ASSETS = [
   '/css/styles.css',
+  '/css/dashboard.css',
   '/vendor/bootstrap/bootstrap.min.css',
   '/vendor/bootstrap/bootstrap.bundle.min.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css',
