@@ -22,6 +22,30 @@ test.describe('site público', () => {
     await verificarAcessibilidade(page, 'entrada');
   });
 
+  test('registo público permite entrar imediatamente após criar a conta', async ({ page }) => {
+    const email = `e2e.registo.${Date.now()}@exemplo.co.mz`;
+
+    await page.goto('/registo');
+    await page.locator('#nome').fill('Paciente Registo E2E');
+    await page.locator('#email').fill(email);
+    await page.locator('#telefone').fill('+258840000123');
+    await page.locator('#password').fill('Teste@2026');
+    await page.locator('#dataNascimento').fill('1992-04-18');
+    await page.locator('#endereco').fill('Av. de Teste 42, Maputo');
+    await page.locator('#aceiteTermos').check();
+    await page.getByRole('button', { name: /criar conta/i }).click();
+
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.locator('.alert-success')).toContainText(/já pode iniciar sessão/i);
+
+    await page.locator('#email').fill(email);
+    await page.locator('#password').fill('Teste@2026');
+    await page.getByRole('button', { name: /entrar/i }).click();
+
+    await expect(page).toHaveURL(/\/paciente\/dashboard$/);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/Paciente/i);
+  });
+
   test('modo escuro aplica-se e persiste entre páginas', async ({ page }) => {
     await page.goto('/inicio');
 

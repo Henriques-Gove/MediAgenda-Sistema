@@ -12,6 +12,7 @@ import {
 } from '../lib/date';
 import { enviarCsv, enviarPdf, gerarCsv, gerarPdf } from '../lib/exportacao';
 import { paginacaoDaQuery } from '../lib/pagination';
+import { eventBus } from '../events/EventBus';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { exigirPerfil } from '../middleware/auth';
 import { validarEsquema, esquemaCriarUtilizador } from '../validation';
@@ -52,6 +53,28 @@ export function rotasAdmin(container: Container): Router {
       });
     }),
   );
+
+  router.get(
+    '/sistema',
+    asyncHandler(async (_req, res) => {
+      const desde = new Date(Date.now() - 30 * 86_400_000);
+      const resumo = await container.relatorios.resumo(desde, new Date());
+
+      res.render('admin/sistema', {
+        titulo: 'Sistema em direto',
+        resumo,
+        eventos: eventBus.historico(25),
+        consumidores: eventBus.observadoresDe('*').map((observador) => observador.nome),
+      });
+    }),
+  );
+
+  router.get('/sistema/eventos.json', (_req, res) => {
+    res.json({
+      geradoEm: new Date().toISOString(),
+      eventos: eventBus.historico(25),
+    });
+  });
 
   router.get(
     '/especialidades',

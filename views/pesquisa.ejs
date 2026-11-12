@@ -1,0 +1,179 @@
+<section class="page-header">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <span class="badge badge-soft-primary mb-2"><i class="bi bi-search me-1"></i> Pesquisa</span>
+        <h1 class="display-6 mb-2">Encontre tudo num só lugar.</h1>
+        <p class="lead mb-0">
+          Procure médicos, especialidades, pacientes e páginas do sistema.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <form class="pesquisa-form" action="/pesquisa" method="get" role="search">
+          <label class="visually-hidden" for="q">Pesquisar no MediAgenda</label>
+          <div class="input-group input-group-lg shadow-sm">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input
+              class="form-control border-start-0"
+              id="q"
+              name="q"
+              type="search"
+              value="<%= termo %>"
+              placeholder="Nome, especialidade ou página"
+              autocomplete="off"
+              autofocus
+            />
+            <button class="btn btn-ma px-4" type="submit">Pesquisar</button>
+          </div>
+          <div class="form-text mt-2">
+            Exemplos: <a href="/pesquisa?q=Cardiologia">Cardiologia</a>,
+            <a href="/pesquisa?q=consultas">consultas</a>,
+            <a href="/pesquisa?q=Ana">Ana</a>.
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <% if (termo) { %>
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+        <p class="text-muted mb-0">
+          <strong><%= totalResultados %></strong>
+          <%= totalResultados === 1 ? 'resultado' : 'resultados' %> para
+          &ldquo;<span class="fw-semibold text-dark"><%= termo %></span>&rdquo;
+        </p>
+        <a class="btn btn-outline-ma btn-sm" href="/pesquisa">
+          <i class="bi bi-x-circle me-1"></i>Limpar pesquisa
+        </a>
+      </div>
+    <% } else { %>
+      <div class="alert alert-light border d-flex align-items-start gap-2 mb-4">
+        <i class="bi bi-lightbulb text-warning fs-5"></i>
+        <div>
+          <div class="fw-semibold">O que procura?</div>
+          <div class="small text-muted mb-0">
+            Escreva um nome, uma especialidade ou uma página. Os resultados aparecem à medida que pesquisa.
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (atalhos.length) { %>
+      <div class="pesquisa-secao">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="pesquisa-secao-icone"><i class="bi bi-compass"></i></span>
+          <h2 class="h5 fw-bold mb-0">Páginas e ações</h2>
+        </div>
+        <div class="pesquisa-atalhos">
+          <% atalhos.forEach(function (atalho) { %>
+            <a class="pesquisa-atalho" href="<%= atalho.href %>">
+              <span class="pesquisa-atalho-icone"><i class="bi <%= atalho.icone %>"></i></span>
+              <span class="min-w-0">
+                <span class="d-block fw-semibold small text-truncate"><%= atalho.titulo %></span>
+                <span class="d-block text-muted text-truncate" style="font-size: 0.76rem"><%= atalho.descricao %></span>
+              </span>
+              <i class="bi bi-arrow-right ms-auto text-muted"></i>
+            </a>
+          <% }); %>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (medicos.length) { %>
+      <div class="pesquisa-secao">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="pesquisa-secao-icone"><i class="bi bi-person-badge"></i></span>
+          <h2 class="h5 fw-bold mb-0">Médicos</h2>
+          <span class="badge badge-soft-secondary"><%= medicos.length %></span>
+        </div>
+        <div class="row g-3">
+          <% medicos.forEach(function (medico) { %>
+            <div class="col-md-6 col-xl-4">
+              <a class="pesquisa-resultado h-100" href="/medicos/<%= medico.id %>">
+                <span class="avatar"><%= medico.utilizador.nome.replace('Dr. ', '').replace('Dra. ', '').charAt(0) %></span>
+                <span class="flex-grow-1 min-w-0">
+                  <span class="d-block fw-semibold"><%= medico.utilizador.nome %></span>
+                  <span class="d-block small text-muted text-truncate">
+                    <%= medico.especialidades.map(function (vinculo) { return vinculo.especialidade.nome; }).join(' · ') || 'Consulta geral' %>
+                  </span>
+                  <span class="d-block small text-muted">
+                    <i class="bi bi-geo-alt me-1"></i><%= medico.localizacao %>
+                  </span>
+                </span>
+                <i class="bi bi-chevron-right text-muted"></i>
+              </a>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (especialidades.length) { %>
+      <div class="pesquisa-secao">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="pesquisa-secao-icone"><i class="bi bi-tags"></i></span>
+          <h2 class="h5 fw-bold mb-0">Especialidades</h2>
+          <span class="badge badge-soft-secondary"><%= especialidades.length %></span>
+        </div>
+        <div class="row g-3">
+          <% especialidades.forEach(function (especialidade) { %>
+            <div class="col-sm-6 col-xl-4">
+              <a class="pesquisa-resultado h-100" href="/medicos?especialidade=<%= especialidade.id %>">
+                <span class="pesquisa-atalho-icone"><i class="bi bi-heart-pulse"></i></span>
+                <span class="flex-grow-1 min-w-0">
+                  <span class="d-block fw-semibold"><%= especialidade.nome %></span>
+                  <span class="d-block small text-muted text-truncate">
+                    <%= especialidade._count.medicos %> médico(s) disponível(is)
+                  </span>
+                </span>
+                <i class="bi bi-chevron-right text-muted"></i>
+              </a>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (pacientes.length) { %>
+      <div class="pesquisa-secao">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="pesquisa-secao-icone"><i class="bi bi-people"></i></span>
+          <h2 class="h5 fw-bold mb-0">Pacientes</h2>
+          <span class="badge badge-soft-secondary"><%= pacientes.length %></span>
+        </div>
+        <div class="row g-3">
+          <% pacientes.forEach(function (paciente) { %>
+            <% const hrefPaciente = perfil === 'ADMINISTRADOR'
+              ? '/admin/utilizadores?busca=' + encodeURIComponent(paciente.utilizador.email)
+              : '/secretario/pacientes?busca=' + encodeURIComponent(paciente.utilizador.email); %>
+            <div class="col-md-6 col-xl-4">
+              <a class="pesquisa-resultado h-100" href="<%= hrefPaciente %>">
+                <span class="avatar"><%= paciente.utilizador.nome.charAt(0).toUpperCase() %></span>
+                <span class="flex-grow-1 min-w-0">
+                  <span class="d-block fw-semibold"><%= paciente.utilizador.nome %></span>
+                  <span class="d-block small text-muted text-truncate"><%= paciente.utilizador.email %></span>
+                  <span class="d-block small text-muted"><%= paciente.telefone || 'Sem telefone' %></span>
+                </span>
+                <i class="bi bi-chevron-right text-muted"></i>
+              </a>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (termo && totalResultados === 0) { %>
+      <div class="card pesquisa-vazio">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-search"></i>
+          <h2 class="h5 fw-bold mt-3">Sem resultados para &ldquo;<%= termo %>&rdquo;</h2>
+          <p class="text-muted mb-3">Tente um nome mais curto, uma especialidade ou uma página do sistema.</p>
+          <a class="btn btn-ma" href="/medicos"><i class="bi bi-person-badge me-1"></i>Ver médicos</a>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</section>

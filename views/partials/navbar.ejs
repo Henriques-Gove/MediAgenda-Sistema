@@ -88,6 +88,14 @@
             <i class="bi bi-calendar2-plus"></i><span><%= t('nav.novaConsulta') %></span>
           </a>
         <% } %>
+        <form class="pesquisa-navbar d-none d-lg-flex" action="/pesquisa" method="get" role="search">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <label class="visually-hidden" for="pesquisaGlobal">Pesquisar no MediAgenda</label>
+          <input id="pesquisaGlobal" name="q" type="search" placeholder="Pesquisar" autocomplete="off" />
+        </form>
+        <a class="btn-icon d-lg-none" href="/pesquisa" aria-label="Pesquisar no MediAgenda" title="Pesquisar">
+          <i class="bi bi-search"></i>
+        </a>
         <a class="nav-link d-none d-lg-inline-flex align-items-center gap-1" href="/inicio" title="<%= t('nav.sitePublico') %>">
           <i class="bi bi-globe2"></i><span class="d-none d-xl-inline"><%= t('nav.sitePublico') %></span>
         </a>

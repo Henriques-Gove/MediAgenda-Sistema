@@ -31,7 +31,7 @@ export class AuditoriaService {
   async listar(filtros: { acao?: string; desde?: Date; utilizadorId?: string } = {}) {
     return this.db.auditoria.findMany({
       where: {
-        ...(filtros.acao ? { acao: { contains: filtros.acao } } : {}),
+        ...(filtros.acao ? { acao: { contains: filtros.acao, mode: 'insensitive' as const } } : {}),
         ...(filtros.desde ? { criadoEm: { gte: filtros.desde } } : {}),
         ...(filtros.utilizadorId ? { utilizadorId: filtros.utilizadorId } : {}),
       },
@@ -46,7 +46,7 @@ export class AuditoriaService {
     paginacao: ParametrosPaginacao,
   ): Promise<Pagina<Awaited<ReturnType<AuditoriaService['listar']>>[number]>> {
     const where = {
-      ...(filtros.acao ? { acao: { contains: filtros.acao } } : {}),
+      ...(filtros.acao ? { acao: { contains: filtros.acao, mode: 'insensitive' as const } } : {}),
       ...(filtros.desde ? { criadoEm: { gte: filtros.desde } } : {}),
       ...(filtros.utilizadorId ? { utilizadorId: filtros.utilizadorId } : {}),
     };

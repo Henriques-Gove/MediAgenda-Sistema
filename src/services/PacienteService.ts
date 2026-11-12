@@ -31,9 +31,9 @@ export class PacienteService {
       where: termo
         ? {
             OR: [
-              { utilizador: { nome: { contains: termo } } },
-              { utilizador: { email: { contains: termo } } },
-              { telefone: { contains: termo } },
+              { utilizador: { nome: { contains: termo, mode: 'insensitive' as const } } },
+              { utilizador: { email: { contains: termo, mode: 'insensitive' as const } } },
+              { telefone: { contains: termo, mode: 'insensitive' as const } },
             ],
           }
         : {},
@@ -51,9 +51,9 @@ export class PacienteService {
     const where = termo
       ? {
           OR: [
-            { utilizador: { nome: { contains: termo } } },
-            { utilizador: { email: { contains: termo } } },
-            { telefone: { contains: termo } },
+            { utilizador: { nome: { contains: termo, mode: 'insensitive' as const } } },
+            { utilizador: { email: { contains: termo, mode: 'insensitive' as const } } },
+            { telefone: { contains: termo, mode: 'insensitive' as const } },
           ],
         }
       : {};

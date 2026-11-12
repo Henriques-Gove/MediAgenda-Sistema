@@ -1,0 +1,403 @@
+<%
+  const rotulosEvento = {
+    ConsultaCriada: 'Consulta criada',
+    ConsultaConfirmada: 'Consulta confirmada',
+    ConsultaCancelada: 'Consulta cancelada',
+    ConsultaReagendada: 'Consulta reagendada',
+    ConsultaRealizada: 'Consulta realizada',
+    ConsultaAvaliada: 'Consulta avaliada',
+    LembreteDevido: 'Lembrete devido',
+    UtilizadorRegistado: 'Utilizador registado',
+    MedicoDesativado: 'Médico desativado',
+    LoginRealizado: 'Sessão iniciada'
+  };
+  const rotulosConsumidor = {
+    NotificacaoHandler: 'Notificação',
+    AuditoriaHandler: 'Auditoria',
+    RelatorioHandler: 'Relatórios'
+  };
+  const nomeConsumidor = (nome) => rotulosConsumidor[nome] || nome;
+  const totalEventos = eventos.length;
+  const textoEventos = (total) => `${total} ${total === 1 ? 'evento' : 'eventos'}`;
+  const totalFalhas = eventos.reduce(
+    (soma, evento) => soma + evento.consumidores.filter((consumidor) => consumidor.estado === 'falhou').length,
+    0,
+  );
+  const ultimoEvento = eventos[0] || null;
+  const totalEstados = resumo.totalConsultas || 0;
+  const estados = [
+    { chave: 'PENDENTE', rotulo: 'Pendentes', total: resumo.pendentes, cor: 'warning', icone: 'bi-hourglass-split' },
+    { chave: 'CONFIRMADA', rotulo: 'Confirmadas', total: resumo.confirmadas, cor: 'success', icone: 'bi-check2-circle' },
+    { chave: 'REALIZADA', rotulo: 'Realizadas', total: resumo.realizadas, cor: 'primary', icone: 'bi-clipboard2-check' },
+    { chave: 'CANCELADA', rotulo: 'Canceladas', total: resumo.canceladas, cor: 'danger', icone: 'bi-x-circle' }
+  ];
+  const passos = [
+    { icone: 'bi-hand-index-thumb', titulo: 'Paciente escolhe', texto: 'Médico, data e hora num único ecrã.' },
+    { icone: 'bi-shield-check', titulo: 'Regras validadas', texto: 'Antecedência, horário, conflitos e limites.' },
+    { icone: 'bi-database-check', titulo: 'Consulta guardada', texto: 'Registo consistente e sem sobreposições.' },
+    { icone: 'bi-broadcast', titulo: 'Evento publicado', texto: 'A marcação é anunciada ao sistema.' },
+    { icone: 'bi-envelope-check', titulo: 'Avisos enviados', texto: 'Confirmação e lembretes ao paciente.' },
+    { icone: 'bi-journal-check', titulo: 'Tudo registado', texto: 'Auditoria e relatórios atualizados.' }
+  ];
+  const regras = [
+    { titulo: 'Antecedência mínima', texto: 'A marcação tem de ser feita com pelo menos uma hora de antecedência.' },
+    { titulo: 'Horário da clínica', texto: 'A consulta tem de caber no horário de funcionamento e na disponibilidade do médico.' },
+    { titulo: 'Conflito de agenda', texto: 'Não são permitidas duas consultas sobrepostas para o mesmo médico.' },
+    { titulo: 'Limite diário', texto: 'Cada médico tem um número máximo de consultas por dia.' },
+    { titulo: 'Limite por paciente', texto: 'O paciente não pode acumular demasiadas consultas futuras com o mesmo médico.' }
+  ];
+%>
+
+<section class="sistema-page">
+  <header class="sistema-hero">
+    <div class="container">
+      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+        <div>
+          <span class="sistema-eyebrow"><span class="sistema-pulso"></span> Atividade em tempo real</span>
+          <h1>Sistema em direto</h1>
+          <p class="mb-0">
+            Acompanhe o percurso de cada marcação: validação, gravação, eventos e avisos.
+            É a arquitectura do MediAgenda a trabalhar, sem códigos técnicos.
+          </p>
+        </div>
+        <div class="sistema-live-card">
+          <span class="sistema-live-dot" aria-hidden="true"></span>
+          <div>
+            <div class="fw-semibold">Ligado</div>
+            <div class="small text-muted" id="eventos-atualizado" aria-live="polite">
+              <%= textoEventos(totalEventos) %> nesta sessão
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container pb-5">
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-xl-3">
+        <article class="sistema-padrao h-100">
+          <span class="sistema-padrao-icon"><i class="bi bi-broadcast"></i></span>
+          <h2>Eventos</h2>
+          <p>Cada marcação publica um evento. Notificações, auditoria e relatórios reagem de forma independente.</p>
+          <span class="sistema-padrao-tag"><i class="bi bi-check2"></i> Ativo</span>
+        </article>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <article class="sistema-padrao h-100">
+          <span class="sistema-padrao-icon"><i class="bi bi-diagram-3"></i></span>
+          <h2>Estados</h2>
+          <p>Pendente, confirmada, realizada e cancelada. Só transições válidas são aceites pelo sistema.</p>
+          <span class="sistema-padrao-tag"><i class="bi bi-check2"></i> Ativo</span>
+        </article>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <article class="sistema-padrao h-100">
+          <span class="sistema-padrao-icon"><i class="bi bi-link-45deg"></i></span>
+          <h2>Validação em cadeia</h2>
+          <p>Cinco regras verificadas por ordem, antes de a consulta chegar à base de dados.</p>
+          <span class="sistema-padrao-tag"><i class="bi bi-check2"></i> Ativo</span>
+        </article>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <article class="sistema-padrao h-100">
+          <span class="sistema-padrao-icon"><i class="bi bi-puzzle"></i></span>
+          <h2>Interfaces específicas</h2>
+          <p>E-mail e SMS partilham apenas o contrato de envio de que realmente precisam.</p>
+          <span class="sistema-padrao-tag"><i class="bi bi-check2"></i> Ativo</span>
+        </article>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-xl-8">
+        <div class="dashboard-card" data-eventos-url="/admin/sistema/eventos.json">
+          <div class="card-header">
+            <span><i class="bi bi-activity me-1"></i> Eventos recentes</span>
+            <span class="badge badge-soft-primary"><%= textoEventos(totalEventos) %></span>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle mb-0 sistema-tabela">
+              <caption class="visually-hidden">Eventos de domínio processados pelo sistema</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Hora</th>
+                  <th scope="col">Evento</th>
+                  <th scope="col" class="d-none d-md-table-cell">Consumidores</th>
+                  <th scope="col">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="eventos-corpo">
+                <% eventos.forEach(function (evento) { %>
+                  <% const falhou = evento.consumidores.some(function (c) { return c.estado === 'falhou'; }); %>
+                  <tr>
+                    <td class="sistema-hora"><%= formatarHora(evento.processadoEm) %></td>
+                    <td>
+                      <div class="sistema-evento-tipo"><%= rotulosEvento[evento.tipo] || evento.tipo %></div>
+                      <% if (evento.resumo) { %><div class="small text-muted"><%= evento.resumo %></div><% } %>
+                    </td>
+                    <td class="d-none d-md-table-cell">
+                      <div class="d-flex flex-wrap gap-1">
+                        <% evento.consumidores.forEach(function (consumidor) { %>
+                          <span class="sistema-consumidor <%= consumidor.estado === 'falhou' ? 'sistema-consumidor-falhou' : '' %>" title="<%= consumidor.estado === 'falhou' ? 'Falhou' : 'Concluído' %>">
+                            <i class="bi <%= consumidor.estado === 'falhou' ? 'bi-exclamation-triangle' : 'bi-check2' %>"></i>
+                            <%= nomeConsumidor(consumidor.nome) %>
+                          </span>
+                        <% }); %>
+                        <% if (!evento.consumidores.length) { %><span class="text-muted small">Sem consumidores</span><% } %>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge badge-soft-<%= falhou ? 'danger' : 'success' %>">
+                        <%= falhou ? 'Com falha' : 'Processado' %>
+                      </span>
+                    </td>
+                  </tr>
+                <% }); %>
+                <% if (!eventos.length) { %>
+                  <tr id="eventos-vazio">
+                    <td colspan="4" class="text-center text-muted small py-4">
+                      Ainda não há eventos nesta sessão. Marque uma consulta para ver o sistema a trabalhar.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+          <div class="card-body py-2 border-top">
+            <span class="small text-muted">
+              <i class="bi bi-arrow-repeat me-1"></i>A lista atualiza automaticamente a cada 8 segundos.
+            </span>
+          </div>
+        </div>
+
+        <div class="dashboard-card mt-4">
+          <div class="card-header"><span><i class="bi bi-people me-1"></i> Quem reage aos eventos</span></div>
+          <div class="card-body">
+            <p class="small text-muted">
+              Cada consumidor trabalha de forma independente. Se um falhar, os restantes continuam.
+            </p>
+            <ul class="sistema-consumidores-lista mb-0">
+              <li><span class="sistema-consumidor"><i class="bi bi-envelope-check"></i> Notificação</span><span class="small text-muted">E-mail e SMS</span></li>
+              <li><span class="sistema-consumidor"><i class="bi bi-journal-text"></i> Auditoria</span><span class="small text-muted">Registo de ações</span></li>
+              <li><span class="sistema-consumidor"><i class="bi bi-graph-up"></i> Relatórios</span><span class="small text-muted">Indicadores</span></li>
+            </ul>
+            <p class="small text-muted mb-0 mt-3">
+              <i class="bi bi-shield-check me-1"></i><%= consumidores.length %> consumidores ligados.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-4">
+        <div class="dashboard-card mb-4">
+          <div class="card-header">
+            <span><i class="bi bi-pie-chart me-1"></i> Consultas por estado</span>
+            <span class="small text-muted">30 dias</span>
+          </div>
+          <div class="card-body">
+            <% estados.forEach(function (estado) { %>
+              <% const percentagem = totalEstados ? Math.round((estado.total / totalEstados) * 100) : 0; %>
+              <div class="sistema-estado mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="small fw-semibold"><i class="bi <%= estado.icone %> me-1 text-<%= estado.cor %>"></i><%= estado.rotulo %></span>
+                  <span class="small text-muted"><%= estado.total %> &middot; <%= percentagem %>%</span>
+                </div>
+                <div class="progress sistema-progresso" role="progressbar" aria-label="<%= estado.rotulo %>" aria-valuenow="<%= percentagem %>" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar bg-<%= estado.cor %>" style="width: <%= percentagem %>%"></div>
+                </div>
+              </div>
+            <% }); %>
+            <a class="btn btn-outline-ma btn-sm w-100 mt-1" href="/admin/relatorios">
+              <i class="bi bi-bar-chart me-1"></i> Abrir relatórios
+            </a>
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="card-header">
+            <span><i class="bi bi-clipboard2-pulse me-1"></i> Resumo da sessão</span>
+          </div>
+          <div class="card-body">
+            <div class="sistema-resumo">
+              <div class="sistema-resumo-item">
+                <span class="sistema-resumo-valor"><%= totalEventos %></span>
+                <span class="sistema-resumo-rotulo">Eventos</span>
+              </div>
+              <div class="sistema-resumo-item">
+                <span class="sistema-resumo-valor"><%= consumidores.length %></span>
+                <span class="sistema-resumo-rotulo">Consumidores</span>
+              </div>
+              <div class="sistema-resumo-item <%= totalFalhas ? 'sistema-resumo-item-alerta' : '' %>">
+                <span class="sistema-resumo-valor"><%= totalFalhas %></span>
+                <span class="sistema-resumo-rotulo">Falhas</span>
+              </div>
+            </div>
+            <div class="sistema-resumo-ultimo mt-3 pt-3 border-top">
+              <span class="small text-muted d-block">Última atividade</span>
+              <span class="small fw-semibold">
+                <% if (ultimoEvento) { %>
+                  <%= formatarHora(ultimoEvento.processadoEm) %> ·
+                  <%= rotulosEvento[ultimoEvento.tipo] || ultimoEvento.tipo %>
+                <% } else { %>
+                  Ainda sem eventos
+                <% } %>
+              </span>
+            </div>
+            <a class="btn btn-outline-ma btn-sm w-100 mt-3" href="/admin/auditoria">
+              <i class="bi bi-journal-text me-1"></i> Ver registos
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-card mt-4">
+      <div class="card-header"><span><i class="bi bi-signpost-split me-1"></i> O percurso de uma marcação</span></div>
+      <div class="card-body">
+        <ol class="sistema-fluxo">
+          <% passos.forEach(function (passo, indice) { %>
+            <li class="sistema-fluxo-passo">
+              <span class="sistema-fluxo-numero"><%= indice + 1 %></span>
+              <span class="sistema-fluxo-icone"><i class="bi <%= passo.icone %>"></i></span>
+              <div>
+                <div class="fw-semibold small"><%= passo.titulo %></div>
+                <div class="small text-muted"><%= passo.texto %></div>
+              </div>
+            </li>
+          <% }); %>
+        </ol>
+      </div>
+    </div>
+
+    <div class="dashboard-card mt-4">
+      <div class="card-header">
+        <span><i class="bi bi-list-check me-1"></i> Regras verificadas antes de confirmar</span>
+        <span class="badge badge-soft-secondary">por esta ordem</span>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <% regras.forEach(function (regra, indice) { %>
+            <div class="col-md-6 col-xl-4">
+              <div class="sistema-regra h-100">
+                <span class="sistema-regra-numero"><%= indice + 1 %></span>
+                <div>
+                  <div class="fw-semibold small"><%= regra.titulo %></div>
+                  <div class="small text-muted"><%= regra.texto %></div>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+        <p class="small text-muted mb-0 mt-3">
+          <i class="bi bi-info-circle me-1"></i>
+          Se uma regra falhar, a marcação é recusada com uma explicação clara para o paciente.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script nonce="<%= cspNonce %>">
+  (function () {
+    var cartao = document.querySelector('[data-eventos-url]');
+    var corpo = document.getElementById('eventos-corpo');
+    var atualizado = document.getElementById('eventos-atualizado');
+    if (!cartao || !corpo) return;
+
+    var url = cartao.getAttribute('data-eventos-url');
+    var rotulos = <%- JSON.stringify(rotulosEvento) %>;
+    var nomes = <%- JSON.stringify(rotulosConsumidor) %>;
+
+    function hora(valor) {
+      try {
+        return new Intl.DateTimeFormat('pt-PT', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).format(new Date(valor));
+      } catch (erro) {
+        return '';
+      }
+    }
+
+    function elemento(tag, classe, texto) {
+      var no = document.createElement(tag);
+      if (classe) no.className = classe;
+      if (texto) no.textContent = texto;
+      return no;
+    }
+
+    function criarLinha(evento) {
+      var falhou = (evento.consumidores || []).some(function (c) { return c.estado === 'falhou'; });
+      var linha = document.createElement('tr');
+
+      linha.appendChild(elemento('td', 'sistema-hora', hora(evento.processadoEm)));
+
+      var celulaEvento = document.createElement('td');
+      celulaEvento.appendChild(elemento('div', 'sistema-evento-tipo', rotulos[evento.tipo] || evento.tipo));
+      if (evento.resumo) {
+        celulaEvento.appendChild(elemento('div', 'small text-muted', evento.resumo));
+      }
+      linha.appendChild(celulaEvento);
+
+      var celulaConsumidores = document.createElement('td');
+      celulaConsumidores.className = 'd-none d-md-table-cell';
+      var lista = elemento('div', 'd-flex flex-wrap gap-1');
+      if ((evento.consumidores || []).length) {
+        evento.consumidores.forEach(function (consumidor) {
+          var chip = elemento('span', 'sistema-consumidor' + (consumidor.estado === 'falhou' ? ' sistema-consumidor-falhou' : ''));
+          var icone = elemento('i', 'bi ' + (consumidor.estado === 'falhou' ? 'bi-exclamation-triangle' : 'bi-check2'));
+          chip.appendChild(icone);
+          chip.appendChild(document.createTextNode(' ' + (nomes[consumidor.nome] || consumidor.nome)));
+          chip.title = consumidor.estado === 'falhou' ? 'Falhou' : 'Concluído';
+          lista.appendChild(chip);
+        });
+      } else {
+        lista.appendChild(elemento('span', 'text-muted small', 'Sem consumidores'));
+      }
+      celulaConsumidores.appendChild(lista);
+      linha.appendChild(celulaConsumidores);
+
+      var celulaEstado = document.createElement('td');
+      celulaEstado.appendChild(
+        elemento('span', 'badge badge-soft-' + (falhou ? 'danger' : 'success'), falhou ? 'Com falha' : 'Processado')
+      );
+      linha.appendChild(celulaEstado);
+
+      return linha;
+    }
+
+    function atualizar() {
+      fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+        .then(function (resposta) {
+          if (!resposta.ok) throw new Error('resposta inválida');
+          return resposta.json();
+        })
+        .then(function (dados) {
+          corpo.textContent = '';
+          if (!dados.eventos || !dados.eventos.length) {
+            var vazio = document.createElement('tr');
+            var celula = elemento('td', 'text-center text-muted small py-4', 'Ainda não há eventos nesta sessão. Marque uma consulta para ver o sistema a trabalhar.');
+            celula.colSpan = 4;
+            vazio.appendChild(celula);
+            corpo.appendChild(vazio);
+          } else {
+            dados.eventos.forEach(function (evento) {
+              corpo.appendChild(criarLinha(evento));
+            });
+          }
+          if (atualizado) {
+            var quantidade = (dados.eventos || []).length;
+            atualizado.textContent =
+              'Atualizado às ' + hora(dados.geradoEm) + ' · ' + quantidade + (quantidade === 1 ? ' evento' : ' eventos');
+          }
+        })
+        .catch(function () {
+          if (atualizado) atualizado.textContent = 'Sem ligação ao servidor';
+        });
+    }
+
+    window.setInterval(atualizar, 8000);
+  })();
+</script>

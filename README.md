@@ -222,7 +222,8 @@ As regras de quem pode criar cada tipo de conta:
 - **Avaliação de consultas:** avaliação de 1 a 5 estrelas e comentário apenas para consultas realizadas, com média por médico.
 - **Lista de espera:** inscrição de pacientes, sugestões de slots e notificação automática quando surge disponibilidade.
 - **Relatórios e estatísticas:** taxa de ocupação, taxa de cancelamento, consultas por especialidade, consultas por mês, satisfação média por médico e exportação em PDF/CSV (`/admin/relatorios/exportar.*`).
-- **Pesquisa e filtros:** pesquisa de médicos por nome/especialidade/localização/avaliação; filtros de consultas, utilizadores, auditoria e notificações.
+- **Pesquisa e filtros:** pesquisa global por médicos, especialidades, pacientes e páginas do sistema (`/pesquisa`), além dos filtros específicos de consultas, utilizadores, auditoria e notificações.
+- **Sistema em direto:** página `/admin/sistema` com o percurso de uma marcação, eventos processados em tempo real, estado das consultas, regras de validação e consumidores ligados.
 - **Auditoria:** registo de ações relevantes em `/admin/auditoria`, alimentado por eventos de domínio.
 
 ### Regras de negócio (aplicação no código)

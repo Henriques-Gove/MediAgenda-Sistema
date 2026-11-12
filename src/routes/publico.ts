@@ -104,6 +104,105 @@ export function rotasPublicas(container: Container): Router {
   });
 
   router.get(
+    '/pesquisa',
+    asyncHandler(async (req, res) => {
+      const utilizador = req.session.utilizador;
+      const q = (textoDaQuery(req.query.q) ?? '').trim();
+
+      if (!utilizador) {
+        return res.redirect(q ? `/medicos?busca=${encodeURIComponent(q)}` : '/medicos');
+      }
+
+      const termo = q.toLocaleLowerCase('pt-PT');
+      const atalhos = [
+        { titulo: 'Painel', descricao: 'Resumo da sua atividade', href: destinoPorPerfil(utilizador.perfil), icone: 'bi-grid-1x2' },
+        ...(utilizador.perfil === Perfil.PACIENTE
+          ? [
+              { titulo: 'As minhas consultas', descricao: 'Histórico e próximas marcações', href: '/paciente/consultas', icone: 'bi-calendar2-check' },
+              { titulo: 'Marcar consulta', descricao: 'Encontrar médico e horário', href: '/medicos', icone: 'bi-calendar2-plus' },
+              { titulo: 'Lista de espera', descricao: 'Ser avisado quando surgir vaga', href: '/paciente/lista-espera', icone: 'bi-hourglass-split' },
+              { titulo: 'Documentos', descricao: 'Ficheiros clínicos partilhados', href: '/paciente/documentos', icone: 'bi-folder2-open' },
+              { titulo: 'Perfil', descricao: 'Dados pessoais e contactos', href: '/paciente/perfil', icone: 'bi-person-gear' },
+            ]
+          : []),
+        ...(utilizador.perfil === Perfil.MEDICO
+          ? [
+              { titulo: 'Agenda', descricao: 'Consultas do dia, semana e mês', href: '/medico/agenda', icone: 'bi-calendar3' },
+              { titulo: 'Consultas', descricao: 'Histórico e estados', href: '/medico/consultas', icone: 'bi-calendar2-check' },
+              { titulo: 'Disponibilidade', descricao: 'Horários de atendimento', href: '/medico/disponibilidade', icone: 'bi-clock' },
+              { titulo: 'Bloqueios', descricao: 'Férias e ausências', href: '/medico/bloqueios', icone: 'bi-calendar-x' },
+              { titulo: 'Documentos', descricao: 'Documentos clínicos', href: '/medico/documentos', icone: 'bi-folder2-open' },
+            ]
+          : []),
+        ...(utilizador.perfil === Perfil.SECRETARIO
+          ? [
+              { titulo: 'Agendas', descricao: 'Agenda de todos os médicos', href: '/secretario/agendas', icone: 'bi-calendar2-week' },
+              { titulo: 'Pacientes', descricao: 'Registar e consultar pacientes', href: '/secretario/pacientes', icone: 'bi-people' },
+              { titulo: 'Médicos', descricao: 'Equipa clínica', href: '/secretario/medicos', icone: 'bi-person-badge' },
+              { titulo: 'Consultas', descricao: 'Marcações e estados', href: '/secretario/consultas', icone: 'bi-calendar2-check' },
+              { titulo: 'Lista de espera', descricao: 'Pedidos e sugestões', href: '/secretario/lista-espera', icone: 'bi-hourglass-split' },
+            ]
+          : []),
+        ...(utilizador.perfil === Perfil.ADMINISTRADOR
+          ? [
+              { titulo: 'Utilizadores', descricao: 'Contas e perfis', href: '/admin/utilizadores', icone: 'bi-people' },
+              { titulo: 'Médicos', descricao: 'Equipa clínica', href: '/admin/medicos', icone: 'bi-person-badge' },
+              { titulo: 'Especialidades', descricao: 'Catálogo da clínica', href: '/admin/especialidades', icone: 'bi-tags' },
+              { titulo: 'Relatórios', descricao: 'Ocupação e cancelamentos', href: '/admin/relatorios', icone: 'bi-bar-chart' },
+              { titulo: 'Sistema em direto', descricao: 'Eventos e regras', href: '/admin/sistema', icone: 'bi-activity' },
+              { titulo: 'Registos', descricao: 'Histórico de operações', href: '/admin/auditoria', icone: 'bi-journal-text' },
+            ]
+          : []),
+        { titulo: 'Segurança', descricao: 'Palavra-passe e sessões', href: '/conta/seguranca', icone: 'bi-shield-lock' },
+      ];
+
+      const atalhosFiltrados = termo
+        ? atalhos.filter((atalho) =>
+            `${atalho.titulo} ${atalho.descricao}`.toLocaleLowerCase('pt-PT').includes(termo),
+          )
+        : atalhos;
+
+      let medicos: Awaited<ReturnType<typeof container.medicos.listar>> = [];
+      let especialidades: Awaited<ReturnType<typeof container.especialidades.listar>> = [];
+      let pacientes: Awaited<ReturnType<typeof container.pacientes.listar>> = [];
+
+      if (termo) {
+        const [todosMedicos, todasEspecialidades] = await Promise.all([
+          container.medicos.listar({ busca: q }),
+          container.especialidades.listar(),
+        ]);
+
+        medicos = todosMedicos.slice(0, 6);
+        especialidades = todasEspecialidades
+          .filter((especialidade) =>
+            `${especialidade.nome} ${especialidade.descricao ?? ''}`
+              .toLocaleLowerCase('pt-PT')
+              .includes(termo),
+          )
+          .slice(0, 6);
+
+        if (utilizador.perfil === Perfil.ADMINISTRADOR || utilizador.perfil === Perfil.SECRETARIO) {
+          pacientes = (await container.pacientes.listar(q)).slice(0, 6);
+        }
+      }
+
+      const totalResultados =
+        atalhosFiltrados.length + medicos.length + especialidades.length + pacientes.length;
+
+      res.render('pesquisa', {
+        titulo: 'Pesquisar',
+        termo: q,
+        atalhos: atalhosFiltrados.slice(0, 8),
+        medicos,
+        especialidades,
+        pacientes,
+        totalResultados,
+        perfil: utilizador.perfil,
+      });
+    }),
+  );
+
+  router.get(
     '/medicos',
     asyncHandler(async (req, res) => {
       const [especialidades, medicos] = await Promise.all([
@@ -260,6 +359,7 @@ export function rotasPublicas(container: Container): Router {
         telefone: corpo.telefone || null,
         preferenciaNotificacao: corpo.preferenciaNotificacao,
         aceiteTermos: corpo.aceiteTermos,
+        confirmarAutomaticamente: !env.exigirConfirmacaoEmail,
         paciente: {
           dataNascimento: corpo.dataNascimento,
           telefone: corpo.telefone,
@@ -273,7 +373,9 @@ export function rotasPublicas(container: Container): Router {
           : '';
       req.session.flash = {
         tipo: 'success',
-        mensagem: `Conta criada com sucesso. Confirme o e-mail para iniciar sessão.${link}`,
+        mensagem: tokenConfirmacao
+          ? `Conta criada com sucesso. Confirme o e-mail para iniciar sessão.${link}`
+          : `Conta criada com sucesso, ${utilizador.nome.split(' ')[0]}. Já pode iniciar sessão.`,
       };
       req.session.utilizador = undefined;
       res.redirect('/login');

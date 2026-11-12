@@ -377,8 +377,8 @@ export class AuthService {
         ...(termo
           ? {
               OR: [
-                { nome: { contains: termo } },
-                { email: { contains: termo } },
+                { nome: { contains: termo, mode: 'insensitive' as const } },
+                { email: { contains: termo, mode: 'insensitive' as const } },
               ],
             }
           : {}),
@@ -410,8 +410,8 @@ export class AuthService {
       ...(termo
         ? {
             OR: [
-              { nome: { contains: termo } },
-              { email: { contains: termo } },
+              { nome: { contains: termo, mode: 'insensitive' as const } },
+              { email: { contains: termo, mode: 'insensitive' as const } },
             ],
           }
         : {}),

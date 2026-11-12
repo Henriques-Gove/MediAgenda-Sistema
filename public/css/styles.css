@@ -997,8 +997,18 @@ main section.py-5 {
   object-fit: cover;
   opacity: 0;
   transform: scale(1.05);
-  animation: auth-slide-ciclo 24s ease-in-out infinite;
+  animation: auth-slide-ciclo 30s ease-in-out infinite;
   will-change: opacity, transform;
+}
+
+.auth-media-slide:nth-child(odd) {
+  --kb-x: -1.6%;
+  --kb-y: -1.3%;
+}
+
+.auth-media-slide:nth-child(even) {
+  --kb-x: 1.6%;
+  --kb-y: -1%;
 }
 
 .auth-media-slide:nth-child(2) {
@@ -1011,6 +1021,10 @@ main section.py-5 {
 
 .auth-media-slide:nth-child(4) {
   animation-delay: 18s;
+}
+
+.auth-media-slide:nth-child(5) {
+  animation-delay: 24s;
 }
 
 .auth-media::after {
@@ -1072,11 +1086,11 @@ main section.py-5 {
 }
 
 .auth-media-dots i {
-  width: 0.38rem;
-  height: 0.38rem;
+  width: 0.9rem;
+  height: 0.22rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.32);
-  animation: auth-dot-ciclo 24s ease-in-out infinite;
+  animation: auth-dot-ciclo 30s ease-in-out infinite;
 }
 
 .auth-media-dots i:nth-child(2) {
@@ -1091,6 +1105,10 @@ main section.py-5 {
   animation-delay: 18s;
 }
 
+.auth-media-dots i:nth-child(5) {
+  animation-delay: 24s;
+}
+
 @keyframes auth-slide-ciclo {
   0% {
     opacity: 0;
@@ -1099,28 +1117,28 @@ main section.py-5 {
   3% {
     opacity: 1;
   }
-  22% {
+  17% {
     opacity: 1;
   }
-  27% {
+  20% {
     opacity: 0;
   }
   100% {
     opacity: 0;
-    transform: scale(1.16) translate3d(-1.4%, -1.2%, 0);
+    transform: scale(1.16) translate3d(var(--kb-x, -1.4%), var(--kb-y, -1.2%), 0);
   }
 }
 
 @keyframes auth-dot-ciclo {
   0%,
-  27% {
+  20% {
     background: #ffffff;
-    transform: scale(1.25);
+    transform: scaleX(1.12);
   }
-  28%,
+  21%,
   100% {
     background: rgba(255, 255, 255, 0.32);
-    transform: scale(1);
+    transform: scaleX(1);
   }
 }
 
@@ -2160,7 +2178,7 @@ html[data-bs-theme="dark"] .agenda-mes td {
   }
 }
 
-/* Galeria "Conheça a clínica" na página inicial */
+/* Galeria "Conheï¿½a a clï¿½nica" na pï¿½gina inicial */
 .clinica-galeria {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
@@ -2251,5 +2269,48 @@ html[data-bs-theme="dark"] .agenda-mes td {
   .clinica-foto:hover img,
   .clinica-foto:focus-within img {
     transform: none;
+  }
+}
+
+/* Pesquisa global na barra de navegacao */
+.pesquisa-navbar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.7rem;
+  border: 1px solid var(--ma-border);
+  border-radius: 999px;
+  background: var(--ma-surface);
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.pesquisa-navbar i {
+  color: var(--ma-muted);
+  font-size: 0.85rem;
+}
+
+.pesquisa-navbar input {
+  width: 10.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--ma-ink);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.pesquisa-navbar input::placeholder {
+  color: var(--ma-muted);
+}
+
+.pesquisa-navbar:focus-within {
+  border-color: var(--ma-primary);
+  box-shadow: 0 0 0 3px var(--ma-primary-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pesquisa-navbar {
+    transition: none;
   }
 }

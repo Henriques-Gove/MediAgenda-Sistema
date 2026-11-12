@@ -49,14 +49,14 @@ export class MedicoService {
     const where: Prisma.MedicoWhereInput = {
       ativo: true,
       ...(filtros.localizacao
-        ? { localizacao: { contains: filtros.localizacao.trim() } }
+        ? { localizacao: { contains: filtros.localizacao.trim(), mode: 'insensitive' as const } }
         : {}),
       ...(busca
         ? {
             OR: [
-              { utilizador: { nome: { contains: busca } } },
-              { localizacao: { contains: busca } },
-              { especialidades: { some: { especialidade: { nome: { contains: busca } } } } },
+              { utilizador: { nome: { contains: busca, mode: 'insensitive' as const } } },
+              { localizacao: { contains: busca, mode: 'insensitive' as const } },
+              { especialidades: { some: { especialidade: { nome: { contains: busca, mode: 'insensitive' as const } } } } },
             ],
           }
         : {}),

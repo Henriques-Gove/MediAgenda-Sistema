@@ -36,6 +36,12 @@ export const env = {
   },
   isTest: process.env.NODE_ENV === 'test',
   limitePedidosDesativado: process.env.RATE_LIMIT_DISABLED === '1',
+  // Quando nao ha SMTP real configurado, exigir confirmacao por e-mail
+  // deixaria os pacientes sem conseguir entrar. Por omissao a conta fica
+  // confirmada; ative REQUIRE_EMAIL_CONFIRMATION=true com SMTP real.
+  exigirConfirmacaoEmail:
+    process.env.REQUIRE_EMAIL_CONFIRMATION === 'true' &&
+    Boolean(process.env.SMTP_HOST?.trim()),
 };
 
 export type Env = typeof env;
