@@ -1,10 +1,30 @@
 services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mediagenda}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mediagenda}
+      POSTGRES_DB: ${POSTGRES_DB:-mediagenda}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - mediagenda-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mediagenda} -d ${POSTGRES_DB:-mediagenda}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     image: mediagenda:latest
     restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "${PORT:-3101}:3101"
     env_file:
@@ -13,13 +33,13 @@ services:
       NODE_ENV: production
       PORT: 3101
       APP_URL: ${APP_URL:-http://localhost:3101}
-      DATABASE_URL: file:/app/data/mediagenda.db
+      DATABASE_URL: postgresql://${POSTGRES_USER:-mediagenda}:${POSTGRES_PASSWORD:-mediagenda}@db:5432/${POSTGRES_DB:-mediagenda}?schema=public
       SESSION_SECRET: ${SESSION_SECRET:?Defina SESSION_SECRET no ficheiro .env}
-      # Coloque true quando a aplicação estiver atrás de HTTPS.
+      # Coloque true quando a aplicacao estiver atras de HTTPS.
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+    command: sh -c "npx prisma migrate deploy && node scripts/seed-se-necessario.mjs && node dist/server.js"
     volumes:
-      - mediagenda-data:/app/data
       - mediagenda-uploads:/app/public/uploads
     healthcheck:
       test:
@@ -35,5 +55,5 @@ services:
       retries: 3
 
 volumes:
-  mediagenda-data:
+  mediagenda-postgres:
   mediagenda-uploads:

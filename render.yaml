@@ -1,14 +1,21 @@
-# Implantação do MediAgenda no Render (Blueprint)
-# Depois de ligar o repositório, use "New + > Blueprint" e o Render cria
-# automaticamente o serviço descrito abaixo.
+# Implantacao do MediAgenda no Render (Blueprint)
+# Depois de ligar o repositorio, use "New + > Blueprint" e o Render cria
+# automaticamente o servico descrito abaixo.
+#
+# Base de dados:
+# - O projeto usa PostgreSQL. Crie uma base num servico gerido e cole a
+#   connection string em DATABASE_URL (variavel marcada com sync: false).
+# - Opcoes gratuitas: Neon (https://neon.tech) ou Supabase. A base gratuita
+#   do Render expira ao fim de 30 dias; para producao use o bloco "databases"
+#   comentado no fim deste ficheiro com um plano pago.
+# - O comando de arranque aplica as migracoes e so carrega os dados de
+#   demonstracao se a base estiver vazia.
 #
 # Notas sobre o plano gratuito:
-# - O plano free não suporta discos persistentes. Sem disco, a base de dados
-#   SQLite é recriada a cada reinício (o script de arranque volta a carregar
-#   os dados de demonstração). Para dados permanentes use o bloco "disk"
-#   comentado abaixo com uma instância paga, ou migre para PostgreSQL.
-# - O serviço adormece após alguns minutos sem tráfego; o primeiro pedido
+# - O servico adormece apos alguns minutos sem trafego; o primeiro pedido
 #   pode demorar cerca de 50 segundos.
+# - Os uploads (documentos e fotos) ficam no disco efemero. Para os manter,
+#   use um disco persistente (plano pago) ou armazenamento externo (S3).
 services:
   - type: web
     name: mediagenda
@@ -25,16 +32,13 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: DATABASE_URL
-        # Plano gratuito: ficheiro local (efémero entre reinícios).
-        value: file:./dev.db
-        # Com disco persistente (instância paga), use:
-        # value: file:/var/data/mediagenda.db
+        sync: false # cole aqui a connection string PostgreSQL (Neon, Supabase ou Render)
       - key: COOKIE_SECURE
         value: "true"
       - key: APP_URL
-        sync: false # preencher com o endereço público (ex.: https://mediagenda-sistema.onrender.com)
+        sync: false # preencher com o endereco publico (ex.: https://mediagenda-sistema.onrender.com)
       - key: SMTP_HOST
-        sync: false # opcional: e-mails reais (vazio = simulação)
+        sync: false # opcional: e-mails reais (vazio = simulacao)
       - key: SMTP_PORT
         sync: false
       - key: SMTP_USER
@@ -42,11 +46,20 @@ services:
       - key: SMTP_PASS
         sync: false
       - key: SMS_API_URL
-        sync: false # opcional: SMS reais (vazio = simulação)
+        sync: false # opcional: SMS reais (vazio = simulacao)
       - key: SMS_API_KEY
         sync: false
-    # Disco persistente (requer instância paga, ex.: starter):
-    # disk:
-    #   name: dados
-    #   mountPath: /var/data
-    #   sizeGB: 1
+
+# Base PostgreSQL gerida pelo Render (requer plano pago; a gratuita expira).
+# Descomente e apague a variavel DATABASE_URL acima para usar esta base:
+# databases:
+#   - name: mediagenda-db
+#     plan: starter
+#     region: oregon
+#     postgresMajorVersion: "16"
+#
+# Depois, no servico, substitua a variavel DATABASE_URL por:
+#       - key: DATABASE_URL
+#         fromDatabase:
+#           name: mediagenda-db
+#           property: connectionString

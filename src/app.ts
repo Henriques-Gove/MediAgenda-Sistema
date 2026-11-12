@@ -102,6 +102,32 @@ export async function criarAplicacao(): Promise<Aplicacao> {
     }),
   );
 
+  // Garante que a sessão fica gravada antes de o navegador seguir um
+  // redirecionamento. Sem esta espera, o pedido seguinte podia chegar antes
+  // de a escrita terminar e perder o login ou as mensagens flash.
+  app.use((req, res, next) => {
+    const redirecionarOriginal = res.redirect.bind(res);
+    res.redirect = ((statusOuUrl: number | string, url?: string) => {
+      const concluir = (erro?: Error | null) => {
+        if (erro) {
+          next(erro);
+          return;
+        }
+        if (typeof statusOuUrl === 'number') {
+          redirecionarOriginal(statusOuUrl, url as string);
+        } else {
+          redirecionarOriginal(statusOuUrl);
+        }
+      };
+      if (!req.session) {
+        concluir();
+        return;
+      }
+      req.session.save(concluir);
+    }) as typeof res.redirect;
+    next();
+  });
+
   app.use(registarPedidos);
   app.use(csrf);
   app.use(flash);

@@ -1,14 +1,16 @@
 /**
- * Cópia de segurança da base SQLite e dos uploads.
+ * Copia de seguranca da base PostgreSQL e dos uploads.
  *
  *   npm run db:backup
  *   npm run db:backup -- --manter=30
  *
- * A base é copiada com VACUUM INTO (cópia consistente mesmo com a aplicação
- * a correr). Os uploads são copiados para a mesma pasta de backup e é gerado
- * um manifesto com tamanhos e hash SHA-256.
+ * Usa `pg_dump` (formato custom, restauravel com `pg_restore`). Se o comando
+ * nao estiver instalado no computador, tenta executa-lo dentro do servico
+ * "db" do docker-compose. Os uploads sao copiados para a mesma pasta e e
+ * gerado um manifesto com tamanhos e hash SHA-256.
  */
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import {
   cpSync,
   existsSync,
@@ -20,7 +22,12 @@ import {
   writeFileSync,
 } from 'node:fs';
 import path from 'node:path';
-import { PrismaClient } from '@prisma/client';
+
+try {
+  process.loadEnvFile(path.resolve(process.cwd(), '.env'));
+} catch {
+  // .env opcional: em producao as variaveis vem do ambiente.
+}
 
 function argumento(nome, padrao) {
   const prefixo = `--${nome}=`;
@@ -31,17 +38,16 @@ function argumento(nome, padrao) {
 const raiz = process.cwd();
 const manter = Math.max(1, Number(argumento('manter', process.env.BACKUP_RETENCAO ?? 14)) || 14);
 const pastaBackups = path.resolve(raiz, argumento('destino', process.env.BACKUP_DIR ?? 'backups'));
+const url = process.env.DATABASE_URL;
 
-function caminhoBaseDados() {
-  const url = process.env.DATABASE_URL ?? 'file:./dev.db';
-  if (!url.startsWith('file:')) {
-    throw new Error('Este script apenas copia bases SQLite (DATABASE_URL=file:...).');
-  }
-  const caminho = url.slice('file:'.length);
-  if (path.isAbsolute(caminho)) return caminho;
-  // Os caminhos relativos do Prisma são resolvidos a partir de prisma/.
-  return path.resolve(raiz, 'prisma', caminho);
+if (!url || !/^postgres(ql)?:\/\//.test(url)) {
+  console.error('Defina DATABASE_URL com uma connection string PostgreSQL.');
+  process.exit(1);
 }
+
+const ligacao = new URL(url);
+const utilizador = decodeURIComponent(ligacao.username || 'postgres');
+const baseDados = ligacao.pathname.replace(/^\//, '') || 'postgres';
 
 function dataParaPasta(data) {
   return data.toISOString().replace(/[-:]/g, '').replace(/\..+$/, '').replace('T', '-');
@@ -51,10 +57,55 @@ function hashFicheiro(caminho) {
   return createHash('sha256').update(readFileSync(caminho)).digest('hex');
 }
 
-const origem = caminhoBaseDados();
-if (!existsSync(origem)) {
-  console.error(`Base de dados não encontrada: ${origem}`);
-  process.exit(1);
+function existeComando(comando) {
+  const resultado = spawnSync(comando, ['--version'], { stdio: 'ignore' });
+  return resultado.status === 0;
+}
+
+function executarDump(ficheiro) {
+  if (existeComando('pg_dump')) {
+    const resultado = spawnSync(
+      'pg_dump',
+      ['--format=custom', '--no-owner', '--no-privileges', `--file=${ficheiro}`, `--dbname=${url}`],
+      { stdio: 'inherit' },
+    );
+    if (resultado.status !== 0) throw new Error('pg_dump falhou.');
+    return 'pg_dump';
+  }
+
+  if (existeComando('docker')) {
+    const verificacao = spawnSync('docker', ['compose', 'ps', '--status', 'running', 'db'], {
+      cwd: raiz,
+      encoding: 'utf8',
+    });
+    if (verificacao.status === 0 && verificacao.stdout.includes('db')) {
+      const resultado = spawnSync(
+        'docker',
+        [
+          'compose',
+          'exec',
+          '-T',
+          'db',
+          'pg_dump',
+          '--format=custom',
+          '--no-owner',
+          '--no-privileges',
+          '-U',
+          utilizador,
+          '-d',
+          baseDados,
+        ],
+        { cwd: raiz, stdio: ['ignore', 'pipe', 'inherit'] },
+      );
+      if (resultado.status !== 0) throw new Error('pg_dump no contentor falhou.');
+      writeFileSync(ficheiro, resultado.stdout);
+      return 'docker compose exec db pg_dump';
+    }
+  }
+
+  throw new Error(
+    'pg_dump nao encontrado. Instale o cliente PostgreSQL ou arranque a base com "docker compose up -d db".',
+  );
 }
 
 const agora = new Date();
@@ -62,17 +113,8 @@ const nome = `mediagenda-${dataParaPasta(agora)}`;
 const destino = path.join(pastaBackups, nome);
 mkdirSync(destino, { recursive: true });
 
-const ficheiroBackup = path.join(destino, 'mediagenda.db');
-const prisma = new PrismaClient({
-  datasources: { db: { url: `file:${origem}` } },
-});
-
-try {
-  const caminhoSql = ficheiroBackup.replace(/'/g, "''");
-  await prisma.$executeRawUnsafe(`VACUUM INTO '${caminhoSql}'`);
-} finally {
-  await prisma.$disconnect();
-}
+const ficheiroBackup = path.join(destino, 'mediagenda.dump');
+const ferramenta = executarDump(ficheiroBackup);
 
 const uploadsOrigem = path.join(raiz, 'public', 'uploads');
 const uploadsDestino = path.join(destino, 'uploads');
@@ -82,8 +124,10 @@ if (existsSync(uploadsOrigem)) {
 
 const manifesto = {
   criadoEm: agora.toISOString(),
-  baseDadosOrigem: origem,
-  baseDadosBackup: 'mediagenda.db',
+  motor: 'postgresql',
+  ferramenta,
+  baseDadosOrigem: `${ligacao.hostname}:${ligacao.port || 5432}/${baseDados}`,
+  baseDadosBackup: 'mediagenda.dump',
   baseDadosBytes: statSync(ficheiroBackup).size,
   baseDadosSha256: hashFicheiro(ficheiroBackup),
   uploadsIncluidos: existsSync(uploadsOrigem),
@@ -91,7 +135,7 @@ const manifesto = {
 };
 writeFileSync(path.join(destino, 'manifest.json'), `${JSON.stringify(manifesto, null, 2)}\n`, 'utf8');
 
-// Retenção: mantém apenas as pastas mais recentes.
+// Retencao: mantem apenas as pastas mais recentes.
 const existentes = readdirSync(pastaBackups, { withFileTypes: true })
   .filter((entrada) => entrada.isDirectory() && entrada.name.startsWith('mediagenda-'))
   .map((entrada) => entrada.name)
@@ -105,7 +149,7 @@ for (const antiga of existentes.slice(manter)) {
 
 console.log('');
 console.log(`Backup criado em ${destino}`);
-console.log(`  Base: ${(manifesto.baseDadosBytes / 1024 / 1024).toFixed(2)} MB`);
+console.log(`  Base: ${(manifesto.baseDadosBytes / 1024 / 1024).toFixed(2)} MB (${ferramenta})`);
 console.log(`  SHA-256: ${manifesto.baseDadosSha256}`);
-console.log(`  Uploads: ${manifesto.uploadsIncluidos ? 'incluídos' : 'sem pasta de uploads'}`);
-console.log(`  Retenção: ${manter} cópia(s)`);
+console.log(`  Uploads: ${manifesto.uploadsIncluidos ? 'incluidos' : 'sem pasta de uploads'}`);
+console.log(`  Retencao: ${manter} copia(s)`);

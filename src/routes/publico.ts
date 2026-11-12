@@ -32,6 +32,20 @@ function regenerarSessao(req: Request): Promise<void> {
   });
 }
 
+/**
+ * Grava a sessão antes de responder com um redirecionamento.
+ *
+ * O express-session grava a sessão no fim da resposta, mas os navegadores
+ * seguem o redirecionamento assim que recebem os cabeçalhos. Sem esta espera,
+ * o pedido seguinte (ex.: o painel) pode chegar antes de a sessão estar na
+ * base de dados e o utilizador era reenviado para o login.
+ */
+function guardarSessao(req: Request): Promise<void> {
+  return new Promise((resolve, reject) => {
+    req.session.save((erro) => (erro ? reject(erro) : resolve()));
+  });
+}
+
 async function iniciarSessao(
   req: Request,
   res: Response,
@@ -52,6 +66,7 @@ async function iniciarSessao(
     tipo: 'success',
     mensagem: `Bem-vindo de volta, ${utilizador.nome.split(' ')[0]}!`,
   };
+  await guardarSessao(req);
   res.redirect(destino);
 }
 
@@ -173,6 +188,7 @@ export function rotasPublicas(container: Container): Router {
             tipo: 'info',
             mensagem: 'Introduza o código de seis dígitos da sua aplicação de autenticação.',
           };
+          await guardarSessao(req);
           res.redirect('/login/2fa');
           return;
         }

@@ -1,9 +1,10 @@
 import { execSync } from 'node:child_process';
 import path from 'node:path';
+import { urlBaseDados } from './urlBaseDados';
 
 /**
- * Cria/recria a base de dados SQLite usada exclusivamente pelos testes.
- * O caminho e relativo ao schema Prisma (prisma/test.db).
+ * Cria/recria o schema PostgreSQL usado exclusivamente pelos testes.
+ * O schema "test" fica na mesma base configurada em DATABASE_URL.
  */
 export default function globalSetup(): void {
   const raiz = path.resolve(__dirname, '..');
@@ -13,7 +14,7 @@ export default function globalSetup(): void {
     stdio: 'pipe',
     env: {
       ...process.env,
-      DATABASE_URL: 'file:./test.db',
+      DATABASE_URL: process.env.DATABASE_URL_TEST ?? urlBaseDados('test'),
     },
   });
 }

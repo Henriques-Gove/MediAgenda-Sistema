@@ -4,8 +4,8 @@ import { semCodigosTecnicos, verificarAcessibilidade } from './helpers';
 test.describe('área de administração', () => {
   test('painel apresenta indicadores e gráficos', async ({ page }) => {
     await page.goto('/admin/dashboard');
-    await expect(page.getByRole('heading', { name: /painel do administrador/i })).toBeVisible();
-    await expect(page.locator('svg[role="img"]').first()).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /painel/i })).toBeVisible();
+    await expect(page.locator('.tile-grid .tile')).toHaveCount(4);
     await semCodigosTecnicos(page);
     await verificarAcessibilidade(page, 'painel de administração');
   });

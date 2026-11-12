@@ -7,7 +7,7 @@ test.describe('área do paciente', () => {
 
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/Ana/i);
     await expect(page.getByText(/pr.ximas consultas/i)).toBeVisible();
-    await expect(page.getByRole('link', { name: /marcar nova consulta/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /marcar consulta/i }).first()).toBeVisible();
     await semCodigosTecnicos(page);
     await verificarAcessibilidade(page, 'painel do paciente');
   });

@@ -62,6 +62,7 @@ export const limiteLogin = rateLimit({
   limit: 10,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  skip: () => env.limitePedidosDesativado,
   handler: responderLimite(
     'Demasiadas tentativas de início de sessão. Aguarde alguns minutos e tente novamente.',
   ),
@@ -72,6 +73,7 @@ export const limiteRecuperacao = rateLimit({
   limit: 5,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  skip: () => env.limitePedidosDesativado,
   handler: responderLimite(
     'Demasiados pedidos de recuperação. Aguarde uma hora antes de tentar novamente.',
   ),
@@ -82,6 +84,7 @@ export const limiteRegisto = rateLimit({
   limit: 8,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  skip: () => env.limitePedidosDesativado,
   handler: responderLimite('Demasiados registos a partir deste endereço. Tente mais tarde.'),
 });
 
@@ -90,6 +93,7 @@ export const limiteApi = rateLimit({
   limit: 120,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  skip: () => env.limitePedidosDesativado,
   handler: (_req, res) => {
     res.status(429).json({ erro: 'Limite de pedidos excedido. Tente novamente dentro de um minuto.' });
   },

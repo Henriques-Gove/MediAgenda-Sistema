@@ -965,7 +965,7 @@ main section.py-5 {
   margin-bottom: 1rem;
 }
 
-/* Média do painel de marca: vídeo real ou ilustração animada da receção */
+/* Média do painel de marca: sequência cinematográfica de imagens da clínica */
 .auth-media {
   position: relative;
   z-index: 1;
@@ -975,63 +975,166 @@ main section.py-5 {
   border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 0 26px 50px -34px rgba(0, 0, 0, 0.7);
   background: #0b4f4a;
+  isolation: isolate;
 }
 
 .auth-media-video,
-.auth-media-ilustracao {
+.auth-media-slides {
   display: block;
   width: 100%;
-  height: auto;
 }
 
-.auth-media-pessoa {
-  transform-origin: center bottom;
-  animation: auth-pessoa-respira 7s ease-in-out infinite;
+.auth-media-slides {
+  position: relative;
+  aspect-ratio: 16 / 10;
 }
 
-.auth-media-paciente {
-  animation-delay: -2.6s;
+.auth-media-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.05);
+  animation: auth-slide-ciclo 24s ease-in-out infinite;
+  will-change: opacity, transform;
 }
 
-.auth-media-planta {
-  transform-origin: center bottom;
-  animation: auth-planta-venta 9s ease-in-out infinite;
+.auth-media-slide:nth-child(2) {
+  animation-delay: 6s;
 }
 
-.auth-media-brilho {
-  animation: auth-brilho-varre 11s ease-in-out infinite;
+.auth-media-slide:nth-child(3) {
+  animation-delay: 12s;
 }
 
-@keyframes auth-pessoa-respira {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
+.auth-media-slide:nth-child(4) {
+  animation-delay: 18s;
 }
 
-@keyframes auth-planta-venta {
-  0%,
-  100% {
-    transform: rotate(-1.2deg);
-  }
-  50% {
-    transform: rotate(1.6deg);
-  }
+.auth-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(4, 47, 46, 0.12) 0%, transparent 34%),
+    linear-gradient(0deg, rgba(4, 47, 46, 0.72) 0%, transparent 46%);
 }
 
-@keyframes auth-brilho-varre {
+.auth-media-shine {
+  position: absolute;
+  inset: -30% -10%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.16) 48%,
+    transparent 58%
+  );
+  transform: translateX(-60%);
+  animation: auth-media-brilho 9s ease-in-out infinite;
+}
+
+.auth-media-caption {
+  position: absolute;
+  left: 0.9rem;
+  bottom: 0.85rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.68rem;
+  border-radius: 999px;
+  background: rgba(4, 47, 46, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #ecfeff;
+}
+
+.auth-media-caption i {
+  color: #5eead4;
+  font-size: 0.82rem;
+}
+
+.auth-media-dots {
+  position: absolute;
+  right: 0.95rem;
+  bottom: 1rem;
+  z-index: 3;
+  display: inline-flex;
+  gap: 0.32rem;
+}
+
+.auth-media-dots i {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.32);
+  animation: auth-dot-ciclo 24s ease-in-out infinite;
+}
+
+.auth-media-dots i:nth-child(2) {
+  animation-delay: 6s;
+}
+
+.auth-media-dots i:nth-child(3) {
+  animation-delay: 12s;
+}
+
+.auth-media-dots i:nth-child(4) {
+  animation-delay: 18s;
+}
+
+@keyframes auth-slide-ciclo {
   0% {
-    transform: translateX(-55%);
+    opacity: 0;
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  3% {
+    opacity: 1;
+  }
+  22% {
+    opacity: 1;
+  }
+  27% {
     opacity: 0;
   }
-  35% {
+  100% {
+    opacity: 0;
+    transform: scale(1.16) translate3d(-1.4%, -1.2%, 0);
+  }
+}
+
+@keyframes auth-dot-ciclo {
+  0%,
+  27% {
+    background: #ffffff;
+    transform: scale(1.25);
+  }
+  28%,
+  100% {
+    background: rgba(255, 255, 255, 0.32);
+    transform: scale(1);
+  }
+}
+
+@keyframes auth-media-brilho {
+  0%,
+  55% {
+    transform: translateX(-60%);
+    opacity: 0;
+  }
+  70% {
     opacity: 1;
   }
   100% {
-    transform: translateX(55%);
+    transform: translateX(60%);
     opacity: 0;
   }
 }
@@ -2037,7 +2140,116 @@ html[data-bs-theme="dark"] .agenda-mes td {
   .auth-benefits li,
   .auth-trust,
   .auth-panel,
-  .auth-panel .btn-ma::after {
+  .auth-panel .btn-ma::after,
+  .auth-media-slide,
+  .auth-media-shine,
+  .auth-media-dots i {
     animation: none !important;
+  }
+
+  .auth-media-slide {
+    opacity: 0;
+  }
+
+  .auth-media-slide:first-child {
+    opacity: 1;
+  }
+
+  .auth-media-shine {
+    display: none;
+  }
+}
+
+/* Galeria "Conhe�a a cl�nica" na p�gina inicial */
+.clinica-galeria {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  height: clamp(320px, 42vw, 460px);
+}
+
+.clinica-foto {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #0b4f4a;
+  box-shadow: 0 22px 44px -34px rgba(4, 47, 46, 0.65);
+  isolation: isolate;
+}
+
+.clinica-foto-larga {
+  grid-row: span 2;
+}
+
+.clinica-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.01);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.clinica-foto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(0deg, rgba(4, 47, 46, 0.78) 0%, rgba(4, 47, 46, 0.18) 42%, transparent 68%);
+}
+
+.clinica-foto figcaption {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 0.9rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: #f0fdfa;
+}
+
+.clinica-foto-titulo {
+  font-weight: 700;
+  font-size: 1.02rem;
+  letter-spacing: -0.01em;
+}
+
+.clinica-foto-texto {
+  font-size: 0.82rem;
+  color: rgba(240, 253, 250, 0.82);
+  line-height: 1.35;
+}
+
+.clinica-foto:hover img,
+.clinica-foto:focus-within img {
+  transform: scale(1.06);
+}
+
+@media (max-width: 767.98px) {
+  .clinica-galeria {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    height: auto;
+  }
+
+  .clinica-foto,
+  .clinica-foto-larga {
+    grid-row: auto;
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clinica-foto img {
+    transition: none;
+  }
+
+  .clinica-foto:hover img,
+  .clinica-foto:focus-within img {
+    transform: none;
   }
 }

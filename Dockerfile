@@ -29,7 +29,6 @@ RUN apk add --no-cache openssl \
 
 ENV NODE_ENV=production \
     PORT=3101 \
-    DATABASE_URL=file:/app/data/mediagenda.db \
     LOG_LEVEL=info
 
 COPY --from=build /app/node_modules ./node_modules
@@ -40,8 +39,8 @@ COPY views ./views
 COPY public ./public
 COPY scripts ./scripts
 
-RUN mkdir -p /app/data /app/public/uploads/documentos /app/public/uploads/perfis \
-  && chown -R mediagenda:mediagenda /app/data /app/public/uploads
+RUN mkdir -p /app/public/uploads/documentos /app/public/uploads/perfis \
+  && chown -R mediagenda:mediagenda /app/public/uploads
 
 USER mediagenda
 EXPOSE 3101

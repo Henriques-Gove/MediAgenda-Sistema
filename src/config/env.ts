@@ -35,6 +35,7 @@ export const env = {
     from: process.env.SMS_FROM ?? 'MediAgenda',
   },
   isTest: process.env.NODE_ENV === 'test',
+  limitePedidosDesativado: process.env.RATE_LIMIT_DISABLED === '1',
 };
 
 export type Env = typeof env;

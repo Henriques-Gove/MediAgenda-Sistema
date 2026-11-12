@@ -21,3 +21,9 @@ pdf_text.txt
 pptx_text.txt
 extract.py
 extract_pptx.py
+
+# Material de origem das fotografias e export da pagina.
+# As versoes otimizadas usadas pelo site ficam em public/img/.
+/*.jfif
+*MidAgenda.html
+*MidAgenda_files/

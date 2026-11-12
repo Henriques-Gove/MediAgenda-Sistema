@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { urlBaseDados } from './tests/urlBaseDados';
 
 export default defineConfig({
   test: {
@@ -6,11 +7,11 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     globalSetup: ['tests/globalSetup.ts'],
     setupFiles: ['tests/setup.ts'],
-    // A base de dados SQLite e partilhada pelos testes de integracao.
+    // Cada execucao usa um schema PostgreSQL isolado (base "mediagenda").
     fileParallelism: false,
     env: {
       NODE_ENV: 'test',
-      DATABASE_URL: 'file:./test.db',
+      DATABASE_URL: process.env.DATABASE_URL_TEST ?? urlBaseDados('test'),
       SESSION_SECRET: 'mediagenda-test-secret',
     },
     testTimeout: 20_000,

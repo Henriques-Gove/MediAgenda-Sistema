@@ -23,7 +23,6 @@
     "test:load": "node tests/load/smoke.mjs",
     "db:backup": "node scripts/backup.mjs",
     "db:restore": "node scripts/restaurar.mjs",
-    "db:prepare-postgres": "node scripts/preparar-postgres.mjs",
     "icons": "node scripts/gerar-icones-pwa.mjs",
     "setup": "node scripts/preparar-ambiente.mjs",
     "deploy:verificar": "node scripts/verificar-deploy.mjs"

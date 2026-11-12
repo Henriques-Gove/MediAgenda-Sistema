@@ -9,7 +9,7 @@ try {
   // .env opcional
 }
 
-process.env.DATABASE_URL ??= 'file:./dev.db';
+process.env.DATABASE_URL ??= 'postgresql://mediagenda:mediagenda@127.0.0.1:5432/mediagenda?schema=public';
 
 const prisma = new PrismaClient();
 const SENHA_DEMO = 'Medi@2026';

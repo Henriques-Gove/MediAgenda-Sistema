@@ -1,6 +1,9 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateTable
 CREATE TABLE "Utilizador" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
@@ -11,33 +14,36 @@ CREATE TABLE "Utilizador" (
     "emailConfirmado" BOOLEAN NOT NULL DEFAULT false,
     "tokenConfirmacao" TEXT,
     "tokenRecuperacao" TEXT,
-    "tokenRecuperacaoExpira" DATETIME,
-    "passwordChangedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "tokenRecuperacaoExpira" TIMESTAMP(3),
+    "passwordChangedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "tentativasFalhas" INTEGER NOT NULL DEFAULT 0,
-    "bloqueadoAte" DATETIME,
+    "bloqueadoAte" TIMESTAMP(3),
     "twoFactorSecret" TEXT,
     "twoFactorEnabled" BOOLEAN NOT NULL DEFAULT false,
-    "consentimentoAceiteEm" DATETIME,
+    "consentimentoAceiteEm" TIMESTAMP(3),
     "fotoUrl" TEXT,
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "atualizadoEm" DATETIME NOT NULL
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizadoEm" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Utilizador_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Paciente" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "utilizadorId" TEXT NOT NULL,
-    "dataNascimento" DATETIME NOT NULL,
+    "dataNascimento" TIMESTAMP(3) NOT NULL,
     "telefone" TEXT NOT NULL,
     "endereco" TEXT NOT NULL,
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "atualizadoEm" DATETIME NOT NULL,
-    CONSTRAINT "Paciente_utilizadorId_fkey" FOREIGN KEY ("utilizadorId") REFERENCES "Utilizador" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizadoEm" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Paciente_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Medico" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "utilizadorId" TEXT NOT NULL,
     "numeroRegisto" TEXT NOT NULL,
     "telefone" TEXT NOT NULL,
@@ -46,20 +52,23 @@ CREATE TABLE "Medico" (
     "ativo" BOOLEAN NOT NULL DEFAULT true,
     "duracaoConsultaMinutos" INTEGER NOT NULL DEFAULT 60,
     "maxConsultasDia" INTEGER NOT NULL DEFAULT 10,
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "atualizadoEm" DATETIME NOT NULL,
-    CONSTRAINT "Medico_utilizadorId_fkey" FOREIGN KEY ("utilizadorId") REFERENCES "Utilizador" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizadoEm" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Medico_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Especialidade" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
     "descricao" TEXT,
     "ativa" BOOLEAN NOT NULL DEFAULT true,
     "duracaoPadraoMinutos" INTEGER NOT NULL DEFAULT 60,
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "atualizadoEm" DATETIME NOT NULL
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizadoEm" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Especialidade_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -67,129 +76,132 @@ CREATE TABLE "MedicoEspecialidade" (
     "medicoId" TEXT NOT NULL,
     "especialidadeId" TEXT NOT NULL,
 
-    PRIMARY KEY ("medicoId", "especialidadeId"),
-    CONSTRAINT "MedicoEspecialidade_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "MedicoEspecialidade_especialidadeId_fkey" FOREIGN KEY ("especialidadeId") REFERENCES "Especialidade" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "MedicoEspecialidade_pkey" PRIMARY KEY ("medicoId","especialidadeId")
 );
 
 -- CreateTable
 CREATE TABLE "Disponibilidade" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "medicoId" TEXT NOT NULL,
     "diaSemana" INTEGER NOT NULL,
     "horaInicio" TEXT NOT NULL,
     "horaFim" TEXT NOT NULL,
     "ativo" BOOLEAN NOT NULL DEFAULT true,
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Disponibilidade_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Disponibilidade_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Bloqueio" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "medicoId" TEXT NOT NULL,
-    "inicio" DATETIME NOT NULL,
-    "fim" DATETIME NOT NULL,
+    "inicio" TIMESTAMP(3) NOT NULL,
+    "fim" TIMESTAMP(3) NOT NULL,
     "motivo" TEXT NOT NULL,
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Bloqueio_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Bloqueio_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Consulta" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "pacienteId" TEXT NOT NULL,
     "medicoId" TEXT NOT NULL,
     "especialidadeId" TEXT,
-    "inicio" DATETIME NOT NULL,
-    "fim" DATETIME NOT NULL,
+    "inicio" TIMESTAMP(3) NOT NULL,
+    "fim" TIMESTAMP(3) NOT NULL,
     "estado" TEXT NOT NULL DEFAULT 'PENDENTE',
     "motivo" TEXT,
     "confirmacaoToken" TEXT,
-    "expiraConfirmacaoEm" DATETIME,
+    "expiraConfirmacaoEm" TIMESTAMP(3),
     "motivoCancelamento" TEXT,
     "canceladaPor" TEXT,
     "cancelamentoTardio" BOOLEAN NOT NULL DEFAULT false,
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "atualizadoEm" DATETIME NOT NULL,
-    CONSTRAINT "Consulta_pacienteId_fkey" FOREIGN KEY ("pacienteId") REFERENCES "Paciente" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Consulta_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Consulta_especialidadeId_fkey" FOREIGN KEY ("especialidadeId") REFERENCES "Especialidade" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizadoEm" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Consulta_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Avaliacao" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "consultaId" TEXT NOT NULL,
     "pacienteId" TEXT NOT NULL,
     "medicoId" TEXT NOT NULL,
     "estrelas" INTEGER NOT NULL,
     "comentario" TEXT,
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Avaliacao_consultaId_fkey" FOREIGN KEY ("consultaId") REFERENCES "Consulta" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Avaliacao_pacienteId_fkey" FOREIGN KEY ("pacienteId") REFERENCES "Paciente" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Avaliacao_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Avaliacao_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Auditoria" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "utilizadorId" TEXT,
     "acao" TEXT NOT NULL,
     "entidade" TEXT,
     "entidadeId" TEXT,
     "detalhes" TEXT,
     "ip" TEXT,
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Auditoria_utilizadorId_fkey" FOREIGN KEY ("utilizadorId") REFERENCES "Utilizador" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Auditoria_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Notificacao" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "consultaId" TEXT,
     "destinatario" TEXT NOT NULL,
     "canal" TEXT NOT NULL,
     "assunto" TEXT NOT NULL,
     "corpo" TEXT NOT NULL,
     "estado" TEXT NOT NULL DEFAULT 'ENVIADA',
-    "enviadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "Notificacao_consultaId_fkey" FOREIGN KEY ("consultaId") REFERENCES "Consulta" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    "enviadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Notificacao_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Configuracao" (
-    "chave" TEXT NOT NULL PRIMARY KEY,
+    "chave" TEXT NOT NULL,
     "valor" TEXT NOT NULL,
-    "descricao" TEXT
+    "descricao" TEXT,
+
+    CONSTRAINT "Configuracao_pkey" PRIMARY KEY ("chave")
 );
 
 -- CreateTable
 CREATE TABLE "Sessao" (
-    "sid" TEXT NOT NULL PRIMARY KEY,
+    "sid" TEXT NOT NULL,
     "dados" TEXT NOT NULL,
-    "expiraEm" DATETIME NOT NULL
+    "expiraEm" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Sessao_pkey" PRIMARY KEY ("sid")
 );
 
 -- CreateTable
 CREATE TABLE "ListaEspera" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "pacienteId" TEXT NOT NULL,
     "medicoId" TEXT NOT NULL,
     "especialidadeId" TEXT,
-    "dataPreferida" DATETIME,
+    "dataPreferida" TIMESTAMP(3),
     "periodo" TEXT,
     "estado" TEXT NOT NULL DEFAULT 'ATIVA',
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "atualizadoEm" DATETIME NOT NULL,
-    CONSTRAINT "ListaEspera_pacienteId_fkey" FOREIGN KEY ("pacienteId") REFERENCES "Paciente" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "ListaEspera_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "ListaEspera_especialidadeId_fkey" FOREIGN KEY ("especialidadeId") REFERENCES "Especialidade" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizadoEm" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ListaEspera_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "DocumentoClinico" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "consultaId" TEXT,
     "pacienteId" TEXT NOT NULL,
     "medicoId" TEXT NOT NULL,
@@ -199,10 +211,9 @@ CREATE TABLE "DocumentoClinico" (
     "ficheiroNome" TEXT,
     "ficheiroCaminho" TEXT,
     "ficheiroTipo" TEXT,
-    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "DocumentoClinico_consultaId_fkey" FOREIGN KEY ("consultaId") REFERENCES "Consulta" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT "DocumentoClinico_pacienteId_fkey" FOREIGN KEY ("pacienteId") REFERENCES "Paciente" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "DocumentoClinico_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "DocumentoClinico_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -279,4 +290,64 @@ CREATE INDEX "DocumentoClinico_pacienteId_criadoEm_idx" ON "DocumentoClinico"("p
 
 -- CreateIndex
 CREATE INDEX "DocumentoClinico_medicoId_criadoEm_idx" ON "DocumentoClinico"("medicoId", "criadoEm");
+
+-- AddForeignKey
+ALTER TABLE "Paciente" ADD CONSTRAINT "Paciente_utilizadorId_fkey" FOREIGN KEY ("utilizadorId") REFERENCES "Utilizador"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Medico" ADD CONSTRAINT "Medico_utilizadorId_fkey" FOREIGN KEY ("utilizadorId") REFERENCES "Utilizador"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MedicoEspecialidade" ADD CONSTRAINT "MedicoEspecialidade_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MedicoEspecialidade" ADD CONSTRAINT "MedicoEspecialidade_especialidadeId_fkey" FOREIGN KEY ("especialidadeId") REFERENCES "Especialidade"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Disponibilidade" ADD CONSTRAINT "Disponibilidade_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Bloqueio" ADD CONSTRAINT "Bloqueio_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Consulta" ADD CONSTRAINT "Consulta_pacienteId_fkey" FOREIGN KEY ("pacienteId") REFERENCES "Paciente"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Consulta" ADD CONSTRAINT "Consulta_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Consulta" ADD CONSTRAINT "Consulta_especialidadeId_fkey" FOREIGN KEY ("especialidadeId") REFERENCES "Especialidade"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Avaliacao" ADD CONSTRAINT "Avaliacao_consultaId_fkey" FOREIGN KEY ("consultaId") REFERENCES "Consulta"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Avaliacao" ADD CONSTRAINT "Avaliacao_pacienteId_fkey" FOREIGN KEY ("pacienteId") REFERENCES "Paciente"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Avaliacao" ADD CONSTRAINT "Avaliacao_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Auditoria" ADD CONSTRAINT "Auditoria_utilizadorId_fkey" FOREIGN KEY ("utilizadorId") REFERENCES "Utilizador"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Notificacao" ADD CONSTRAINT "Notificacao_consultaId_fkey" FOREIGN KEY ("consultaId") REFERENCES "Consulta"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ListaEspera" ADD CONSTRAINT "ListaEspera_pacienteId_fkey" FOREIGN KEY ("pacienteId") REFERENCES "Paciente"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ListaEspera" ADD CONSTRAINT "ListaEspera_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ListaEspera" ADD CONSTRAINT "ListaEspera_especialidadeId_fkey" FOREIGN KEY ("especialidadeId") REFERENCES "Especialidade"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DocumentoClinico" ADD CONSTRAINT "DocumentoClinico_consultaId_fkey" FOREIGN KEY ("consultaId") REFERENCES "Consulta"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DocumentoClinico" ADD CONSTRAINT "DocumentoClinico_pacienteId_fkey" FOREIGN KEY ("pacienteId") REFERENCES "Paciente"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DocumentoClinico" ADD CONSTRAINT "DocumentoClinico_medicoId_fkey" FOREIGN KEY ("medicoId") REFERENCES "Medico"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 

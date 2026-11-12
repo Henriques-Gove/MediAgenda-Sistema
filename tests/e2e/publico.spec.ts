@@ -3,7 +3,7 @@ import { semCodigosTecnicos, verificarAcessibilidade } from './helpers';
 
 test.describe('site público', () => {
   test('página inicial apresenta a proposta e a navegação', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/inicio');
 
     await expect(page).toHaveTitle(/MediAgenda/);
     await expect(page.locator('h1')).toBeVisible();
@@ -23,7 +23,7 @@ test.describe('site público', () => {
   });
 
   test('modo escuro aplica-se e persiste entre páginas', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/inicio');
 
     const html = page.locator('html');
     await expect(html).not.toHaveAttribute('data-bs-theme', 'dark');

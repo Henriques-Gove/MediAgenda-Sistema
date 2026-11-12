@@ -1,6 +1,6 @@
 # MediAgenda
 
-Sistema web de agendamento de consultas médicas para a clínica **MediAgenda**. O projeto foi construído como um monólito modular em **Node.js + TypeScript + Express + Prisma + SQLite**, com interface web responsiva em **EJS + Bootstrap**, camada de domínio orientada a eventos, testes automatizados (unitários e end-to-end) e implantação preparada para Docker e Render.
+Sistema web de agendamento de consultas médicas para a clínica **MediAgenda**. O projeto foi construído como um monólito modular em **Node.js + TypeScript + Express + Prisma + PostgreSQL**, com interface web responsiva em **EJS + Bootstrap**, camada de domínio orientada a eventos, testes automatizados (unitários e end-to-end) e implantação preparada para Docker e Render.
 
 > **Nota:** os códigos técnicos dos requisitos (RF/RNF/RN) aparecem apenas em comentários de código e testes internos; a interface do utilizador apresenta tudo em linguagem natural, em português.
 
@@ -13,7 +13,7 @@ Sistema web de agendamento de consultas médicas para a clínica **MediAgenda**.
 | Runtime | Node.js 20.12+ |
 | Linguagem | TypeScript 5.9 |
 | Framework web | Express 4 |
-| ORM / base de dados | Prisma 6 + SQLite (PostgreSQL suportado por configuração) |
+| ORM / base de dados | Prisma 6 + PostgreSQL 16 (local via Docker, produção no Render/Neon) |
 | Autenticação | `express-session` com store persistido em base de dados + `bcryptjs` + RBAC por perfil |
 | Segurança | CSRF em todos os formulários, Helmet (CSP com nonce), rate limiting, sessões `httpOnly` |
 | Views | EJS + `express-ejs-layouts` |
@@ -30,6 +30,7 @@ Sistema web de agendamento de consultas médicas para a clínica **MediAgenda**.
 
 - Node.js 20.12 ou superior
 - npm
+- Docker (para a base PostgreSQL local) ou uma base PostgreSQL já acessível
 
 ### Instalação
 
@@ -46,7 +47,7 @@ NODE_ENV=development
 PORT=3101
 APP_URL=http://localhost:3101
 SESSION_SECRET=mediagenda-segredo-muito-seguro-mudar-em-producao
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://mediagenda:mediagenda@127.0.0.1:5432/mediagenda?schema=public"
 
 # Se SMTP_HOST estiver vazio, os e-mails são simulados.
 SMTP_HOST=
@@ -61,6 +62,14 @@ SMS_API_URL=
 SMS_API_KEY=
 SMS_FROM=MediAgenda
 ```
+
+### Subir a base PostgreSQL
+
+```bash
+docker compose up -d db
+```
+
+O serviço `db` usa a imagem `postgres:16-alpine` e as credenciais do `.env` (`mediagenda` / `mediagenda` / base `mediagenda`). Se preferir um servico externo, basta trocar `DATABASE_URL` pela connection string do fornecedor (Neon, Supabase, Render).
 
 ### Preparar a base de dados e os dados demo
 
@@ -137,7 +146,19 @@ npm run deploy:verificar -- https://o-meu-servico.onrender.com
 docker compose up --build
 ```
 
-O `docker-compose.yml` sobe a aplicação com a base de dados em volume persistente. O `Dockerfile` compila o TypeScript e executa as migrações antes de arrancar.
+O `docker-compose.yml` sobe dois servicos: a aplicacao e a base PostgreSQL (`db`), com os dados num volume persistente. O `Dockerfile` compila o TypeScript; o comando de arranque aplica as migracoes, carrega os dados demo se a base estiver vazia e inicia o servidor.
+
+Para parar sem apagar os dados:
+
+```bash
+docker compose down
+```
+
+Para apagar tambem o volume da base:
+
+```bash
+docker compose down -v
+```
 
 ---
 
@@ -166,7 +187,8 @@ Pacientes adicionais do seed:
 
 - **Área autenticada:** sidebar fixa em desktop, organizada por perfil e com secções (principal, gestão, análise e sistema); no mobile passa para um menu offcanvas.
 - **Autenticação:** login, registo, recuperação e reposição de palavra-passe num painel dividido, com marca à esquerda e formulário compacto à direita.
-- **Contas demo:** os chips no login preenchem automaticamente o e-mail e a palavra-passe.
+- **Login simplificado:** mensagem curta, ilustração animada da receção e ligação direta para criar conta (apenas pacientes).
+- **Painéis por perfil:** fundo animado, cenas clínicas discretas e atalhos em cartões (tiles) com ícone, título e uma linha de contexto.
 - **Detalhes de usabilidade:** toggle de visibilidade da palavra-passe, modo escuro persistente, link "saltar para o conteúdo", favicon próprio, estados ativos com `aria-current` e página offline (service worker).
 - **Assets locais:** Bootstrap 5, Bootstrap Icons e respetivas fontes são servidos de `public/vendor`, sem dependência de CDN em runtime.
 
@@ -239,7 +261,7 @@ src/
   server.ts        Arranque, scheduler e encerramento graceful
 views/             Templates EJS
 public/            CSS, favicon, vendor (Bootstrap/Bootstrap Icons) e service worker
-prisma/            Schema, migrações, seed e bases de dados SQLite locais
+prisma/            Schema, migrações PostgreSQL e seed
 tests/             Testes unitários, de integração e end-to-end
 docs/              Documentação do sistema
 ```
@@ -290,9 +312,16 @@ A suíte unitária/integração cobre:
 - a orquestração da **Facade**;
 - integração HTTP com **Supertest**: páginas públicas, API, login, RBAC, marcação e confirmação de consulta.
 
-A suíte end-to-end (Playwright) percorre o sistema como utilizadores reais: site público, modo escuro, página offline, áreas de paciente, médico, secretaria e administração, exportações e lista de espera. Usa uma base de dados isolada (`prisma/e2e.db`) e nunca toca na base de dados de desenvolvimento.
+A suíte end-to-end (Playwright) percorre o sistema como utilizadores reais: site público, modo escuro, página offline, áreas de paciente, médico, secretaria e administração, exportações e lista de espera. Usa o schema PostgreSQL isolado `e2e` e nunca toca nos dados de desenvolvimento.
 
-Os testes de integração usam `prisma/test.db`, recriada automaticamente antes de cada execução.
+Os testes de integração usam o schema `test`, recriado automaticamente antes de cada execução. Ambos precisam da base PostgreSQL a correr:
+
+```bash
+docker compose up -d db
+npm test
+```
+
+> Em CI, o GitHub Actions sobe um serviço `postgres:16` com as mesmas credenciais; não é preciso configurar nada.
 
 ---
 
@@ -329,8 +358,11 @@ O histórico de notificações pode ser consultado em `/admin/notificacoes`.
 | `npm run setup` | Gera Prisma Client (se necessário), sincroniza o schema e executa o seed |
 | `npm run deploy:verificar` | Confirma se o site publicado está a correr o commit mais recente |
 | `npm run db:push` | Sincroniza o schema com a base de dados |
+| `npm run db:migrate` | Cria/aplica migrações em desenvolvimento |
 | `npm run db:seed` | Executa o seed de demonstração |
 | `npm run db:reset` | Recria a base de dados e volta a executar o seed |
+| `npm run db:backup` | Cria um dump PostgreSQL (`pg_dump`) e copia os uploads |
+| `npm run db:restore` | Restaura um dump PostgreSQL (`pg_restore`) |
 | `npm test` | Executa os testes uma vez |
 | `npm run test:watch` | Executa os testes em modo watch |
 | `npm run test:coverage` | Executa os testes com relatório de cobertura |
@@ -355,7 +387,7 @@ O histórico de notificações pode ser consultado em `/admin/notificacoes`.
 O âmbito funcional está concluído. Para uma utilização real em produção, recomenda-se:
 
 1. **Configurar SMTP e SMS reais** através das variáveis de ambiente.
-2. **Migrar para PostgreSQL** em produção (basta alterar `DATABASE_URL`; o projeto já inclui o schema correspondente em `prisma/postgresql`).
+2. **Criar a base PostgreSQL de producao** (Neon, Supabase ou Render) e definir `DATABASE_URL` no servico.
 3. **Configurar HTTPS** no servidor de implantação (o Render fornece por omissão).
-4. **Base de dados persistente no Render** — o plano gratuito não tem disco: a SQLite é recriada a cada reinício. Use uma instância paga com disco em `/var/data` ou PostgreSQL.
+4. **Persistir os uploads** — no plano gratuito do Render o disco e efemero; use um disco pago ou armazenamento externo (S3).
 5. **Aumentar a cobertura de testes** com cenários de cancelamento tardio e relatórios.

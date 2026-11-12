@@ -1,23 +1,21 @@
 /**
- * Restauro de uma cópia de segurança.
+ * Restauro de uma copia de seguranca PostgreSQL.
  *
- *   npm run db:restore -- backups/mediagenda-20261111-120000 --confirmar
+ *   npm run db:restore -- backups/mediagenda-20261112-120000 --confirmar
  *
- * Pare a aplicação antes de executar. A base atual é guardada em
- * backups/antes-restauro-* e o backup é validado por SHA-256 e
- * PRAGMA integrity_check.
+ * Pare a aplicacao antes de executar. A base atual e guardada em
+ * backups/antes-restauro-* e o backup e validado por SHA-256.
  */
 import { createHash } from 'node:crypto';
-import {
-  copyFileSync,
-  cpSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  statSync,
-} from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { cpSync, existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { PrismaClient } from '@prisma/client';
+
+try {
+  process.loadEnvFile(path.resolve(process.cwd(), '.env'));
+} catch {
+  // .env opcional: em producao as variaveis vem do ambiente.
+}
 
 const argumentos = process.argv.slice(2);
 const confirmar = argumentos.includes('--confirmar');
@@ -25,27 +23,24 @@ const ignorarHash = argumentos.includes('--ignorar-hash');
 const origemArg = argumentos.find((valor) => !valor.startsWith('--'));
 
 if (!origemArg || !confirmar) {
-  console.error('Utilização: npm run db:restore -- <pasta-do-backup> --confirmar');
-  console.error('Pare a aplicação antes de restaurar.');
+  console.error('Utilizacao: npm run db:restore -- <pasta-do-backup> --confirmar');
+  console.error('Pare a aplicacao antes de restaurar.');
   process.exit(1);
 }
 
 const raiz = process.cwd();
 const origem = path.resolve(raiz, origemArg);
-const backupDb = path.join(origem, 'mediagenda.db');
+const backupDb = path.join(origem, 'mediagenda.dump');
+const url = process.env.DATABASE_URL;
 
-if (!existsSync(backupDb)) {
-  console.error(`Não foi encontrado ${backupDb}`);
+if (!url || !/^postgres(ql)?:\/\//.test(url)) {
+  console.error('Defina DATABASE_URL com uma connection string PostgreSQL.');
   process.exit(1);
 }
 
-function caminhoBaseDados() {
-  const url = process.env.DATABASE_URL ?? 'file:./dev.db';
-  if (!url.startsWith('file:')) {
-    throw new Error('Este script apenas restaura bases SQLite (DATABASE_URL=file:...).');
-  }
-  const caminho = url.slice('file:'.length);
-  return path.isAbsolute(caminho) ? caminho : path.resolve(raiz, 'prisma', caminho);
+if (!existsSync(backupDb)) {
+  console.error(`Nao foi encontrado ${backupDb}`);
+  process.exit(1);
 }
 
 function hashFicheiro(caminho) {
@@ -57,12 +52,58 @@ if (existsSync(manifestoPath) && !ignorarHash) {
   const manifesto = JSON.parse(readFileSync(manifestoPath, 'utf8'));
   const hashAtual = hashFicheiro(backupDb);
   if (manifesto.baseDadosSha256 && manifesto.baseDadosSha256 !== hashAtual) {
-    console.error('O hash do backup não corresponde ao manifesto. Use --ignorar-hash apenas se souber o que está a fazer.');
+    console.error('O hash do backup nao corresponde ao manifesto. Use --ignorar-hash apenas se souber o que esta a fazer.');
     process.exit(1);
   }
 }
 
-const destino = caminhoBaseDados();
+const ligacao = new URL(url);
+const utilizador = decodeURIComponent(ligacao.username || 'postgres');
+const baseDados = ligacao.pathname.replace(/^\//, '') || 'postgres';
+
+function existeComando(comando) {
+  const resultado = spawnSync(comando, ['--version'], { stdio: 'ignore' });
+  return resultado.status === 0;
+}
+
+function restaurar() {
+  if (existeComando('pg_restore')) {
+    const resultado = spawnSync(
+      'pg_restore',
+      ['--clean', '--if-exists', '--no-owner', '--no-privileges', `--dbname=${url}`, backupDb],
+      { stdio: 'inherit' },
+    );
+    if (resultado.status !== 0) throw new Error('pg_restore falhou.');
+    return 'pg_restore';
+  }
+
+  if (existeComando('docker')) {
+    const resultado = spawnSync(
+      'docker',
+      [
+        'compose',
+        'exec',
+        '-T',
+        'db',
+        'pg_restore',
+        '--clean',
+        '--if-exists',
+        '--no-owner',
+        '--no-privileges',
+        '-U',
+        utilizador,
+        '-d',
+        baseDados,
+      ],
+      { cwd: raiz, stdio: ['pipe', 'inherit', 'inherit'], input: readFileSync(backupDb) },
+    );
+    if (resultado.status !== 0) throw new Error('pg_restore no contentor falhou.');
+    return 'docker compose exec db pg_restore';
+  }
+
+  throw new Error('pg_restore nao encontrado. Instale o cliente PostgreSQL ou use "docker compose".');
+}
+
 const pastaSeguranca = path.resolve(
   raiz,
   'backups',
@@ -70,35 +111,27 @@ const pastaSeguranca = path.resolve(
 );
 mkdirSync(pastaSeguranca, { recursive: true });
 
-if (existsSync(destino)) {
-  copyFileSync(destino, path.join(pastaSeguranca, 'mediagenda.db'));
-  console.log(`Base atual guardada em ${pastaSeguranca}`);
+try {
+  console.log('A guardar a base atual antes de restaurar...');
+  const atual = path.join(pastaSeguranca, 'mediagenda.dump');
+  if (existeComando('pg_dump')) {
+    spawnSync('pg_dump', ['--format=custom', '--no-owner', '--no-privileges', `--file=${atual}`, `--dbname=${url}`], {
+      stdio: 'inherit',
+    });
+  }
+} catch {
+  console.warn('Nao foi possivel guardar a base atual; a continuar com o restauro.');
 }
 
-mkdirSync(path.dirname(destino), { recursive: true });
-copyFileSync(backupDb, destino);
+const ferramenta = restaurar();
 
 const uploadsOrigem = path.join(origem, 'uploads');
 if (existsSync(uploadsOrigem)) {
   cpSync(uploadsOrigem, path.join(raiz, 'public', 'uploads'), { recursive: true, force: true });
 }
 
-const prisma = new PrismaClient({
-  datasources: { db: { url: `file:${destino}` } },
-});
-try {
-  const resultado = await prisma.$queryRawUnsafe('PRAGMA integrity_check');
-  const estado = Array.isArray(resultado) ? resultado[0]?.integrity_check : 'desconhecido';
-  if (estado !== 'ok') {
-    console.error(`A base restaurada não passou na verificação de integridade: ${estado}`);
-    process.exitCode = 1;
-  } else {
-    console.log('');
-    console.log(`Backup restaurado em ${destino}`);
-    console.log(`  Integridade: ok`);
-    console.log(`  Tamanho: ${(statSync(destino).size / 1024 / 1024).toFixed(2)} MB`);
-    console.log('  Inicie a aplicação e confirme o acesso antes de retomar o serviço.');
-  }
-} finally {
-  await prisma.$disconnect();
-}
+console.log('');
+console.log(`Backup restaurado com ${ferramenta}`);
+console.log(`  Base: ${ligacao.hostname}:${ligacao.port || 5432}/${baseDados}`);
+console.log(`  Tamanho: ${(statSync(backupDb).size / 1024 / 1024).toFixed(2)} MB`);
+console.log('  Inicie a aplicacao e confirme o acesso antes de retomar o servico.');

@@ -53,8 +53,10 @@ export class PrismaSessionStore extends Store {
 
   override touch(sid: string, sess: SessionData, callback: Callback): void {
     const expiraEm = this.calcularExpiracao(sess);
+    // updateMany não falha quando a sessão já não existe (ex.: logout noutro
+    // separador); apenas não atualiza nada.
     this.db.sessao
-      .update({ where: { sid }, data: { expiraEm } })
+      .updateMany({ where: { sid }, data: { expiraEm } })
       .then(() => callback(null))
       .catch((erro) => callback(erro));
   }
